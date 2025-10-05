@@ -1,6 +1,5 @@
+/* Hide the default page heading */
 .firstHeading {
-	border-bottom: none;
-	margin: 0 !important;
 	display: none;
 }
 
@@ -8,125 +7,143 @@
 	display: inline !important;
 }
 
+/* Modern main container layout */
 #main {
-	padding: 0 !important;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2vw;
+}
+
+/* User page left/right as flex children instead of floats */
+#user-page-left,
+#user-page-right {
+	box-sizing: border-box;
+	padding: 0 1em;
 }
 
 #user-page-left {
-	width: 35%;
-	float: left;
+	flex: 1 1 320px;
+	max-width: 35%;
+	min-width: 270px;
 }
 
 #user-page-right {
-	float: right;
-	width: 60%;
+	flex: 2 1 400px;
+	max-width: 62%;
+	min-width: 320px;
 }
-
-#user-page-left h2, #user-page-right h2 {
-	border-bottom: 1px solid #dcdcdc;
-	padding: 0 0 3px 0;
-	margin: 0 0 5px 0;
-	font-size: 17px;
-	letter-spacing: -1px;
-	color: #333;
+@media (max-width: 900px) {
+	#main {
+		flex-direction: column;
+	}
+	#user-page-left, #user-page-right {
+		max-width: 100%;
+		padding: 0;
+	}
 }
-
-.no-info-container {
-	margin: 10px 0 20px 0;
-	background-color: #f2f4f7;
-	padding: 20px;
-	text-align: center;
-	color: #777;
-}
-
-.item-small {
-	color: #999;
-	font-size: 9px;
-	margin: 0 0 0 6px;
-}
-
+/* Headings */
+#user-page-left h2, #user-page-right h2,
 .user-section-heading {
-	border-bottom: 1px solid #DCDCDC;
-	width: 100%;
-	line-height: 22px;
-	margin: 0 0 8px 0;
+	border-bottom: 1px solid #dcdcdc;
+	padding-block-end: 3px;
+	margin-block: 0 8px;
+	font-size: 1.1em;
+	color: #ffffff;
+	letter-spacing: -1px;
+}
+/* Section Titles and Actions: Flex for spacing */
+.user-section-heading {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .user-section-title {
-	float: left;
-	font-size: 20px;
-	letter-spacing: -1px;
-	padding: 0 10px 0 0;
+	font-size: 1.25em;
+	padding-inline-end: 0.5em;
 }
 
+/* Actions row */
 .user-section-actions {
-	position: relative;
-	right: 0;
-	top: -2px;
+	display: flex;
+	gap: 0.5em;
+	align-items: center;
 }
 
-.action-right {
-	float: right;
-	font-size: 10px;
-	padding: 0 5px 0 0;
-}
-
-.action-left {
-	float: left;
-	font-size: 10px;
+/* Small items (e.g., secondary text) */
+.item-small {
+	color: #999;
+	font-size: 0.7em;
+	margin-inline-start: 0.4em;
 }
 
 .user-section-actions a {
 	text-decoration: none;
 }
 
-/* Profile Top */
+/* Top Profile */
 #profile-top {
 	border-bottom: 1px solid #d4dfd7;
-	padding: 10px 0;
-	margin: 0 0 10px 0;
+	padding: 0.75em 0;
+	margin-block-end: 0.75em;
 	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 #profile-toggle-button {
-	background-color: #ffa500;
-	top: 5px;
-	right: 0;
-	padding: 2px 10px;
+	background: #ffa500;
+	color: #fff;
+	padding: 0.2em 0.7em;
+	font-weight: 700;
+	border-radius: 0.4em;
 	position: absolute;
+	top: 0.7em;
+	right: 0.7em;
+	text-decoration: none;
 }
 
 #profile-toggle-button a {
 	color: #fff;
-	font-weight: 700;
+	text-decoration: none;
 }
 
 #profile-title-container {
-	padding: 0 0 6px 6px;
+	display: flex;
+	align-items: center;
+	gap: 1em;
 }
 
 #profile-title {
 	font-size: 2em;
 	font-weight: 700;
-	line-height: 26px;
-	float: left;
-	margin: 0 15px 0 0;
+	line-height: 1.2;
+	margin-inline-end: 1em;
+}
+
+/* Level and honorific */
+#points-level,
+#honorific-level {
+	display: inline-block;
+	margin-block-start: 4px;
+	margin-inline-end: 0.5em;
 }
 
 #points-level {
-	background-color: #c00;
-	font-size: 11px;
-	text-align: center;
-	float: left;
-	padding: 1px 5px;
-	margin: 4px 8px 0 0;
+	background: #c00;
+	color: #fff;
+	font-size: 0.8em;
+	font-weight: 700;
+	padding: 0.2em 0.7em;
+	border-radius: 0.4em;
 }
 
 #honorific-level {
-	font-size: 12px;
-	float: left;
-	margin: 4px 0 0 0;
+	font-size: 0.85em;
 }
+
 
 #honorific-level a {
 	text-decoration: none;
@@ -139,15 +156,18 @@
 }
 
 #profile-image {
-	float: left;
-	margin: 0 8px 0 0;
+	margin-inline-end: 1em;
 	position: relative;
 }
 
 #profile-image img {
-	background-color: #fff;
+	border-radius: 0.5em;
+	background: #fff;
 	border: 1px solid #dcdcdc;
 	padding: 3px;
+	width: 90px;
+	height: 90px;
+	object-fit: cover;
 }
 
 /* Avatar removal link below the avatar -- make the text a bit smaller and center it */
@@ -157,27 +177,10 @@
 	text-align: center;
 }
 
-#profile-right {
-	float: left;
-	position: relative;
-}
-
 .profile-actions a {
 	text-decoration: none;
 	font-weight: 700;
 	margin: 0 6px;
-}
-
-/* User-Relationship */
-.user-relationship-container {
-	padding: 0 0 25px 0;
-}
-
-.user-relationship-container a {
-	text-decoration: none;
-	float: left;
-	margin: 5px 10px 0 0;
-	display: block;
 }
 
 .user-relationship-container img {
@@ -186,28 +189,13 @@
 	padding: 3px;
 }
 
-/* User Gift / User Awards */
-.user-gift-container {
-	padding: 0 0 25px 0;
-}
-
-.user-gift-container a {
-	text-decoration: none;
-	display: block;
-	float: left;
-	margin: 5px 10px 0 0;
-}
-
 .user-gift-container img {
 	background-color: #fff;
 	border: 1px solid #dcdcdc;
 	padding: 3px;
 }
 
-/* Fanboxes */
-.user-fanbox-container {
-	padding: 0 0 25px 0;
-}
+
 
 /* User Activity */
 .activity-item {
@@ -241,14 +229,14 @@
 	padding: 0 0 25px 0;
 }
 
-/* Message Board */
+/* Message Board: More modern look */
 #user-page-board {
-	margin: 5px 0 10px 0;
+	margin-block: 0.3em 0.6em;
 }
 
 .user-page-message-form,
 .user-page-message-form-blocked {
-	margin: 5px 0 15px 0;
+	margin-block: 0.3em 1em;
 	font-weight: 700;
 }
 
@@ -256,11 +244,20 @@
 	color: #f00;
 }
 
+/* User Board Messages */
 .user-board-message {
 	border: 1px solid #e2e2e2;
-	margin: 0 0 15px 0;
+	border-radius: 0.4em;
+	margin-block-end: 1em;
+	background: #fafbfc;
+	padding: 0.6em;
+	display: flex;
+	gap: 1em;
 }
-
+.user-board-message-image {
+	padding: 0;
+	margin: 0; /* gap does the spacing */
+}
 .user-board-message-from {
 	background-color: #F8F5F5;
 	padding: 3px 0 5px 5px;
@@ -282,17 +279,19 @@
 	margin: 2px 0 0 5px;
 }
 
-.user-board-message-image {
-	float: left;
-	padding: 0 10px 5px 0;
-}
+
 
 .user-board-message-image img {
+	border-radius: 50%;
 	border: 1px solid #dcdcdc;
+	width: 48px;
+	height: 48px;
+	object-fit: cover;
 }
 
 .user-board-message-body {
-	margin: 0 10px 0 0;
+	flex: 1 1 0;
+	margin: 0;
 }
 
 .user-board-message-body p {
@@ -332,10 +331,33 @@
 	margin: 0 5px 0 0 !important;
 }
 
-/* Casual Games */
-.casual-game-container {
-	padding: 0 0 18px 0;
+/* Awards, Gifts, Fanboxes, etc. */
+.user-gift-container,
+.user-fanbox-container,
+.user-relationship-container,
+.casual-game-container,
+.user-articles-container {
+	padding-block-end: 1.5em;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
 }
+
+.user-gift-container,
+.user-relationship-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em 1em;
+}
+
+.user-gift-container a,
+.user-relationship-container a {
+	text-decoration: none;
+	display: flex; /* so children like images align nicely */
+	align-items: center;
+	margin: 0; /* gap does the work */
+}
+
 
 .casual-game-container p {
 	border-top: 1px solid #dcdcdc;
@@ -366,9 +388,6 @@
 }
 
 /* User Articles */
-.user-articles-container {
-	padding: 0 0 23px 0;
-}
 
 .article-item {
 	margin: 0;
@@ -385,13 +404,6 @@
 	margin: 0;
 	padding: 7px 0 2px 0;
 	border: none;
-}
-
-.number-of-votes {
-	margin: 0 10px 3px 0;
-	text-align: center;
-	float: left;
-	width: 25px;
 }
 
 .vote-number {
@@ -416,16 +428,25 @@
 	height: 25px;
 	width: 100%;
 }
+/* Modernize picture containers */
+.picture-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em 1em; /* vertical and horizontal gap */
+}
 
 .picture-container .mini-image {
-	float: left;
-	margin: 5px 10px 0 0;
+	margin: 0; /* Flex handles the gap! */
 }
 
 .picture-container img {
-	background-color: #fff;
+	border-radius: 0.4em;
+	background: #fff;
 	border: 1px solid #dcdcdc;
 	padding: 3px;
+	width: 70px;
+	height: 70px;
+	object-fit: cover;
 }
 
 .picture-container a {
@@ -445,6 +466,16 @@
 	font-weight: 700;
 }
 
+/* Info/No Info containers */
+.no-info-container,
+.no-pictures-container {
+	margin-block: 0.7em 1.3em;
+	background: #f2f4f7;
+	padding: 1.3em;
+	text-align: center;
+	color: #777;
+	border-radius: 0.7em;
+}
 .no-pictures-container {
 	background-color: #eff3f0;
 	color: #777;
@@ -461,3 +492,48 @@
 	height: 90px;
 	width: 425px;
 }
+.parent-selector-for-votes {
+	display: flex;
+	align-items: center;
+	gap: 0.7em;
+}
+.number-of-votes {
+	width: 25px;
+	text-align: center;
+	margin: 0; /* gap handles spacing */
+}
+
+.usergroup-badges {
+    display: flex;
+    flex-wrap: wrap;     /* this is the magic */
+    gap: 4px;            /* nice spacing */
+    margin-top: 4px;
+    max-width: 100%;     /* so it breaks naturally */
+}
+
+.usergroup-badge {
+    display: inline-block;
+    font-size: 14px;     /* or 16px if you like */
+    padding: 2px 6px;
+    border-radius: 6px;
+    background-color: #444;
+    color: #fff;
+    white-space: nowrap; /* keeps text inside each badge */
+}
+.user-profile-tagline {
+  font-style: italic;
+  color: #666;
+  margin: 0.25em 0 0.75em 0;
+  font-size: 16px;
+}
+.sp-username .sp-user-aka {
+  margin-left: 0.35em;
+  font-size: 28px;
+  font-style: italic;
+  opacity: 0.8;
+}
+.sp-username {
+	margin-top: 32px;
+	font-size: 35px;
+}
+.usergroup-badge.group-sysop { font-weight: 600; }
