@@ -1,6 +1,8 @@
 <?php
 
+use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 class UserProfileHooks {
 
@@ -460,5 +462,9 @@ class UserProfileHooks {
 			'<div id="mw-diff-ntitle3" class="rccomment">' . $newMinor . $rdel . '</div>' .
 			'<div id="mw-diff-ntitle4">' . $nextLink . $differenceEngine->markPatrolledLink() . '</div>';
 	}
-
+	public static function onLoadExtensionSchemaUpdates( $updater ) {
+		$dir = __DIR__ . '/../sql/patches';
+		$updater->addExtensionUpdate( [ 'addTable', 'user_profile', "$dir/patch-add-up-universes-pets-hobbies.sql", true ] );
+		return true;
+	}
 }

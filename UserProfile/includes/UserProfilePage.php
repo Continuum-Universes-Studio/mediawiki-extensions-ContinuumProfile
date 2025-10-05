@@ -1,8 +1,11 @@
 <?php
 
+use MediaWiki\Html\Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use MediaWiki\User\UserIdentity;
 /**
  * User profile Wiki Page
  *
@@ -150,8 +153,10 @@ class UserProfilePage extends Article {
 			] );
 		}
 
+		#$out->addHTML( $this->getUserGroups() );
 		$out->addHTML( $this->getRelationships( 1 ) );
 		$out->addHTML( $this->getRelationships( 2 ) );
+		$out->addHTML( $this->getRelationships( 3 ) );
 		$out->addHTML( $this->getGifts() );
 		$out->addHTML( $this->getAwards() );
 		$out->addHTML( $this->getCustomInfo() );
@@ -729,7 +734,8 @@ class UserProfilePage extends Article {
 		$joined_data = $profile_data['real_name'] . $location . $hometown .
 						$profile_data['birthday'] . $profile_data['occupation'] .
 						$profile_data['websites'] . $profile_data['places_lived'] .
-						$profile_data['schools'] . $profile_data['about'];
+						$profile_data['schools'] . $profile_data['about'] .
+						$profile_data['quote'];
 		$edit_info_link = SpecialPage::getTitleFor( 'UpdateProfile' );
 
 		// Privacy fields holy shit!
@@ -771,7 +777,10 @@ class UserProfilePage extends Article {
 		if ( in_array( 'up_about', $this->profile_visible_fields ) ) {
 			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-about-me' )->escaped(), $profile_data['about'], false );
 		}
-
+		
+		if ( in_array( 'up_quote', $this->profile_visible_fields ) ) {
+			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-quote' )->escaped(), $profile_data['quote'], false );
+		}
 		$output = '';
 		if ( $joined_data ) {
 			$output .= '<div class="user-section-heading">
@@ -912,7 +921,9 @@ class UserProfilePage extends Article {
 						$profile_data['music'] . $profile_data['books'] .
 						$profile_data['video_games'] .
 						$profile_data['magazines'] . $profile_data['drinks'] .
-						$profile_data['snacks'];
+						$profile_data['snacks'] . $profile_data['universes'] .
+						$profile_data['pets'] . $profile_data['hobbies'] .
+						$profile_data['heroes'];
 		$edit_info_link = SpecialPage::getTitleFor( 'UpdateProfile' );
 
 		$interests_output = '';
@@ -940,6 +951,19 @@ class UserProfilePage extends Article {
 		if ( in_array( 'up_drinks', $this->profile_visible_fields ) ) {
 			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-drinks' )->escaped(), $profile_data['drinks'], false );
 		}
+		if ( in_array( 'up_universes', $this->profile_visible_fields ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-universes' )->escaped(), $profile_data['universes'], false );
+		}
+		if ( in_array( 'up_pets', $this->profile_visible_fields ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-pets' )->escaped(), $profile_data['pets'], false );
+		}
+		if ( in_array( 'up_hobbies', $this->profile_visible_fields ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-hobbies' )->escaped(), $profile_data['hobbies'], false );
+		}
+		if ( in_array( 'up_heroes', $this->profile_visible_fields ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-heroes' )->escaped(), $profile_data['heroes'], false );
+		}
+
 
 		$output = '';
 		if ( $joined_data ) {
@@ -1073,11 +1097,26 @@ class UserProfilePage extends Article {
 
 		$output .= '<div id="profile-title-container">';
 
-		$profileTitle = '<div id="profile-title">' .
-			htmlspecialchars( $this->profileOwner->getName() ) .
-		'</div>';
+		// Username + badges + tagline (as one block)
+		$badgesHtml  = $this->renderGroupBadges();                  // string (prefer inline <span> badges)
+		$taglineHtml = $this->renderTagline( $profile_data['tagline'] ); // string (make this a <span> if you want same line)
+		$usernameHtml = $this->buildUsernameLine();                 // string: <h1 class="sp-username">… (aka …)</h1>
 
-		MediaWikiServices::getInstance()->getHookContainer()->run( 'UserProfileGetProfileTitle', [ $this, &$profileTitle ] );
+		$profileTitle = Html::rawElement(
+			'div',
+			[ 'id' => 'profile-title' ],
+			$usernameHtml
+			. ( $taglineHtml ? $taglineHtml : '' )
+			. ( $badgesHtml ? $badgesHtml : '' )
+		);
+
+		// Show tagline if it exists
+		// Let existing hook modify/replace the whole title if it wants
+		MediaWikiServices::getInstance()->getHookContainer()->run(
+			'UserProfileGetProfileTitle',
+			[ $this, &$profileTitle ]
+		);
+
 		$output .= $profileTitle;
 
 		// Show the user's level and the amount of points they have if
@@ -1117,6 +1156,10 @@ class UserProfilePage extends Article {
 				'AddRelationship',
 				$this->profileOwner->getName() . '/foe'
 			);
+			$add_family = SpecialPage::getTitleFor(
+				'AddRelationship',
+				$this->profileOwner->getName() . '/family'
+			);
 			$remove_relationship = SpecialPage::getTitleFor(
 				'RemoveRelationship',
 				$this->profileOwner->getName()
@@ -1128,6 +1171,8 @@ class UserProfilePage extends Article {
 
 				$profileLinks['user-add-foe'] =
 					'<a href="' . htmlspecialchars( $add_foe->getFullURL() ) . '" rel="nofollow">' . wfMessage( 'user-add-foe' )->escaped() . '</a>';
+				$profileLinks['user-add-family'] =
+					'<a href="' . htmlspecialchars( $add_family->getFullURL() ) . '" rel="nofollow">' . wfMessage( 'user-add-family' )->escaped() . '</a>';
 			} else {
 				if ( $relationship == 1 ) {
 					$profileLinks['user-remove-friend'] =
@@ -1136,6 +1181,10 @@ class UserProfilePage extends Article {
 				if ( $relationship == 2 ) {
 					$profileLinks['user-remove-foe'] =
 						'<a href="' . htmlspecialchars( $remove_relationship->getFullURL() ) . '">' . wfMessage( 'user-remove-foe' )->escaped() . '</a>';
+				}
+				if ( $relationship == 3 ) {
+					$profileLinks['user-remove-family'] =
+						'<a href="' . htmlspecialchars( $remove_relationship->getFullURL() ) . '">' . wfMessage( 'user-remove-family' )->escaped() . '</a>';
 				}
 			}
 
@@ -1209,83 +1258,82 @@ class UserProfilePage extends Article {
 	 * @param int $rel_type
 	 * - 1 for friends
 	 * - 2 (or anything else than 1) for foes
-	 *
+	 * - 3 for family
+	 * 
 	 * @return string
 	 */
 	function getRelationships( $rel_type ) {
 		global $wgUserProfileDisplay;
-
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$context = $this->getContext();
 		$language = $context->getLanguage();
 
-		// If not enabled in site settings, don't display
-		if ( $rel_type == 1 ) {
-			if ( $wgUserProfileDisplay['friends'] == false ) {
-				return '';
-			}
-		} else {
-			if ( $wgUserProfileDisplay['foes'] == false ) {
-				return '';
-			}
+		// Map rel_type to string for URLs and config
+		$rel_type_map = [
+			1 => 'friends',
+			2 => 'foes',
+			3 => 'family'
+		];
+		$rel_type_name = $rel_type_map[$rel_type] ?? 'foes';
+
+		// Check if this relationship type is enabled
+		if ( empty( $wgUserProfileDisplay[$rel_type_name] ) ) {
+			return '';
 		}
 
-		$output = ''; // Prevent E_NOTICE
-
+		$output = '';
 		$count = 4;
 		$key = $cache->makeKey( 'relationship', 'profile', 'actor_id', "{$this->profileOwner->getActorId()}-{$rel_type}" );
 		$data = $cache->get( $key );
 
-		// Try cache
 		if ( !$data ) {
 			$listLookup = new RelationshipListLookup( $this->profileOwner, $count );
-			$friends = $listLookup->getRelationshipList( $rel_type );
-			$cache->set( $key, $friends );
+			$list = $listLookup->getRelationshipList( $rel_type );
+			$cache->set( $key, $list );
 		} else {
-			$logger = LoggerFactory::getInstance( 'SocialProfile' );
-			$logger->debug( "Got profile relationship type {rel_type} for user {user_name} from cache\n", [
-				'rel_type' => $rel_type,
-				'user_name' => $this->profileOwner->getName()
-			] );
-
-			$friends = $data;
+			$list = $data;
 		}
 
 		$stats = new UserStats( $this->profileOwner );
 		$stats_data = $stats->getUserStats();
 
+		// Pick the correct label and count
 		if ( $rel_type == 1 ) {
 			$relationship_count = $stats_data['friend_count'];
 			$relationship_title = wfMessage( 'user-friends-title' )->escaped();
+		} elseif ( $rel_type == 2 ) {
+			$relationship_count = $stats_data['foe_count'];
+			$relationship_title = wfMessage( 'user-foes-title' )->escaped();
+		} elseif ( $rel_type == 3 ) {
+			$relationship_count = $stats_data['family_count'];
+			$relationship_title = wfMessage( 'user-family-title' )->escaped();
 		} else {
 			$relationship_count = $stats_data['foe_count'];
 			$relationship_title = wfMessage( 'user-foes-title' )->escaped();
 		}
 
-		if ( count( $friends ) > 0 ) {
+		// Only display if there are relationships
+		if ( count($list) > 0 ) {
 			$x = 1;
 			$per_row = 4;
-
 			$output .= '<div class="user-section-heading">
 				<div class="user-section-title">' . $relationship_title . '</div>
 				<div class="user-section-actions">
 					<div class="action-right">';
-			if ( intval( $relationship_count ) > 4 ) {
-				// Use the friendlier URLs here by default (T191157)
-				$rel_type_name = ( $rel_type == 1 ? 'friends' : 'foes' );
+			if ( intval($relationship_count) > 4 ) {
 				$view_all_title = SpecialPage::getTitleFor(
 					'ViewRelationships',
 					$this->profileOwner->getName() . '/' . $rel_type_name
 				);
-				$output .= '<a href="' . htmlspecialchars( $view_all_title->getFullURL() ) .
-					'" rel="nofollow">' . wfMessage( 'user-view-all' )->escaped() . '</a>';
+				$output .= '<a href="' . htmlspecialchars($view_all_title->getFullURL()) .
+					'" rel="nofollow">' . wfMessage('user-view-all')->escaped() . '</a>';
 			}
 			$output .= '</div>
 					<div class="action-left">';
-			if ( intval( $relationship_count ) > 4 ) {
-				$output .= wfMessage( 'user-count-separator', $per_row, $relationship_count )->escaped();
+			if ( intval($relationship_count) > 4 ) {
+				$output .= wfMessage('user-count-separator', $per_row, $relationship_count)->escaped();
 			} else {
-				$output .= wfMessage( 'user-count-separator', $relationship_count, $relationship_count )->escaped();
+				$output .= wfMessage('user-count-separator', $relationship_count, $relationship_count)->escaped();
 			}
 			$output .= '</div>
 				</div>
@@ -1294,34 +1342,31 @@ class UserProfilePage extends Article {
 			<div class="visualClear"></div>
 			<div class="user-relationship-container">';
 
-			foreach ( $friends as $friend ) {
+			foreach ( $list as $friend ) {
 				$user = User::newFromActorId( $friend['actor'] );
 				if ( !$user ) {
 					continue;
 				}
 				$avatar = new wAvatar( $user->getId(), 'ml' );
-
-				// Chop down username that gets displayed
 				$user_name = htmlspecialchars( $language->truncateForVisual( $user->getName(), 9, '..' ) );
-
 				$output .= "<a href=\"" . htmlspecialchars( $user->getUserPage()->getFullURL() ) .
 					"\" title=\"" . htmlspecialchars( $user->getName() ) . "\" rel=\"nofollow\">
 					{$avatar->getAvatarURL()}<br />
 					{$user_name}
 				</a>";
 
-				if ( $x == count( $friends ) || ( $x != 1 && $x % $per_row == 0 ) ) {
+				if ( $x == count( $list ) || ( $x != 1 && $x % $per_row == 0 ) ) {
 					$output .= '<div class="visualClear"></div>';
 				}
-
 				$x++;
 			}
-
 			$output .= '</div>';
 		}
 
 		return $output;
 	}
+
+
 
 	/**
 	 * Gets the recent social activity for a given user.
@@ -1473,6 +1518,10 @@ class UserProfilePage extends Article {
 						break;
 					case 'foe':
 						$item_html .= wfMessage( 'user-recent-activity-foe' )->escaped() .
+							" <b>{$user_link_2}</b> {$item_time}";
+						break;
+					case 'family':
+						$item_html .= wfMessage( 'user-recent-activity-family' )->escaped() .
 							" <b>{$user_link_2}</b> {$item_time}";
 						break;
 					case 'system_message':
@@ -1742,6 +1791,7 @@ class UserProfilePage extends Article {
 
 		$listLookup = new RelationshipListLookup( $this->profileOwner, 4 );
 		$friends = $listLookup->getFriendList();
+		$family = $listLookup->getFamilyList();
 
 		$stats = new UserStats( $this->profileOwner );
 		$stats_data = $stats->getUserStats();
@@ -1770,6 +1820,14 @@ class UserProfilePage extends Article {
 						SpecialPage::getTitleFor( 'SendBoardBlast' )->getFullURL()
 					) . '">' .
 					wfMessage( 'user-send-board-blast' )->escaped() . '</a>';
+			}
+			if ( $family ) {
+				$output .= wfMessage( 'pipe-separator' )->escaped() .
+					'<a href="' .
+					htmlspecialchars(
+						SpecialPage::getTitleFor( 'SendBoardFamilyBlast' )->getFullURL()
+					) . '">' .
+					wfMessage( 'user-send-board-family-blast' )->escaped() . '</a>';
 			}
 			if ( $total > 10 ) {
 				$output .= wfMessage( 'pipe-separator' )->escaped();
@@ -2091,6 +2149,98 @@ class UserProfilePage extends Article {
 
 		return $output;
 	}
+	/**
+	 * Build inline user-group badges for the profile owner.
+	 * Keeps implicit/noisy groups out by default.
+	 *
+	 * @return string HTML
+	 */
+	private function renderGroupBadges(): string {
+		$services = MediaWikiServices::getInstance();
+		$ugm = $services->getUserGroupManager();
+
+		// Hide noisy/implicit groups; tweak if you want.
+		$hide = [ '*', 'user', 'autoconfirmed', 'emailconfirmed' ];
+
+		$groups = array_diff( $ugm->getUserGroups( $this->profileOwner ), $hide );
+		if ( !$groups ) {
+			return '';
+		}
+
+		$badges = '';
+		foreach ( $groups as $group ) {
+			$label = $this->getContext()->msg( "group-$group" )->text();
+			$badges .= Html::element(
+				'span',
+				[ 'class' => "usergroup-badge group-$group", 'title' => $label ],
+				$label
+			) . ' ';
+		}
+
+		return Html::rawElement( 'span', [ 'class' => 'usergroup-badges' ], rtrim( $badges ) );
+	}
+	function renderTagline( $value, $required = true ) {
+		$context = $this->getContext();
+		$out = $context->getOutput();
+
+		$output = '';
+		if ( $value || $required ) {
+			$value = $out->parseAsInterface( trim( $value ), false );
+			$output = "<span class=\"user-profile-tagline\">{$value}</span>";
+		}
+		return $output;
+	}
+
+	private function buildUsernameLine(): string {
+		// Owner & viewer as User (not UserIdentity), because SPUserSecurity expects User
+		$ownerUser = $this->user instanceof User ? $this->user : \RequestContext::getMain()->getUser();
+		$viewerUser = method_exists( $this, 'getContext' )
+			? $this->getContext()->getUser()
+			: \RequestContext::getMain()->getUser();
+
+		$username = htmlspecialchars( $ownerUser->getName() );
+		$akaHtml  = '';
+
+		// Use the same privacy logic Interests uses
+		if ( \SPUserSecurity::isFieldVisible( $ownerUser, 'up_real_name', $viewerUser ) ) {
+			$real = '';
+
+			// Prefer SocialProfile field value
+			if ( method_exists( $this, 'getProfileField' ) ) {
+				$real = (string)$this->getProfileField( 'up_real_name' );
+			} elseif ( class_exists( '\UserProfile' ) ) {
+				$up = new \UserProfile( $ownerUser );
+				if ( method_exists( $up, 'getProfile' ) ) {
+					$prof = $up->getProfile();
+					if ( is_array( $prof ) && isset( $prof['up_real_name'] ) ) {
+						$real = (string)$prof['up_real_name'];
+					}
+				}
+			}
+
+			// Optional policy: fall back to core real name if SP field is blank
+			if ( $real === '' ) {
+				$rn = trim( (string)$ownerUser->getRealName() );
+				if ( $rn !== '' ) {
+					$real = $rn;
+				}
+			}
+
+			$real = trim( $real );
+			if ( $real !== '' && $real !== $ownerUser->getName() ) {
+				$akaText = \wfMessage( 'user-profile-aka' )->params( $real )->escaped();
+				$akaHtml = \Html::rawElement( 'span', [ 'class' => 'sp-user-aka' ], $akaText );
+			}
+		}
+
+		return \Html::rawElement(
+			'div',
+			[ 'class' => 'sp-username' ],
+			$username . ( $akaHtml ? ' ' . $akaHtml : '' )
+		);
+	}
+
+
 
 	/**
 	 * Initialize UserProfile data for the given user if that hasn't been done

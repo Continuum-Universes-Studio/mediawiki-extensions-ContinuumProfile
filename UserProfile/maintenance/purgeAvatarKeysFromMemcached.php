@@ -64,7 +64,7 @@ class PurgeAvatarKeysFromMemcached extends Maintenance {
 			// Deleting ALL cache keys for ALL users? Oh my...
 			// user_stats.stats_user_image_count is technically speaking incremented
 			// when the user uploads a new avatar (see
-			// /extensions/SocialProfile/UserProfile/SpecialUploadAvatar.php, function performUpload),
+			// /extensions/ContinuumProfile/UserProfile/SpecialUploadAvatar.php, function performUpload),
 			// but in practise this doesn't always appear to be the case, or at
 			// least the value of user_stats.stats_user_image_count is 0 for me
 			// on Brickipedia despite that I've uploaded a custom avatar in the

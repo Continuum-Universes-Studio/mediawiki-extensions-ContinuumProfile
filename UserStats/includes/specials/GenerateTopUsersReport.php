@@ -1,6 +1,8 @@
 <?php
 
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * A special page to generate the report of the users who earned the most
@@ -138,6 +140,8 @@ class GenerateTopUsersReport extends SpecialPage {
 			$date = getdate(); // It's a PHP core function
 			$period_title = $contLang->getMonthName( $date['mon'] ) .
 				' ' . $date['year'];
+		} else {
+			throw new LogicException( "Period must be 'weekly' or 'monthly'" );
 		}
 
 		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
@@ -282,7 +286,6 @@ class GenerateTopUsersReport extends SpecialPage {
 		// For grep: user-stats-report-weekly-page-title, user-stats-report-monthly-page-title
 		$title = Title::makeTitleSafe(
 			NS_PROJECT,
-			// @phan-suppress-next-line PhanPossiblyUndeclaredVariable $period_title is set
 			$this->msg( "user-stats-report-{$period}-page-title", $period_title )->inContentLanguage()->plain()
 		);
 

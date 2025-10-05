@@ -30,7 +30,6 @@
 	},
 	"Hooks": {
 		"BeforeCreateEchoEvent": "UserBoardHooks::onBeforeCreateEchoEvent",
-		"EchoGetDefaultNotifiedUsers": "UserBoardHooks::onEchoGetDefaultNotifiedUsers",
 		"EchoGetBundleRules": "UserBoardHooks::onEchoGetBundleRules"
 	},
 	"DefaultUserOptions": {
@@ -74,5 +73,5 @@
 		"localBasePath": "resources",
 		"remoteExtPath": "SocialProfile/UserBoard/resources"
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

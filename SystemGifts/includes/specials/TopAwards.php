@@ -8,6 +8,7 @@
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 class TopAwards extends UnlistedSpecialPage {
 
@@ -54,6 +55,16 @@ class TopAwards extends UnlistedSpecialPage {
 				'category_name' => 'Friend',
 				'category_threshold' => '25',
 				'category_id' => 8
+			],
+			[
+				'category_name' => 'Foe',
+				'category_threshold' => '26',
+				'category_id' => 9
+			],
+			[
+				'category_name' => 'Family',
+				'category_threshold' => '27',
+				'category_id' => 10
 			]
 		];
 

@@ -1,6 +1,9 @@
 <?php
 
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\User\UserNamePrefixSearch;
 
 /**
  * Special:GiveGift -- a special page for sending out user-to-user gifts
@@ -223,8 +226,12 @@ class GiveGift extends SpecialPage {
 			// No prefix suggestion for invalid user
 			return [];
 		}
+
+		$services = MediaWikiServices::getInstance();
 		// Autocomplete subpage as user list - public to allow caching
-		return UserNamePrefixSearch::search( 'public', $search, $limit, $offset );
+		return $services->getUserNamePrefixSearch()->search(
+			UserNamePrefixSearch::AUDIENCE_PUBLIC, $user, $limit, $offset
+		);
 	}
 
 	/**
@@ -320,7 +327,8 @@ class GiveGift extends SpecialPage {
 
 			$listLookup = new RelationshipListLookup( $user );
 			$friends = $listLookup->getFriendList();
-
+			$family = $listLookup->getFamilyList();
+			
 			if ( $friends ) {
 				$output .= '<div class="g-give-title">' .
 					$this->msg( 'g-give-list-friends-title' )->escaped() .
@@ -337,6 +345,29 @@ class GiveGift extends SpecialPage {
 					}
 					$output .= '<option value="' . htmlspecialchars( $friendActor->getName() ) . '">' .
 						htmlspecialchars( $friendActor->getName() ) .
+					'</option>' . "\n";
+				}
+				$output .= '</select>
+					</div>
+					<div class="g-give-separator">' .
+					$this->msg( 'g-give-separator' )->escaped() .
+				'</div>';
+			} else if ( $family ) {
+				$output .= '<div class="g-give-title">' .
+					$this->msg( 'g-give-list-family-title' )->escaped() .
+				'</div>
+					<div class="g-gift-select">
+						<select name="family-list">
+							<option value="#" selected="selected">' .
+							$this->msg( 'g-select-a-family-member' )->escaped() .
+						'</option>';
+				foreach ( $family as $familyMember ) {
+					$familyActor = User::newFromActorId( $familyMember['actor'] );
+					if ( !$familyActor || !$familyActor instanceof User ) {
+						continue;
+					}
+					$output .= '<option value="' . htmlspecialchars( $familyActor->getName() ) . '">' .
+						htmlspecialchars( $familyActor->getName() ) .
 					'</option>' . "\n";
 				}
 				$output .= '</select>

@@ -33,5 +33,11 @@ CREATE TABLE IF NOT EXISTS /*_*/user_profile (
   `up_custom_3` text,
   `up_custom_4` text,
   `up_custom_5` text,
+  `up_universes` text,
+  `up_pets` text,
+  `up_hobbies` text,
+  `up_heroes` text,
+  `up_quote` text,
+  `up_privatebirthday` int(4) NOT NULL default '0',
   `up_type` int(5) NOT NULL default '1'
 ) /*$wgDBTableOptions*/;

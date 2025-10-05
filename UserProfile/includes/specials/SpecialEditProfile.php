@@ -1,7 +1,14 @@
 <?php
 
+use MediaWiki\Config\ConfigException;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
+use MediaWiki\User\UserNamePrefixSearch;
+use Wikimedia\Services\NoSuchServiceException;
+use Wikimedia\Services\ContainerDisabledException;
+use Wikimedia\Services\ServiceDisabledException;
+use Wikimedia\Rdbms\DBError;
 
 /**
  * A special page to allow privileged users to update others' social profiles
@@ -13,6 +20,8 @@ use MediaWiki\User\UserIdentity;
  */
 
 class SpecialEditProfile extends SpecialUpdateProfile {
+	/** @var string[] */
+	public $profile_visible_fields;
 
 	public function __construct() {
 		SpecialPage::__construct( 'EditProfile', 'editothersprofiles' );
@@ -77,6 +86,8 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			$this->createUserInputForm();
 			return;
 		}
+
+		$this->profile_visible_fields = SPUserSecurity::getVisibleFields( $target, $user );
 
 		if ( $request->wasPosted() && $user->matchEditToken( $request->getVal( 'wpEditToken' ) ) ) {
 			$this->saveProfileBasic( $target );
@@ -194,7 +205,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 				'up_location_city', 'up_location_state', 'up_location_country',
 				'up_hometown_city', 'up_hometown_state', 'up_hometown_country',
 				'up_birthday', 'up_occupation', 'up_about', 'up_schools',
-				'up_places_lived', 'up_websites'
+				'up_places_lived', 'up_websites', 'up_quote'
 			],
 			[ 'up_actor' => $tar->getActorId() ],
 			__METHOD__
@@ -213,6 +224,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			$schools = $s->up_schools;
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
+			$quote = $s->up_quote;
 		}
 
 		if ( !isset( $location_country ) ) {
@@ -246,7 +258,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-info' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-name' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="real_name" id="real_name" value="' . htmlspecialchars( $real_name, ENT_QUOTES ) . '"/></p>
+			<p class="profile-update-unit"><input type="text" size="25" name="real_name" id="real_name" value="' . ( $real_name && in_array( 'up_real_name', $this->profile_visible_fields ) ? htmlspecialchars( $real_name, ENT_QUOTES ) : '' ) . '"/></p>
 			<div class="visualClear"></div>';
 		if ( $this->getUser()->isAllowed( 'editothersprofiles-private' ) ) {
 			$form .= '<p class="profile-update-unit-left">' . $this->msg( 'email' )->escaped() . '</p>
@@ -273,7 +285,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-location' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-city' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="location_city" id="location_city" value="' . ( isset( $location_city ) ? htmlspecialchars( $location_city, ENT_QUOTES ) : '' ) . '" /></p>
+			<p class="profile-update-unit"><input type="text" size="25" name="location_city" id="location_city" value="' . ( isset( $location_city ) && in_array( 'up_location_city', $this->profile_visible_fields ) ? htmlspecialchars( $location_city, ENT_QUOTES ) : '' ) . '" /></p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left" id="location_state_label">' . $this->msg( 'user-profile-personal-country' )->escaped() . '</p>';
 		$form .= '<p class="profile-update-unit">';
@@ -296,7 +308,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-hometown' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-city' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="hometown_city" id="hometown_city" value="' . ( isset( $hometown_city ) ? htmlspecialchars( $hometown_city, ENT_QUOTES ) : '' ) . '" /></p>
+			<p class="profile-update-unit"><input type="text" size="25" name="hometown_city" id="hometown_city" value="' . ( isset( $hometown_city ) && in_array( 'up_hometown_city', $this->profile_visible_fields ) ? htmlspecialchars( $hometown_city, ENT_QUOTES ) : '' ) . '" /></p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left" id="hometown_state_label">' . $this->msg( 'user-profile-personal-country' )->escaped() . '</p>
 			<p class="profile-update-unit">';
@@ -319,7 +331,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-birthday' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-birthdate-with-year' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" class="long-birthday" size="25" name="birthday" id="birthday" value="' . ( isset( $birthday ) ? htmlspecialchars( $birthday, ENT_QUOTES ) : '' ) . '" /></p>
+			<p class="profile-update-unit"><input type="text" class="long-birthday" size="25" name="birthday" id="birthday" value="' . ( isset( $birthday ) && in_array( 'up_birthday', $this->profile_visible_fields ) ? htmlspecialchars( $birthday, ENT_QUOTES ) : '' ) . '" /></p>
 			<div class="visualClear"></div>
 		</div><div class="visualClear"></div>';
 
@@ -327,17 +339,26 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-aboutme' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-aboutme' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="about" id="about" rows="3" cols="75">' . ( isset( $about ) ? htmlspecialchars( $about, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="about" id="about" rows="3" cols="75">' . ( isset( $about ) && in_array( 'up_about', $this->profile_visible_fields ) ? htmlspecialchars( $about, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 		</div>
 		<div class="visualClear"></div>
 
+		<div class="profile-update" id="profile-update-personal-heroes">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-quote' )->escaped() . '</p>
+			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-quote' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="quote" id="quote" rows="2" cols="75">' . ( isset( $quote ) && in_array( 'up_quote', $this->profile_visible_fields ) ? htmlspecialchars( $quote, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+		</div>
+
 		<div class="profile-update" id="profile-update-personal-work">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-work' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-occupation' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="occupation" id="occupation" rows="2" cols="75">' . ( isset( $occupation ) ? htmlspecialchars( $occupation, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="occupation" id="occupation" rows="2" cols="75">' . ( isset( $occupation ) && in_array( 'up_occupation', $this->profile_visible_fields ) ? htmlspecialchars( $occupation, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 		</div>
@@ -347,7 +368,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-education' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-schools' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="schools" id="schools" rows="2" cols="75">' . ( isset( $schools ) ? htmlspecialchars( $schools, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="schools" id="schools" rows="2" cols="75">' . ( isset( $schools ) && in_array( 'up_schools', $this->profile_visible_fields ) ? htmlspecialchars( $schools, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 		</div>
@@ -357,7 +378,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-places' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-placeslived' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="places" id="places" rows="3" cols="75">' . ( isset( $places ) ? htmlspecialchars( $places, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="places" id="places" rows="3" cols="75">' . ( isset( $places ) && in_array( 'up_places_lived', $this->profile_visible_fields ) ? htmlspecialchars( $places, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 		</div>
@@ -367,7 +388,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-web' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-websites' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="websites" id="websites" rows="2" cols="75">' . ( isset( $websites ) ? htmlspecialchars( $websites, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="websites" id="websites" rows="2" cols="75">' . ( isset( $websites ) && in_array( 'up_websites', $this->profile_visible_fields ) ? htmlspecialchars( $websites, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 		</div>
@@ -378,6 +399,17 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		return $form;
 	}
 
+	/**
+	 * @param UserIdentity $tar 
+	 * @return string 
+	 * @throws LogicException 
+	 * @throws ConfigException 
+	 * @throws NoSuchServiceException 
+	 * @throws ContainerDisabledException 
+	 * @throws ServiceDisabledException 
+	 * @throws UnexpectedValueException 
+	 * @throws DBError 
+	 */
 	function displayPersonalForm( $tar ) {
 		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$s = $dbr->selectRow(
@@ -385,8 +417,9 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			[
 				'up_about', 'up_places_lived', 'up_websites', 'up_relationship',
 				'up_occupation', 'up_companies', 'up_schools', 'up_movies',
-				'up_tv', 'up_music', 'up_books', 'up_video_games',
-				'up_magazines', 'up_snacks', 'up_drinks'
+				'up_magazines', 'up_snacks', 'up_drinks',  'up_video_games',
+				'up_tv', 'up_music', 'up_books', 'up_universes',
+				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote'
 			],
 			[
 				// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
@@ -409,6 +442,11 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			$magazines = $s->up_magazines;
 			$snacks = $s->up_snacks;
 			$drinks = $s->up_drinks;
+			$universes = $s->up_universes;
+			$pets = $s->up_pets;
+			$hobbies = $s->up_hobbies;
+			$heroes = $s->up_heroes;
+			$quote = $s->up_quote;
 		}
 
 		$this->getOutput()->setPageTitle( $this->msg( 'user-profile-section-interests' )->escaped() );
@@ -418,32 +456,32 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-title">' . $this->msg( 'user-profile-interests-entertainment' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-movies' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="movies" id="movies" rows="3" cols="75">' . ( isset( $movies ) ? htmlspecialchars( $movies, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="movies" id="movies" rows="3" cols="75">' . ( isset( $movies ) && in_array( 'up_movies', $this->profile_visible_fields ) ? htmlspecialchars( $movies, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-tv' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="tv" id="tv" rows="3" cols="75">' . ( isset( $tv ) ? htmlspecialchars( $tv, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="tv" id="tv" rows="3" cols="75">' . ( isset( $tv ) && in_array( 'up_tv', $this->profile_visible_fields ) ? htmlspecialchars( $tv, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-music' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="music" id="music" rows="3" cols="75">' . ( isset( $music ) ? htmlspecialchars( $music, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="music" id="music" rows="3" cols="75">' . ( isset( $music ) && in_array( 'up_music', $this->profile_visible_fields ) ? htmlspecialchars( $music, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-books' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="books" id="books" rows="3" cols="75">' . ( isset( $books ) ? htmlspecialchars( $books, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="books" id="books" rows="3" cols="75">' . ( isset( $books ) && in_array( 'up_books', $this->profile_visible_fields ) ? htmlspecialchars( $books, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-magazines' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="magazines" id="magazines" rows="3" cols="75">' . ( isset( $magazines ) ? htmlspecialchars( $magazines, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="magazines" id="magazines" rows="3" cols="75">' . ( isset( $magazines ) && in_array( 'up_magazines', $this->profile_visible_fields ) ? htmlspecialchars( $magazines, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-videogames' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="videogames" id="videogames" rows="3" cols="75">' . ( isset( $videogames ) ? htmlspecialchars( $videogames, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="videogames" id="videogames" rows="3" cols="75">' . ( isset( $videogames ) && in_array( 'up_video_games', $this->profile_visible_fields ) ? htmlspecialchars( $videogames, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			</div>
@@ -451,12 +489,38 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-title">' . $this->msg( 'user-profile-interests-eats' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-foodsnacks' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="snacks" id="snacks" rows="3" cols="75">' . ( isset( $snacks ) ? htmlspecialchars( $snacks, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="snacks" id="snacks" rows="3" cols="75">' . ( isset( $snacks ) && in_array( 'up_snacks', $this->profile_visible_fields ) ? htmlspecialchars( $snacks, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-drinks' )->escaped() . '</p>
 			<p class="profile-update-unit">
-				<textarea name="drinks" id="drinks" rows="3" cols="75">' . ( isset( $drinks ) ? htmlspecialchars( $drinks, ENT_QUOTES ) : '' ) . '</textarea>
+				<textarea name="drinks" id="drinks" rows="3" cols="75">' . ( isset( $drinks ) && in_array( 'up_drinks', $this->profile_visible_fields ) ? htmlspecialchars( $drinks, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+			</div>
+			<div class="profile-info visualClear">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-interests-others' )->escaped() . '</p>
+			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-universes' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="universes" id="universes" rows="3" cols="75">' . ( isset( $universes ) && in_array( 'up_universes', $this->profile_visible_fields ) ? htmlspecialchars( $universes, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-pets' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="pets" id="pets" rows="3" cols="75">' . ( isset( $pets ) && in_array( 'up_pets', $this->profile_visible_fields ) ? htmlspecialchars( $pets, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+			</div>
+			<div class="visualClear"></div>
+			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-hobbies' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="hobbies" id="hobbies" rows="3" cols="75">' . ( isset( $hobbies ) && in_array( 'up_hobbies', $this->profile_visible_fields ) ? htmlspecialchars( $hobbies, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+			<div class="visualClear"></div>
+			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-heroes' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="heroes" id="heroes" rows="3" cols="75">' . ( isset( $heroes ) && in_array( 'up_heroes', $this->profile_visible_fields ) ? htmlspecialchars( $heroes, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			</div>
@@ -492,6 +556,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			$custom2 = $s->up_custom_2;
 			$custom3 = $s->up_custom_3;
 			$custom4 = $s->up_custom_4;
+			$custom5 = $s->up_custom_5;
 		}
 
 		$this->getOutput()->setHTMLTitle( $this->msg( 'pagetitle', $this->msg( 'user-profile-tidbits-title' ) ) );
@@ -503,31 +568,38 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 					<div id="profile-update-custom1">
 					<p class="profile-update-unit-left">' . $this->msg( 'custom-info-field1' )->inContentLanguage()->parse() . '</p>
 					<p class="profile-update-unit">
-						<textarea name="custom1" id="fav_moment" rows="3" cols="75">' . ( isset( $custom1 ) ? htmlspecialchars( $custom1, ENT_QUOTES ) : '' ) . '</textarea>
+						<textarea name="custom1" id="fav_moment" rows="3" cols="75">' . ( isset( $custom1 ) && in_array( 'up_custom1', $this->profile_visible_fields ) ? htmlspecialchars( $custom1, ENT_QUOTES ) : '' ) . '</textarea>
 					</p>
 					</div>
 					<div class="visualClear"></div>
 					<div id="profile-update-custom2">
 					<p class="profile-update-unit-left">' . $this->msg( 'custom-info-field2' )->inContentLanguage()->parse() . '</p>
 					<p class="profile-update-unit">
-						<textarea name="custom2" id="least_moment" rows="3" cols="75">' . ( isset( $custom2 ) ? htmlspecialchars( $custom2, ENT_QUOTES ) : '' ) . '</textarea>
+						<textarea name="custom2" id="least_moment" rows="3" cols="75">' . ( isset( $custom2 ) && in_array( 'up_custom2', $this->profile_visible_fields ) ? htmlspecialchars( $custom2, ENT_QUOTES ) : '' ) . '</textarea>
 					</p>
 					</div>
 					<div class="visualClear"></div>
 					<div id="profile-update-custom3">
 					<p class="profile-update-unit-left">' . $this->msg( 'custom-info-field3' )->inContentLanguage()->parse() . '</p>
 					<p class="profile-update-unit">
-						<textarea name="custom3" id="fav_athlete" rows="3" cols="75">' . ( isset( $custom3 ) ? htmlspecialchars( $custom3, ENT_QUOTES ) : '' ) . '</textarea>
+						<textarea name="custom3" id="fav_athlete" rows="3" cols="75">' . ( isset( $custom3 ) && in_array( 'up_custom3', $this->profile_visible_fields ) ? htmlspecialchars( $custom3, ENT_QUOTES ) : '' ) . '</textarea>
 					</p>
 					</div>
 					<div class="visualClear"></div>
 					<div id="profile-update-custom4">
 					<p class="profile-update-unit-left">' . $this->msg( 'custom-info-field4' )->inContentLanguage()->parse() . '</p>
 					<p class="profile-update-unit">
-						<textarea name="custom4" id="least_fav_athlete" rows="3" cols="75">' . ( isset( $custom4 ) ? htmlspecialchars( $custom4, ENT_QUOTES ) : '' ) . '</textarea>
+						<textarea name="custom4" id="least_fav_athlete" rows="3" cols="75">' . ( isset( $custom4 ) && in_array( 'up_custom4', $this->profile_visible_fields ) ? htmlspecialchars( $custom4, ENT_QUOTES ) : '' ) . '</textarea>
 					</p>
 					</div>
 					<div class="visualClear"></div>
+					<div id="profile-update-custom5">
+					<p class="profile-update-unit-left">' . $this->msg( 'custom-info-field5' )->inContentLanguage()->parse() . '</p>
+					<p class="profile-update-unit">
+						<textarea name="custom5" id="fav_sport" rows="3" cols="75">' . ( isset( $custom5 ) && in_array( 'up_custom5', $this->profile_visible_fields ) ? htmlspecialchars( $custom5, ENT_QUOTES ) : '' ) . '</textarea>
+					</p>
+					<div class="visualClear"></div>
+					</div>
 				</div>
 			<input type="hidden" name="wpEditToken" value="' . htmlspecialchars( $this->getUser()->getEditToken(), ENT_QUOTES ) . '" />
 			<input type="submit" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" />
@@ -551,8 +623,12 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			// No prefix suggestion for invalid user
 			return [];
 		}
+
+		$services = MediaWikiServices::getInstance();
 		// Autocomplete subpage as user list - public to allow caching
-		return UserNamePrefixSearch::search( 'public', $search, $limit, $offset );
+		return $services->getUserNamePrefixSearch()->search(
+			UserNamePrefixSearch::AUDIENCE_PUBLIC, $user, $limit, $offset
+		);
 	}
 
 }

@@ -76,7 +76,7 @@ class ViewGift extends UnlistedSpecialPage {
 				'g-description-title',
 				$giftRecipientUser->getName(),
 				$gift['name']
-			)->parse() );
+			)->text() );
 
 			$output = '<div class="back-links">
 				<a href="' . htmlspecialchars( $giftRecipientUser->getUserPage()->getFullURL() ) . '">'

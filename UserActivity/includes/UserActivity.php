@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * UserActivity class
@@ -82,6 +83,9 @@ class UserActivity {
 		}
 		if ( strtoupper( $filter ) == 'FOES' ) {
 			$this->rel_type = 2;
+		}
+		if ( strtoupper( $filter ) == 'FAMILY' ) {
+			$this->rel_type = 3;
 		}
 		if ( strtoupper( $filter ) == 'ALL' ) {
 			$this->show_all = true;
@@ -207,7 +211,7 @@ class UserActivity {
 		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_REPLICA );
 
 		# Bail out if Vote table doesn't exist
-		if ( !$dbr->tableExists( 'Vote' ) ) {
+		if ( !$dbr->tableExists( 'Vote', __METHOD__ ) ) {
 			return;
 		}
 
@@ -280,7 +284,7 @@ class UserActivity {
 		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_REPLICA );
 
 		# Bail out if Comments table doesn't exist
-		if ( !$dbr->tableExists( 'Comments' ) ) {
+		if ( !$dbr->tableExists( 'Comments', __METHOD__ ) ) {
 			return;
 		}
 
@@ -679,8 +683,10 @@ class UserActivity {
 		foreach ( $res as $row ) {
 			if ( $row->r_type == 1 ) {
 				$r_type = 'friend';
-			} else {
+			} else if ( $row->r_type == 2 ) {
 				$r_type = 'foe';
+			} else {
+				$r_type = 'family';
 			}
 
 			$user = User::newFromActorId( $row->r_actor );
@@ -1135,6 +1141,9 @@ class UserActivity {
 		if ( $this->show_relationships ) {
 			$this->simplifyPageActivity( 'foe' );
 		}
+		if ( $this->show_relationships ) {
+			$this->simplifyPageActivity( 'family' );
+		}
 		if ( $this->show_messages_sent ) {
 			$this->simplifyPageActivity( 'user_message' );
 		}
@@ -1165,7 +1174,7 @@ class UserActivity {
 			$users = '';
 			$pages = '';
 
-			if ( $type == 'friend' || $type == 'foe' || $type == 'user_message' ) {
+			if ( $type == 'friend' || $type == 'foe' || $type == 'family' || $type == 'user_message' ) {
 				$page_title = Title::newFromText( $page_name, NS_USER );
 			} else {
 				$page_title = Title::newFromText( $page_name );
@@ -1218,6 +1227,7 @@ class UserActivity {
 									if (
 										$type == 'friend' ||
 										$type == 'foe' ||
+										$type == 'family' ||
 										$type == 'user_message'
 									) {
 										$page_title2 = Title::newFromText( $page_name2, NS_USER );
@@ -1306,6 +1316,8 @@ class UserActivity {
 				return 'addedFriendIcon.png';
 			case 'foe':
 				return 'addedFoeIcon.png';
+			case 'family':
+				return 'addedFamilyIcon.png';
 			case 'system_message':
 				return 'challengeIcon.png';
 			case 'system_gift':

@@ -92,7 +92,8 @@ class ViewSystemGifts extends SpecialPage {
 		/**
 		 * Show gift count for user
 		 */
-		$out->setPageTitle( $this->msg( 'ga-title', $rel->user_name ) );
+		$out->setPageTitle( $this->msg( 'ga-title', $rel->user_name )->text() );
+
 
 		$output .= '<div class="back-links">' .
 			$this->msg(

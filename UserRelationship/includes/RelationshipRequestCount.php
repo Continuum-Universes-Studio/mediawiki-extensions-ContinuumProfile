@@ -67,6 +67,12 @@ class RelationshipRequestCount {
 		return $this;
 	}
 
+	public function setFamily() {
+		$this->type = 3;
+
+		return $this;
+	}
+
 	/**
 	 * Purge the cache of the amount of open relationship requests for a user.
 	 */

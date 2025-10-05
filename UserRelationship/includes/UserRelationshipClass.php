@@ -121,7 +121,7 @@ class UserRelationship {
 						$updateProfileLink->getFullURL()
 					)->text()
 				];
-			} else {
+			} else if ( $type == 2 ) {
 				$subject = wfMessage( 'foe_request_subject', $userFrom )->text();
 				$body = [
 					'html' => wfMessage( 'foe_request_body_html',
@@ -129,6 +129,36 @@ class UserRelationship {
 						$userFrom
 					)->parse(),
 					'text' => wfMessage( 'foe_request_body',
+						$name,
+						$userFrom,
+						$requestLink->getFullURL(),
+						$updateProfileLink->getFullURL()
+					)->text()
+				];
+			} else if ( $type == 3 ) {
+				// Default to foe if no relationship type is specified
+				$subject = wfMessage( 'family_request_subject', $userFrom )->text();
+				$body = [
+					'html' => wfMessage( 'family_request_body_html',
+						$name,
+						$userFrom
+					)->parse(),
+					'text' => wfMessage( 'family_request_body',
+						$name,
+						$userFrom,
+						$requestLink->getFullURL(),
+						$updateProfileLink->getFullURL()
+					)->text()
+				];
+			} else {
+				// Fallback for unhandled request types
+				$subject = wfMessage( 'generic_request_subject', $userFrom )->text();
+				$body = [
+					'html' => wfMessage( 'generic_request_body_html',
+						$name,
+						$userFrom
+					)->parse(),
+					'text' => wfMessage( 'generic_request_body',
 						$name,
 						$userFrom,
 						$requestLink->getFullURL(),
@@ -183,7 +213,7 @@ class UserRelationship {
 						$updateProfileLink->getFullURL()
 					)->text()
 				];
-			} else {
+			} elseif ( $type == 2 ) {
 				$subject = wfMessage( 'foe_accept_subject', $userFrom )->text();
 				$body = [
 					'html' => wfMessage(
@@ -199,7 +229,40 @@ class UserRelationship {
 						$updateProfileLink->getFullURL()
 					)->text()
 				];
-			}
+			} elseif ( $type == 3 ) {
+				$subject = wfMessage( 'family_accept_subject', $userFrom->getName() )->text();
+				$body = [
+					'html' => wfMessage(
+						'family_accept_body_html',
+						$name,
+						$userFrom->getName()
+					)->parse(),
+					'text' => wfMessage(
+						'family_accept_body',
+						$name,
+						$userFrom->getName(),
+						$userFrom->getUserPage()->getFullURL(),
+						$updateProfileLink->getFullURL()
+					)->text()
+				];
+			} else {
+				// Fallback for unhandled accept types
+				$subject = wfMessage( 'generic_accept_subject', $userFrom->getName() )->text();
+				$body = [
+					'html' => wfMessage(
+						'generic_accept_body_html',
+						$name,
+						$userFrom->getName()
+					)->parse(),
+					'text' => wfMessage(
+						'generic_accept_body',
+						$name,
+						$userFrom->getName(),
+						$userFrom->getUserPage()->getFullURL(),
+						$updateProfileLink->getFullURL()
+					)->text()
+				];
+			} 
 
 			$user->sendMail( $subject, $body );
 		}
@@ -246,7 +309,7 @@ class UserRelationship {
 						$updateProfileLink->getFullURL()
 					)->text()
 				];
-			} else {
+			} elseif ( $type == 2 ) {
 				$subject = wfMessage( 'foe_removed_subject', $userFrom->getName() )->text();
 				$body = [
 					'html' => wfMessage(
@@ -256,6 +319,39 @@ class UserRelationship {
 					)->parse(),
 					'text' => wfMessage(
 						'foe_removed_body',
+						$name,
+						$userFrom->getName(),
+						$userFrom->getUserPage()->getFullURL(),
+						$updateProfileLink->getFullURL()
+					)->text()
+				];
+			} elseif ( $type == 3 ) {
+				$subject = wfMessage( 'family_removed_subject', $userFrom->getName() )->text();
+				$body = [
+					'html' => wfMessage(
+						'family_removed_body_html',
+						$name,
+						$userFrom->getName()
+					)->parse(),
+					'text' => wfMessage(
+						'family_removed_body',
+						$name,
+						$userFrom->getName(),
+						$userFrom->getUserPage()->getFullURL(),
+						$updateProfileLink->getFullURL()
+					)->text()
+				];
+			} else {
+				// Fallback for unhandled remove types
+				$subject = wfMessage( 'generic_removed_subject', $userFrom->getName() )->text();
+				$body = [
+					'html' => wfMessage(
+						'generic_removed_body_html',
+						$name,
+						$userFrom->getName()
+					)->parse(),
+					'text' => wfMessage(
+						'generic_removed_body',
 						$name,
 						$userFrom->getName(),
 						$userFrom->getUserPage()->getFullURL(),
@@ -320,15 +416,22 @@ class UserRelationship {
 			$stats = new UserStatsTrack( $this->user->getActorId() );
 			if ( $ur_type == 1 ) {
 				$stats->incStatField( 'friend' );
-			} else {
+			} else if ( $ur_type == 2 ) {
 				$stats->incStatField( 'foe' );
+			} else if ( $ur_type == 3 ) {
+				$stats->incStatField( 'family' );
 			}
 
 			$stats = new UserStatsTrack( $userFrom->getActorId() );
 			if ( $ur_type == 1 ) {
 				$stats->incStatField( 'friend' );
-			} else {
+			} else if ( $ur_type == 2 ) {
 				$stats->incStatField( 'foe' );
+			} else if ( $ur_type == 3 ) {
+				$stats->incStatField( 'family' );
+			} else {
+				// Fallback for unhandled relationship types
+				$stats->incStatField( 'generic' );
 			}
 
 			if ( $email ) {
@@ -355,8 +458,10 @@ class UserRelationship {
 			// Hooks (for Semantic SocialProfile mostly)
 			if ( $ur_type == 1 ) {
 				MediaWikiServices::getInstance()->getHookContainer()->run( 'NewFriendAccepted', [ $userFrom, $this->user ] );
-			} else {
+			} else if ( $ur_type == 2 ) {
 				MediaWikiServices::getInstance()->getHookContainer()->run( 'NewFoeAccepted', [ $userFrom, $this->user ] );
+			} else if ( $ur_type == 3 ) {
+				MediaWikiServices::getInstance()->getHookContainer()->run( 'NewFamilyAccepted', [ $userFrom, $this->user ] );
 			}
 
 			return true;
@@ -400,6 +505,9 @@ class UserRelationship {
 		$cache->delete( $cache->makeKey( 'relationship', 'profile', 'actor_id', "{$user1->getActorId()}-2" ) );
 		$cache->delete( $cache->makeKey( 'relationship', 'profile', 'actor_id', "{$user2->getActorId()}-2" ) );
 
+		$cache->delete( $cache->makeKey( 'relationship', 'profile', 'actor_id', "{$user1->getActorId()}-3" ) );
+		$cache->delete( $cache->makeKey( 'relationship', 'profile', 'actor_id', "{$user2->getActorId()}-3" ) );
+
 		// RelationshipRemovedByUserID hook
 		MediaWikiServices::getInstance()->getHookContainer()->run( 'RelationshipRemovedByUserID', [ $user1, $user2 ] );
 
@@ -407,11 +515,13 @@ class UserRelationship {
 		$stats = new UserStatsTrack( $user1->getActorId() );
 		$stats->updateRelationshipCount( 1 );
 		$stats->updateRelationshipCount( 2 );
+		$stats->updateRelationshipCount( 3 );
 		$stats->clearCache();
 
 		$stats = new UserStatsTrack( $user2->getActorId() );
 		$stats->updateRelationshipCount( 1 );
 		$stats->updateRelationshipCount( 2 );
+		$stats->updateRelationshipCount( 3 );
 		$stats->clearCache();
 	}
 
@@ -535,8 +645,13 @@ class UserRelationship {
 		foreach ( $res as $row ) {
 			if ( $row->ur_type == 1 ) {
 				$typeName = 'Friend';
-			} else {
+			} else if ( $row->ur_type == 2 ) {
 				$typeName = 'Foe';
+			} else if ( $row->ur_type == 3 ) {
+				$typeName = 'Family';
+			} else {
+				// Fallback for unhandled request types
+				$typeName = 'Generic';
 			}
 			$request[] = [
 				'id' => $row->ur_id,

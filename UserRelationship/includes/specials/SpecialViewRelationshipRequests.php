@@ -145,9 +145,14 @@ class SpecialViewRelationshipRequests extends SpecialPage {
 							'ur-requests-message-foe',
 							$userFrom->getName()
 						)->parse();
-					} else {
+					} else if ( $request['type'] == 'Friend' ) {
 						$msg = $this->msg(
 							'ur-requests-message-friend',
+							$userFrom->getName()
+						)->parse();
+					} else {
+						$msg = $this->msg(
+							'ur-requests-message-family',
 							$userFrom->getName()
 						)->parse();
 					}

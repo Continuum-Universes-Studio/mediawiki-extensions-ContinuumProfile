@@ -1,4 +1,5 @@
 <?php
+
 /**
  * A special page for removing existing friends/foes for the current logged in user
  *
@@ -10,6 +11,8 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license GPL-2.0-or-later
  */
+
+use MediaWiki\Title\Title;
 
 class SpecialRemoveRelationship extends UnlistedSpecialPage {
 
@@ -71,11 +74,17 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 			$confirmMsg = $this->msg( 'ur-remove-relationship-message-confirm-friend', $this->user_to->getName() )->parseAsBlock();
 			$error = htmlspecialchars( $this->msg( 'ur-remove-error-not-loggedin-friend' )->plain() );
 			$pending = $this->msg( 'ur-remove-error-message-pending-friend-request', $this->user_to->getName() )->parse();
-		} else {
+		} else if ( $this->relationship_type == 2 ) {
 			$confirmTitle = $this->msg( 'ur-remove-relationship-title-confirm-foe', $this->user_to->getName() )->parse();
 			$confirmMsg = $this->msg( 'ur-remove-relationship-message-confirm-foe', $this->user_to->getName() )->parseAsBlock();
 			$error = htmlspecialchars( $this->msg( 'ur-remove-error-not-loggedin-foe' )->plain() );
 			$pending = $this->msg( 'ur-remove-error-message-pending-foe-request', $this->user_to->getName() )->parse();
+		} else {
+			// Default to foe if no relationship type is specified
+			$confirmTitle = $this->msg( 'ur-remove-relationship-title-confirm-family', $this->user_to->getName() )->parse();
+			$confirmMsg = $this->msg( 'ur-remove-relationship-message-confirm-family', $this->user_to->getName() )->parseAsBlock();
+			$error = htmlspecialchars( $this->msg( 'ur-remove-error-not-loggedin-family' )->plain() );
+			$pending = $this->msg( 'ur-remove-error-message-pending-family-request', $this->user_to->getName() )->parse();
 		}
 
 		$output = '';
@@ -188,13 +197,23 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 				$this->user_to->getName(),
 				$this->msg( 'ur-remove' )->plain()
 			)->parseAsBlock();
-		} else {
+		} else if ( $this->relationship_type == 2 ) {
 			$title = $this->msg(
 				'ur-remove-relationship-title-foe',
 				$this->user_to->getName()
 			)->parse();
 			$remove = $this->msg(
 				'ur-remove-relationship-message-foe',
+				$this->user_to->getName(),
+				$this->msg( 'ur-remove' )->plain()
+			)->parseAsBlock();
+		} else {
+			$title = $this->msg(
+				'ur-remove-relationship-title-family',
+				$this->user_to->getName()
+			)->parse();
+			$remove = $this->msg(
+				'ur-remove-relationship-message-family',
 				$this->user_to->getName(),
 				$this->msg( 'ur-remove' )->plain()
 			)->parseAsBlock();

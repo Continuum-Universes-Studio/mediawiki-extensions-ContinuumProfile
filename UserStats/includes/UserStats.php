@@ -88,6 +88,7 @@ class UserStats {
 		$stats['challenges_won'] = $row->stats_challenges_won ?? 0;
 		$stats['friend_count'] = $row->stats_friends_count ?? 0;
 		$stats['foe_count'] = $row->stats_foe_count ?? 0;
+		$stats['family_count'] = $row->stats_family_count ?? 0;
 		$stats['user_board'] = $row->user_board_count ?? 0;
 		$stats['user_board_priv'] = $row->user_board_count_priv ?? 0;
 		$stats['user_board_sent'] = $row->user_board_sent ?? 0;

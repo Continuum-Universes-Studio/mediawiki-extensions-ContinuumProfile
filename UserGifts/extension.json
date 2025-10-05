@@ -36,7 +36,6 @@
 	},
 	"Hooks": {
 		"BeforeCreateEchoEvent": "UserGiftsHooks::onBeforeCreateEchoEvent",
-		"EchoGetDefaultNotifiedUsers": "UserGiftsHooks::onEchoGetDefaultNotifiedUsers",
 		"EchoGetBundleRules": "UserGiftsHooks::onEchoGetBundleRules"
 	},
 	"DefaultUserOptions": {
@@ -90,5 +89,5 @@
 			"giftadmin": true
 		}
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

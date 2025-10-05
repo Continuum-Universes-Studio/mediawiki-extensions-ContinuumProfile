@@ -1,4 +1,5 @@
 <?php
+
 /**
  * A special page for adding friends/foe requests for existing users in the wiki
  *
@@ -11,6 +12,10 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license GPL-2.0-or-later
  */
+
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\User\UserNamePrefixSearch;
 
 class SpecialAddRelationship extends UnlistedSpecialPage {
 
@@ -129,8 +134,10 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 		} elseif ( $hasRelationship >= 1 ) {
 			if ( $hasRelationship == 1 ) {
 				$error = $this->msg( 'ur-add-error-message-existing-relationship-friend', $this->user_to->getName() )->parseAsBlock();
-			} else {
+			} else if ( $hasRelationship == 2 ) {
 				$error = $this->msg( 'ur-add-error-message-existing-relationship-foe', $this->user_to->getName() )->parseAsBlock();
+			} else {
+				$error = $this->msg( 'ur-add-error-message-existing-relationship-family', $this->user_to->getName() )->parseAsBlock();
 			}
 
 			$avatar = new wAvatar( $this->user_to->getId(), 'l' );
@@ -151,8 +158,10 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 		} elseif ( UserRelationship::userHasRequestByID( $this->user_to, $currentUser ) == true ) {
 			if ( $this->relationship_type == 1 ) {
 				$error = $this->msg( 'ur-add-error-message-pending-friend-request', $this->user_to->getName() )->parseAsBlock();
-			} else {
+			} else if ( $this->relationship_type == 2 ) {
 				$error = $this->msg( 'ur-add-error-message-pending-foe-request', $this->user_to->getName() )->parseAsBlock();
+			} else {
+				$error = $this->msg( 'ur-add-error-message-pending-family-request', $this->user_to->getName() )->parseAsBlock();
 			}
 
 			$avatar = new wAvatar( $this->user_to->getId(), 'l' );
@@ -178,8 +187,10 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 
 			if ( $this->relationship_type == 1 ) {
 				$error = $this->msg( 'ur-add-error-message-not-loggedin-friend' )->escaped();
-			} else {
+			} else if ( $this->relationship_type == 2 ) {
 				$error = $this->msg( 'ur-add-error-message-not-loggedin-foe' )->escaped();
+			} else {
+				$error = $this->msg( 'ur-add-error-message-not-loggedin-family' )->escaped();
 			}
 
 			$out->setPageTitle( $this->msg( 'ur-error-title' )->plain() );
@@ -213,9 +224,12 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 				if ( $this->relationship_type == 1 ) {
 					$out->setPageTitle( $this->msg( 'ur-add-sent-title-friend', $this->user_to->getName() )->parse() );
 					$sent = $this->msg( 'ur-add-sent-message-friend', $this->user_to->getName() )->parseAsBlock();
-				} else {
+				} else if ( $this->relationship_type == 2 ) {
 					$out->setPageTitle( $this->msg( 'ur-add-sent-title-foe', $this->user_to->getName() )->parse() );
 					$sent = $this->msg( 'ur-add-sent-message-foe', $this->user_to->getName() )->parseAsBlock();
+				} else {
+					$out->setPageTitle( $this->msg( 'ur-add-sent-title-family', $this->user_to->getName() )->parse() );
+					$sent = $this->msg( 'ur-add-sent-message-family', $this->user_to->getName() )->parseAsBlock();
 				}
 
 				$output = "<div class=\"relationship-action\">
@@ -250,8 +264,11 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 			// No prefix suggestion for invalid user
 			return [];
 		}
+		$services = MediaWikiServices::getInstance();
 		// Autocomplete subpage as user list - public to allow caching
-		return UserNamePrefixSearch::search( 'public', $search, $limit, $offset );
+		return $services->getUserNamePrefixSearch()->search(
+			UserNamePrefixSearch::AUDIENCE_PUBLIC, $user, $limit, $offset
+		);
 	}
 
 	/**
@@ -266,10 +283,15 @@ class SpecialAddRelationship extends UnlistedSpecialPage {
 			$out->setPageTitle( $this->msg( 'ur-add-title-friend', $this->user_to->getName() )->parse() );
 			$add = $this->msg( 'ur-add-message-friend', $this->user_to->getName() )->parseAsBlock();
 			$button = $this->msg( 'ur-add-button-friend' )->escaped();
-		} else {
+		} else if ( $this->relationship_type == 2 ) {
 			$out->setPageTitle( $this->msg( 'ur-add-title-foe', $this->user_to->getName() )->parse() );
 			$add = $this->msg( 'ur-add-message-foe', $this->user_to->getName() )->parseAsBlock();
 			$button = $this->msg( 'ur-add-button-foe' )->escaped();
+		} else {
+			// Default to foe if no relationship type is specified
+			$out->setPageTitle( $this->msg( 'ur-add-title-family', $this->user_to->getName() )->parse() );
+			$add = $this->msg( 'ur-add-message-family', $this->user_to->getName() )->parseAsBlock();
+			$button = $this->msg( 'ur-add-button-family' )->escaped();
 		}
 
 		$avatar = new wAvatar( $this->user_to->getId(), 'l' );

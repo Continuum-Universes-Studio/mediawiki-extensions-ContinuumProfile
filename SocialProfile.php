@@ -115,6 +115,7 @@ $wgSocialProfileFileBackend = '';
 $wgUserProfileDisplay['board'] = true;
 $wgUserProfileDisplay['foes'] = true;
 $wgUserProfileDisplay['friends'] = true;
+$wgUserProfileDisplay['family'] = true; // Family is a custom field that can be added to user profiles
 $wgUserProfileDisplay['avatar'] = true; // If set to false, disables both avatar display and upload
 
 // Should we display UserBoard-related things on social profile pages?
@@ -133,8 +134,8 @@ $wgAvatarKey = $GLOBALS['wgDBname'];
 // Extension credits that show up on Special:Version
 $wgExtensionCredits['other'][] = [
 	'path' => __FILE__,
-	'name' => 'SocialProfile',
-	'author' => [ 'Aaron Wright', 'David Pean', 'Jack Phoenix' ],
+	'name' => 'ContinuumProfile',
+	'author' => [ 'Aaron Wright', 'David Pean', 'Jack Phoenix', 'Christian Daniel Jensen', 'Anita' ],
 	'version' => '1.14',
 	'url' => 'https://www.mediawiki.org/wiki/Extension:SocialProfile',
 	'descriptionmsg' => 'socialprofile-desc',
@@ -146,12 +147,12 @@ $wgAutoloadClasses['SocialProfileHooks'] = __DIR__ . '/SocialProfileHooks.php';
 // Loader files
 require_once __DIR__ . '/UserProfile/UserProfile.php'; // Profile page configuration loader file
 wfLoadExtensions( [
-	'SocialProfile/SystemGifts', // SystemGifts (awards functionality)
-	'SocialProfile/UserActivity', // UserActivity - recent social changes
-	'SocialProfile/UserBoard',
-	'SocialProfile/UserRelationship',
-	'SocialProfile/UserStats',
-	'SocialProfile/UserGifts',
+	'ContinuumProfile/SystemGifts', // SystemGifts (awards functionality)
+	'ContinuumProfile/UserActivity', // UserActivity - recent social changes
+	'ContinuumProfile/UserBoard',
+	'ContinuumProfile/UserRelationship',
+	'ContinuumProfile/UserStats',
+	'ContinuumProfile/UserGifts',
 ] );
 
 $wgHooks['BeforePageDisplay'][] = 'SocialProfileHooks::onBeforePageDisplay';
@@ -166,24 +167,18 @@ $wgHooks['ParserFirstCallInit'][] = 'AvatarParserFunction::setupAvatarParserFunc
 $wgResourceModules['ext.socialprofile.clearfix'] = [
 	'styles' => 'clearfix.css',
 	'localBasePath' => __DIR__ . '/shared',
-	'remoteExtPath' => 'SocialProfile/shared',
+	'remoteExtPath' => 'ContinuumProfile/shared',
 ];
 
 $wgResourceModules['ext.socialprofile.responsive'] = [
 	'styles' => 'responsive.less',
 	'localBasePath' => __DIR__ . '/shared',
-	'remoteExtPath' => 'SocialProfile/shared',
+	'remoteExtPath' => 'ContinuumProfile/shared',
 ];
 
 // General/shared JS modules -- not (necessarily) directly used by SocialProfile,
 // but rather by other social tools which depend on SP
 // @see https://phabricator.wikimedia.org/T100025
-$wgResourceModules['ext.socialprofile.flash'] = [
-	'scripts' => 'flash.js',
-	'localBasePath' => __DIR__ . '/shared',
-	'remoteExtPath' => 'SocialProfile/shared',
-];
-
 $wgResourceModules['ext.socialprofile.LightBox'] = [
 	'scripts' => 'LightBox.js',
 	'localBasePath' => __DIR__ . '/shared',

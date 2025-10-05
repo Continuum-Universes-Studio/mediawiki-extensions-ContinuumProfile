@@ -79,7 +79,7 @@ class SPUserSecurity {
 	 * @return string HTML suitable for output
 	 */
 	public static function renderEye( $fieldKey, User $user ) {
-		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
+		$dbw = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$s = $dbw->selectRow(
 			'user_fields_privacy',
 			[ '*' ],
@@ -87,47 +87,20 @@ class SPUserSecurity {
 			__METHOD__
 		);
 
-		if ( $s && !empty( $s->ufp_privacy ) ) {
-			$privacy = $s->ufp_privacy;
-		} else {
-			$privacy = 'public';
-		}
+		$privacy = ( $s && !empty( $s->ufp_privacy ) ) ? $s->ufp_privacy : 'public';
 
-		// Form list with remaining privacies
 		$all_privacy = [ 'public', 'hidden', 'friends', 'foaf' ];
 
-		$ret = '<div class="eye-container" current_action="' .
-			htmlspecialchars( $privacy, ENT_QUOTES ) . '" fieldkey="' .
-			htmlspecialchars( $fieldKey, ENT_QUOTES ) . '">
-					<div class="title">' .
-					// For grep: i18n messages used here:
-					// user-profile-privacy-status-privacy-public,
-					// user-profile-privacy-status-privacy-hidden,
-					// user-profile-privacy-status-privacy-friends,
-					// user-profile-privacy-status-privacy-foaf
-					wfMessage( 'user-profile-privacy-status-privacy-' . $privacy )->escaped() . '</div>
-					<div class="menu">';
-		$noscriptVersion = '<noscript><select name="' . htmlspecialchars( $fieldKey, ENT_QUOTES ) . '">';
-
+		$ret = '<select name="' . htmlspecialchars( $fieldKey, ENT_QUOTES ) . '" id="privacy-' . htmlspecialchars( $fieldKey, ENT_QUOTES ) . '" class="privacy-dropdown">';
 		foreach ( $all_privacy as $priv ) {
-			if ( $priv == $privacy ) {
-				$noscriptVersion .= '<option value="' . htmlspecialchars( $privacy, ENT_QUOTES ) .
-					'" selected="selected">' . wfMessage( 'user-profile-privacy-status-privacy-' . $privacy )->escaped() . '</option>';
-				continue;
-			}
-
-			$ret .= '<div class="item" action="' . htmlspecialchars( $priv, ENT_QUOTES ) . '">' .
-				wfMessage( 'user-profile-privacy-status-privacy-' . $priv )->escaped() .
-				'</div>';
-			$noscriptVersion .= '<option value="' . htmlspecialchars( $priv, ENT_QUOTES ) . '">' .
-				wfMessage( 'user-profile-privacy-status-privacy-' . $priv )->escaped() . '</option>';
+			$ret .= '<option value="' . htmlspecialchars( $priv, ENT_QUOTES ) . '"'
+				. ( $priv == $privacy ? ' selected="selected"' : '' ) . '>'
+				. wfMessage( 'user-profile-privacy-status-privacy-' . $priv )->escaped()
+				. '</option>';
 		}
+		$ret .= '</select>';
 
-		$ret .= '</div>
-			</div>';
-		$noscriptVersion .= '</select></noscript>';
-
-		return $ret . $noscriptVersion;
+		return $ret;
 	}
 
 	/**

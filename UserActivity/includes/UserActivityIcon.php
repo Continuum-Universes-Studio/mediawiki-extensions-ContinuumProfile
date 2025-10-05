@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\Html\Html;
+
 /**
  * Object to easily build icons shown in a user activity feed.
  */
@@ -33,7 +36,7 @@ class UserActivityIcon {
 		global $wgExtensionAssetsPath;
 
 		$params = [
-			'src' => "{$wgExtensionAssetsPath}/SocialProfile/images/{$this->getTypeIcon()}",
+			'src' => "{$wgExtensionAssetsPath}/ContinuumProfile/images/{$this->getTypeIcon()}",
 			'alt' => $this->getTypeIcon(),
 			'border' => 0,
 		];

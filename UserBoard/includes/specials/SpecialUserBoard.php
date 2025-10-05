@@ -1,6 +1,9 @@
 <?php
 
+use MediaWiki\Html\Html;
+use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * Display User Board messages for a user
@@ -67,7 +70,7 @@ class SpecialViewUserBoard extends SpecialPage {
 
 		$ub_messages_show = 25;
 		$user_name = $userFromURL = $request->getVal( 'user', $par );
-		$user_name_2 = $request->getVal( 'conv' );
+		$user_name_2 = $request->getVal( 'conv' ) ?? '';
 		$user_2 = 0; // Prevent E_NOTICE
 		$page = $request->getInt( 'page', 1 );
 		$output = '';
@@ -310,7 +313,7 @@ class SpecialViewUserBoard extends SpecialPage {
 		} else {
 			if ( $currentUser->getName() == $user_name ) {
 				$can_post = true;
-				$user_name_to = htmlspecialchars( $user_name_2 ?? '', ENT_QUOTES );
+				$user_name_to = htmlspecialchars( $user_name_2, ENT_QUOTES );
 				$user_name_from = htmlspecialchars( $user_name, ENT_QUOTES );
 			}
 		}

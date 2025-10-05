@@ -14,7 +14,7 @@
  * @copyright Copyright © 2007, Wikia Inc.
  * @license GPL-2.0-or-later
  */
-
+use MediaWiki\User\ActorNormalization;
 class SpecialViewRelationships extends SpecialPage {
 
 	public function __construct() {
@@ -127,6 +127,7 @@ class SpecialViewRelationships extends SpecialPage {
 		$stats_data = $stats->getUserStats();
 		$friend_count = $stats_data['friend_count'];
 		$foe_count = $stats_data['foe_count'];
+		$family_count = $stats_data['family_count'];
 
 		if ( $rel_type == 1 ) {
 			$out->setPageTitle( $this->msg( 'ur-title-friend', $targetUser->getName() )->parse() );
@@ -145,7 +146,7 @@ class SpecialViewRelationships extends SpecialPage {
 				$targetUser->getName(),
 				$total
 			)->escaped() . '</div>';
-		} else {
+		} else if ( $rel_type == 2 ) {
 			$out->setPageTitle( $this->msg( 'ur-title-foe', $targetUser->getName() )->parse() );
 
 			$total = $foe_count;
@@ -160,6 +161,24 @@ class SpecialViewRelationships extends SpecialPage {
 		<div class="relationship-count">'
 			. $this->msg(
 				'ur-relationship-count-foes',
+				$targetUser->getName(),
+				$total
+			)->escaped() . '</div>';
+		} else {
+			$out->setPageTitle( $this->msg( 'ur-title-family', $targetUser->getName() )->parse() );
+
+			$total = $family_count;
+
+			$rem = $this->msg( 'ur-remove-relationship-family' )->plain();
+
+			$output .= '<div class="back-links">
+			<a href="' . htmlspecialchars( $targetUser->getUserPage()->getFullURL() ) . '">' .
+				$this->msg( 'ur-backlink', $targetUser->getName() )->parse() .
+			'</a>
+		</div>
+		<div class="relationship-count">'
+			. $this->msg(
+				'ur-relationship-count-family',
 				$targetUser->getName(),
 				$total
 			)->escaped() . '</div>';
@@ -224,6 +243,12 @@ class SpecialViewRelationships extends SpecialPage {
 								$this->msg( 'ur-add-foe' )->text(),
 								[],
 								[ 'user' => $actor->getName(), 'rel_type' => 2 ]
+							),
+							$linkRenderer->makeLink(
+								$addRelationshipLink,
+								$this->msg( 'ur-add-family' )->text(),
+								[],
+								[ 'user' => $actor->getName(), 'rel_type' => 3 ]
 							),
 							''
 						] );

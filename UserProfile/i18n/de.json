@@ -15,9 +15,7 @@
 			"Tim 'Avatar' Bartel",
 			"TomatoCake",
 			"Umherirrender",
-			"Umlaut",
-			"MoritzMT20",
-			"Russianbabe1978"
+			"Umlaut"
 		]
 	},
 	"editprofile": "Benutzerprofile anderer Benutzer bearbeiten",
@@ -36,8 +34,10 @@
 	"user-meet-people": "Leute treffen",
 	"user-add-friend": "Als Freund hinzufügen",
 	"user-add-foe": "Als Feind hinzufügen",
+	"user-add-family": "Als Familienmitglied hinzufügen",
 	"user-remove-friend": "Freundschaft beenden",
 	"user-remove-foe": "Feindschaft beenden",
+	"user-remove-family": "Familienmitgliedschaft beenden",
 	"user-send-message": "Nachricht senden",
 	"user-send-gift": "Geschenk senden",
 	"user-contributions": "Beiträge",
@@ -137,6 +137,9 @@
 	"user-profile-interests-eats": "Essen & Trinken",
 	"user-profile-interests-foodsnacks": "Essen",
 	"user-profile-interests-drinks": "Getränke",
+	"user-profile-interests-universes": "Universen",
+	"user-profile-interests-pets": "Haustiere",
+	"user-profile-interests-hobbies": "Hobbys",
 	"user-profile-preferences-emails": "E-Mail-Benachrichtigungen",
 	"user-profile-preferences-emails-manage": "E-Mail-Benachrichtigungen werden von der Echo-Erweiterung verwaltet. Du kannst diese in deinen [[Special:Preferences#mw-prefsection-echo|Einstellungen]] anpassen.",
 	"user-profile-preferences-emails-personalmessage": "Bei Empfang persönlicher Nachrichten",
@@ -227,5 +230,9 @@
 	"apihelp-socialprofile-userprofileprivacy-param-tuid": "Ziel-Benutzer-ID",
 	"apihelp-smpuserprofiletype-param-do": "Auszuführende Aktion (get oder set)",
 	"apihelp-smpuserprofiletype-param-user": "Benutzername (nur relevant, wenn <kbd>do</kbd> <kbd>get</kbd> entspricht, da dieses Modul nicht zum Festlegen der Benutzerseitentypen anderer Benutzer verwendet werden kann, sondern nur deiner eigenen Benutzerseite)",
-	"random-users-avatars-title": "Triff die Community"
+	"random-users-avatars-title": "Triff die Community",
+	"nsfwblur-pref-birthyear-title": "Geburtsjahr anzeigen",
+	"nsfwblur-pref-birthyear-label": "Zeige Geburtsjahr in meinem Profil an",
+	"nsfwblur-pref-birthyear-help": "Wenn aktiviert, wird das Geburtsjahr in deinem Profil angezeigt. Wenn nicht, werden nur Monat und Tag angezeigt."
+
 }

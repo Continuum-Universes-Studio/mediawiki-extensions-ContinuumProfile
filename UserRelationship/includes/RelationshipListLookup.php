@@ -53,8 +53,10 @@ class RelationshipListLookup {
 		foreach ( $res as $row ) {
 			if ( $row->ur_type == 1 ) {
 				$type_name = 'Friend';
-			} else {
+			} else if ( $row->ur_type == 2 ) {
 				$type_name = 'Foe';
+			} else {
+				$type_name = 'Family';
 			}
 			$requests[] = [
 				'id' => $row->ur_id,
@@ -77,6 +79,7 @@ class RelationshipListLookup {
 	 * @param int $type
 	 * - 1 for friends
 	 * - 2 (or anything else but 1) for foes
+	 * - 3 for family
 	 * @param int $page If greater than 0, will be used to
 	 * calculate the OFFSET for the SQL query
 	 * @return array Array of relationship information
@@ -140,5 +143,14 @@ class RelationshipListLookup {
 	 */
 	public function getFoeList( $page = 0 ) {
 		return $this->getRelationshipList( 2, $page );
+	}
+	/**
+	 * Gets the list of family for the current user
+	 *
+	 * @param int $page See getRelationshipList()
+	 * @return array See getRelationshipList()
+	 */
+	public function getFamilyList( $page = 0 ) {
+		return $this->getRelationshipList( 3, $page );
 	}
 }

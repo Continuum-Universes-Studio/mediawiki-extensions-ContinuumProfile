@@ -30,5 +30,7 @@ CREATE TABLE user_profile (
   up_custom_3          TEXT,
   up_custom_4          TEXT,
   up_custom_5          TEXT,
-  up_type              INTEGER      NOT NULL  DEFAULT 1
+  up_type              INTEGER      NOT NULL  DEFAULT 1,
+  up_privatebirthday   INTEGER      NOT NULL  DEFAULT 0
+
 );

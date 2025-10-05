@@ -1,7 +1,10 @@
 <?php
 
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
+use function Eris\Generator\int;
 
 /**
  * A special page to allow users to update their social profile
@@ -158,22 +161,21 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$out->addModules( 'ext.userProfile.updateProfile' );
 
 		if ( $request->wasPosted() && $user->matchEditToken( $request->getVal( 'wpEditToken' ) ) ) {
-			// NoJS support
-			if ( $request->getBool( 'should_update_field_visibilities' ) ) {
-				$newFieldVisibilities = [];
-				foreach ( $request->getValues() as $key => $val ) {
-					if ( preg_match( '/up_/i', $key ) ) {
-						$newFieldVisibilities[$key] = $val;
-					}
-				}
-				if ( !empty( $newFieldVisibilities ) ) {
-					foreach ( $newFieldVisibilities as $fieldKey => $visibility ) {
-						// TODO Would be nice if the SPUserSecurity class had a batch API of
-						// some kind for situations like these...
-						SPUserSecurity::setPrivacy( $user, $fieldKey, $visibility );
+			// Save field visibilities if any were posted, regardless of the JS flag
+			$postedVis = $this->getPostedFieldVisibilities();
+			if ( !empty( $postedVis ) ) {
+				foreach ( $postedVis as $fieldKey => $visibility ) {
+					$normalized = $this->normalizePrivacyValue( $visibility, 'public' );
+
+					if ( class_exists('SPUserSecurity') && method_exists('SPUserSecurity','setPrivacy') ) {
+						SPUserSecurity::setPrivacy( $user, $fieldKey, $normalized );
+					} else {
+						// Fallback: write directly to user_fields_privacy
+						$this->savePrivacyDirect( $user->getId(), $fieldKey, $normalized );
 					}
 				}
 			}
+
 
 			if ( !$section ) {
 				$section = 'basic';
@@ -302,6 +304,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$user = $this->getUser();
 
 		$notify_friend = $request->getInt( 'notify_friend', 0 );
+		$notify_family = $request->getInt( 'notify_family', 0 );
 		$notify_gift = $request->getInt( 'notify_gift', 0 );
 		$notify_challenge = $request->getInt( 'notify_challenge', 0 );
 		$notify_honorifics = $request->getInt( 'notify_honorifics', 0 );
@@ -311,6 +314,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
 		$userOptionsManager->setOption( $user, 'notifygift', $notify_gift );
 		$userOptionsManager->setOption( $user, 'notifyfriendrequest', $notify_friend );
+		$userOptionsManager->setOption( $user, 'notifyfamilyrequest', $notify_family );
 		$userOptionsManager->setOption( $user, 'notifychallenge', $notify_challenge );
 		$userOptionsManager->setOption( $user, 'notifyhonorifics', $notify_honorifics );
 		$userOptionsManager->setOption( $user, 'notifymessage', $notify_message );
@@ -364,23 +368,71 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$request = $this->getRequest();
 
+		// As for why the rest of the fields are done below instead of here...that's got to do with T373265
+		// tl,dr summary: we do NOT want to overwrite hidden/otherwise not-viewable-by-the-current-user
+		// data when a privileged user (who is *not* allowed to view said user profile data, however) uses
+		// Special:EditProfile (sic) to edit another user's profile
 		$basicProfileData = [
-			'up_location_city' => $request->getVal( 'location_city' ) ?? '',
-			'up_location_state' => $request->getVal( 'location_state' ) ?? '',
-			'up_location_country' => $request->getVal( 'location_country' ) ?? '',
-
-			'up_hometown_city' => $request->getVal( 'hometown_city' ) ?? '',
-			'up_hometown_state' => $request->getVal( 'hometown_state' ) ?? '',
-			'up_hometown_country' => $request->getVal( 'hometown_country' ) ?? '',
-
 			'up_birthday' => self::formatBirthdayDB( $request->getVal( 'birthday' ) ),
-			'up_about' => $request->getVal( 'about' ) ?? '',
-			'up_occupation' => $request->getVal( 'occupation' ) ?? '',
-			'up_schools' => $request->getVal( 'schools' ) ?? '',
-			'up_places_lived' => $request->getVal( 'places' ) ?? '',
-			'up_websites' => $request->getVal( 'websites' ) ?? '',
-			'up_relationship' => $request->getVal( 'relationship' ) ?? 0
 		];
+
+		if ( $request->getVal( 'location_city' ) ) {
+			$basicProfileData['up_location_city'] = $request->getVal( 'location_city' );
+		}
+		if ( $request->getVal( 'location_state' ) ) {
+			$basicProfileData['up_location_state'] = $request->getVal( 'location_state' );
+		}
+		if ( $request->getVal( 'location_country' ) ) {
+			$basicProfileData['up_location_country'] = $request->getVal( 'location_country' );
+		}
+
+		if ( $request->getVal( 'hometown_city' ) ) {
+			$basicProfileData['up_hometown_city'] = $request->getVal( 'hometown_city' );
+		}
+		if ( $request->getVal( 'hometown_state' ) ) {
+			$basicProfileData['up_hometown_state'] = $request->getVal( 'hometown_state' );
+		}
+		if ( $request->getVal( 'hometown_country' ) ) {
+			$basicProfileData['up_hometown_country'] = $request->getVal( 'hometown_country' );
+		}
+
+		if ( $request->getVal( 'about' ) ) {
+			$basicProfileData['up_about'] = $request->getVal( 'about' );
+		}
+		if ( $request->getVal( 'occupation' ) ) {
+			$basicProfileData['up_occupation'] = $request->getVal( 'occupation' );
+		}
+		if ( $request->getVal( 'tagline' ) ) {
+			$basicProfileData['up_tagline'] = $request->getVal( 'tagline' );
+		}
+		if ( $request->getVal( 'schools' ) ) {
+			$basicProfileData['up_schools'] = $request->getVal( 'schools' );
+		}
+		if ( $request->getVal( 'places' ) ) {
+			$basicProfileData['up_places_lived'] = $request->getVal( 'places' );
+		}
+		if ( $request->getVal( 'websites' ) ) {
+			$basicProfileData['up_websites'] = $request->getVal( 'websites' );
+		}
+		if ( $request->getVal( 'universes' ) ) {
+			$basicProfileData['up_universes'] = $request->getVal( 'universes' );
+		}
+		if ( $request->getVal( 'pets' ) ) {
+			$basicProfileData['up_pets'] = $request->getVal( 'pets' );
+		}
+		if ( $request->getVal( 'hobbies' ) ) {
+			$basicProfileData['up_hobbies'] = $request->getVal( 'hobbies' );
+		}
+		if ( $request->getVal( 'heroes' ) ) {
+			$basicProfileData['up_heroes'] = $request->getVal( 'heroes' );
+		}
+		if ( $request->getVal( 'quote' ) ) {
+			$basicProfileData['up_quote'] = $request->getVal( 'quote' );
+		}
+		if ($request->getVal('private_birthyear') !== null) {
+			$basicProfileData['private_birthyear'] = intval($request->getVal('private_birthyear'));
+		}
+
 
 		$dbw->update(
 			'user_profile',
@@ -419,7 +471,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				'up_custom_1' => $request->getVal( 'custom1' ),
 				'up_custom_2' => $request->getVal( 'custom2' ),
 				'up_custom_3' => $request->getVal( 'custom3' ),
-				'up_custom_4' => $request->getVal( 'custom4' )
+				'up_custom_4' => $request->getVal( 'custom4' ),
+				'up_custom_5' => $request->getVal( 'custom5' ),
 			],
 			/* WHERE */[ 'up_actor' => $user->getActorId() ],
 			__METHOD__
@@ -453,7 +506,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'up_magazines' => $request->getVal( 'magazines' ),
 			'up_video_games' => $request->getVal( 'videogames' ),
 			'up_snacks' => $request->getVal( 'snacks' ),
-			'up_drinks' => $request->getVal( 'drinks' )
+			'up_drinks' => $request->getVal( 'drinks' ),
+			'up_universes' => $request->getVal( 'universes' ),
+			'up_pets' => $request->getVal( 'pets' ),
+			'up_hobbies' => $request->getVal( 'hobbies' ),
+			'up_heroes' => $request->getVal( 'heroes' )
+
 		];
 
 		$dbw->update(
@@ -481,8 +539,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			[
 				'up_location_city', 'up_location_state', 'up_location_country',
 				'up_hometown_city', 'up_hometown_state', 'up_hometown_country',
-				'up_birthday', 'up_occupation', 'up_about', 'up_schools',
-				'up_places_lived', 'up_websites'
+				'up_birthday', 'up_occupation', 'up_tagline', 'up_about', 'up_schools',
+				'up_places_lived', 'up_websites', 'private_birthyear', 'up_quote'
 			],
 			[ 'up_actor' => $user->getActorId() ],
 			__METHOD__
@@ -495,6 +553,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$location_country = $s->up_location_country;
 			$about = $s->up_about;
 			$occupation = $s->up_occupation;
+			$tagline = $s->up_tagline ?? '';
 			$hometown_city = $s->up_hometown_city;
 			$hometown_state = $s->up_hometown_state;
 			$hometown_country = $s->up_hometown_country;
@@ -504,6 +563,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$schools = $s->up_schools;
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
+			$quote = $s->up_quote;
 		}
 
 		if ( !isset( $location_country ) ) {
@@ -541,137 +601,110 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$form .= Html::hidden( 'should_update_field_visibilities', true );
 		$form .= '<div class="profile-info clearfix">';
 		$form .= '<div class="profile-update">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-info' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-name' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="real_name" id="real_name" value="' . htmlspecialchars( $real_name, ENT_QUOTES ) . '"/></p>
-			<div class="visualClear">' . $this->renderEye( 'up_real_name' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'email' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="email" id="email" value="' . htmlspecialchars( $email, ENT_QUOTES ) . '"/>';
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-info' )->escaped() . '</p>';
+		$form .= $this->renderTextFieldRow( 'user-profile-personal-name', 'real_name', $real_name, 'text', 25 );
+		$form .= $this->renderBigTextFieldRow( 'user-profile-personal-tagline', 'tagline', $tagline, 3, 25 );
+		$form .= $this->renderTextFieldRow( 'email', 'email', $email, 'text', 25 );
 		if ( !$user->mEmailAuthenticated ) {
 			$confirm = SpecialPage::getTitleFor( 'Confirmemail' );
 			$form .= '<br />';
 			$form .= " <a href=\"{$confirm->getFullURL()}\">" . $this->msg( 'confirmemail' )->escaped() . '</a>';
 		}
-		$form .= '</p>
-			<div class="visualClear">' . $this->renderEye( 'up_email' ) . '</div>';
 		if ( !$user->mEmailAuthenticated ) {
 			$form .= '<p class="profile-update-unit-left"></p>
 				<p class="profile-update-unit-small">' .
 					$this->msg( 'user-profile-personal-email-needs-auth' )->escaped() .
 				'</p>';
 		}
-		$form .= '<div class="visualClear"></div>
-		</div>
-		<div class="visualClear"></div>';
 
 		$form .= '<div class="profile-update">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-location' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-city' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="location_city" id="location_city" value="' . ( isset( $location_city ) ? htmlspecialchars( $location_city, ENT_QUOTES ) : '' ) . '" /></p>
-			<div class="visualClear">' . $this->renderEye( 'up_location_city' ) . '</div>
-			<p class="profile-update-unit-left" id="location_state_label">' . $this->msg( 'user-profile-personal-country' )->escaped() . '</p>';
-		$form .= '<p class="profile-update-unit">';
-		// Hidden helper for UpdateProfile.js since JS cannot directly access PHP variables
-		$form .= '<input type="hidden" id="location_state_current" value="' . ( isset( $location_state ) ? htmlspecialchars( $location_state, ENT_QUOTES ) : '' ) . '" />';
-		$form .= '<span id="location_state_form">';
-		$form .= '</span>';
-		$form .= '<select name="location_country" id="location_country"><option></option>';
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-location' )->escaped() . '</p>';
+		$form .= $this->renderTextFieldRow( 'user-profile-personal-city', 'location_city', $location_city, 'text', 25 );
+		$form .= $this->renderCountryDropdownRow(
+			'user-profile-personal-country',
+			'location_country',
+			$location_country,
+			$countries,
+			$location_state
+		);
 
-		foreach ( $countries as $country ) {
-			$form .= Xml::option( $country, $country, ( $country == $location_country ) );
-		}
+		$form .= '<div class="profile-update">';
+		$form .= '<p class="profile-update-title">' . $this->msg( 'user-profile-personal-hometown' )->escaped() . '</p>';
+		$form .= $this->renderTextFieldRow( 'user-profile-personal-hometown-city', 'hometown_city', $hometown_city, 'text', 25 );
+		$form .= $this->renderCountryDropdownRow(
+			'user-profile-personal-country',
+			'hometown_country',
+			$hometown_country,
+			$countries,
+			$hometown_state,
+			true
+		);
+		$form .= '</div>';
 
-		$form .= '</select>';
-		$form .= '</p>
-			<div class="visualClear">' . $this->renderEye( 'up_location_country' ) . '</div>
-		</div>
-		<div class="visualClear"></div>';
+		$form .= '<div class="profile-update">';
+		$s = $dbr->selectRow('user_profile', [ 'private_birthyear' ], [ 'up_actor' => $user->getActorId() ], __METHOD__ );
+		$private_birthyear = ( $s !== false && isset( $s->private_birthyear ) ) ? $s->private_birthyear : null;
 
-		$form .= '<div class="profile-update">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-hometown' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-city' )->escaped() . '</p>
-			<p class="profile-update-unit"><input type="text" size="25" name="hometown_city" id="hometown_city" value="' . ( isset( $hometown_city ) ? htmlspecialchars( $hometown_city, ENT_QUOTES ) : '' ) . '" /></p>
-			<div class="visualClear">' . $this->renderEye( 'up_hometown_city' ) . '</div>
-			<p class="profile-update-unit-left" id="hometown_state_label">' . $this->msg( 'user-profile-personal-country' )->escaped() . '</p>
-			<p class="profile-update-unit">';
-		$form .= '<span id="hometown_state_form">';
-		$form .= '</span>';
-		// Hidden helper for UpdateProfile.js since JS cannot directly access PHP variables
-		$form .= '<input type="hidden" id="hometown_state_current" value="' . ( isset( $hometown_state ) ? htmlspecialchars( $hometown_state, ENT_QUOTES ) : '' ) . '" />';
-		$form .= '<select name="hometown_country" id="hometown_country"><option></option>';
-
-		foreach ( $countries as $country ) {
-			$form .= Xml::option( $country, $country, ( $country == $hometown_country ) );
-		}
-
-		$form .= '</select>';
-		$form .= '</p>
-			<div class="visualClear">' . $this->renderEye( 'up_hometown_country' ) . '</div>
-		</div>
-		<div class="visualClear"></div>';
-
-		$form .= '<div class="profile-update">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-birthday' )->escaped() . '</p>
-			<p class="profile-update-unit-left" id="birthday-format">' .
-				$this->msg( $showYOB ? 'user-profile-personal-birthdate-with-year' : 'user-profile-personal-birthdate' )->escaped() .
-			'</p>
-			<p class="profile-update-unit"><input type="text"' .
-			( $showYOB ? ' class="long-birthday"' : null ) .
-			' size="25" name="birthday" id="birthday" value="' .
-			( isset( $birthday ) ? htmlspecialchars( $birthday, ENT_QUOTES ) : '' ) . '" /></p>
-			<div class="visualClear">' . $this->renderEye( 'up_birthday' ) . '</div>
-		</div><div class="visualClear"></div>';
+		$form .= $this->renderBirthdayFields( $birthday, $private_birthyear, $showYOB );
 
 		$form .= '<div class="profile-update" id="profile-update-personal-aboutme">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-aboutme' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-aboutme' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="about" id="about" rows="3" cols="75">' . ( isset( $about ) ? htmlspecialchars( $about, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_about' ) . '</div>
-		</div>
-		<div class="visualClear"></div>
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-aboutme' )->escaped() . '</p>';
+			$form .= $this->renderBigTextFieldRow(
+				'user-profile-personal-aboutme',
+				'about',
+				$about,
+				5,
+				75
+			);
 
-		<div class="profile-update" id="profile-update-personal-work">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-work' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-occupation' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="occupation" id="occupation" rows="2" cols="75">' . ( isset( $occupation ) ? htmlspecialchars( $occupation, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_occupation' ) . '</div>
-		</div>
-		<div class="visualClear"></div>
+		$form .= '<div class="profile-update" id="profile-update-personal-work">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-work' )->escaped() . '</p>';
+		$form .= $this->renderBigTextFieldRow(
+			'user-profile-personal-occupation',
+			'occupation',
+			$occupation,
+			5,
+			25
+		);
 
-		<div class="profile-update" id="profile-update-personal-education">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-education' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-schools' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="schools" id="schools" rows="2" cols="75">' . ( isset( $schools ) ? htmlspecialchars( $schools, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_schools' ) . '</div>
-		</div>
-		<div class="visualClear"></div>
+		$form .= '<div class="profile-update" id="profile-update-personal-education">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-education' )->escaped() . '</p>';
+		$form .= $this->renderBigTextFieldRow(
+			'user-profile-personal-schools',
+			'schools',
+			$schools,
+			3,
+			25
+		);
 
-		<div class="profile-update" id="profile-update-personal-places">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-places' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-placeslived' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="places" id="places" rows="3" cols="75">' . ( isset( $places ) ? htmlspecialchars( $places, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_places_lived' ) . '</div>
-		</div>
-		<div class="visualClear"></div>
+		$form .= '<div class="profile-update" id="profile-update-personal-places">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-places' )->escaped() . '</p>';
+		$form .= $this->renderBigTextFieldRow(
+			'user-profile-personal-placeslived',
+			'places',
+			$places,
+			3,
+			25
+		);
 
-		<div class="profile-update" id="profile-update-personal-web">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-web' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-websites' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="websites" id="websites" rows="2" cols="75">' . ( isset( $websites ) ? htmlspecialchars( $websites, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_websites' ) . '</div>
-		</div>
-		<div class="visualClear"></div>';
-
+		$form .= '<div class="profile-update" id="profile-update-personal-web">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-web' )->escaped() . '</p>';
+		$form .= $this->renderBigTextFieldRow(
+			'user-profile-personal-websites',
+			'websites',
+			$websites,
+			3,
+			25
+		);
+		$form .= '<div class="profile-update" id="profile-update-personal-quote">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-quote' )->escaped() . '</p>';
+		$form .= $this->renderBigTextFieldRow(
+			'user-profile-personal-quote',
+			'quote',
+			$quote,
+			3,
+			75
+		);
 		$form .= '
 			<input type="submit" class="site-button" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" size="20" />
 			</div>
@@ -692,9 +725,10 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'user_profile',
 			[
 				'up_about', 'up_places_lived', 'up_websites', 'up_relationship',
-				'up_occupation', 'up_companies', 'up_schools', 'up_movies',
+				'up_occupation', 'up_tagline', 'up_companies', 'up_schools', 'up_movies',
 				'up_tv', 'up_music', 'up_books', 'up_video_games',
-				'up_magazines', 'up_snacks', 'up_drinks'
+				'up_magazines', 'up_snacks', 'up_drinks', 'up_universes',
+				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote'
 			],
 			[
 				// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
@@ -717,6 +751,10 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$magazines = $s->up_magazines;
 			$snacks = $s->up_snacks;
 			$drinks = $s->up_drinks;
+			$universes = $s->up_universes;
+			$pets = $s->up_pets;
+			$hobbies = $s->up_hobbies;
+			$heroes = $s->up_heroes;
 		}
 
 		$this->getOutput()->setPageTitle( $this->msg( 'user-profile-section-interests' )->escaped() );
@@ -728,60 +766,117 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		// with the nice JS-enabled drop-down (instead of having to rely on a plain ol'
 		// <select> + form submission, as no-JS users have to)
 		$form .= Html::hidden( 'should_update_field_visibilities', true );
-		$form .= '<div class="profile-info profile-info-other-info clearfix">
-			<div class="profile-update">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-interests-entertainment' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-movies' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="movies" id="movies" rows="3" cols="75">' . ( isset( $movies ) ? htmlspecialchars( $movies, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_movies' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-tv' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="tv" id="tv" rows="3" cols="75">' . ( isset( $tv ) ? htmlspecialchars( $tv, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_tv' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-music' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="music" id="music" rows="3" cols="75">' . ( isset( $music ) ? htmlspecialchars( $music, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_music' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-books' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="books" id="books" rows="3" cols="75">' . ( isset( $books ) ? htmlspecialchars( $books, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_books' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-magazines' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="magazines" id="magazines" rows="3" cols="75">' . ( isset( $magazines ) ? htmlspecialchars( $magazines, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_magazines' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-videogames' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="videogames" id="videogames" rows="3" cols="75">' . ( isset( $videogames ) ? htmlspecialchars( $videogames, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_video_games' ) . '</div>
-			</div>
-			<div class="profile-info">
-			<p class="profile-update-title">' . $this->msg( 'user-profile-interests-eats' )->escaped() . '</p>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-foodsnacks' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="snacks" id="snacks" rows="3" cols="75">' . ( isset( $snacks ) ? htmlspecialchars( $snacks, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_snacks' ) . '</div>
-			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-drinks' )->escaped() . '</p>
-			<p class="profile-update-unit">
-				<textarea name="drinks" id="drinks" rows="3" cols="75">' . ( isset( $drinks ) ? htmlspecialchars( $drinks, ENT_QUOTES ) : '' ) . '</textarea>
-			</p>
-			<div class="visualClear">' . $this->renderEye( 'up_drinks' ) . '</div>
-			</div>
-			<input type="submit" class="site-button" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" size="20" />
-			</div>
-			<input type="hidden" name="wpEditToken" value="' . htmlspecialchars( $this->getUser()->getEditToken(), ENT_QUOTES ) . '" />
-		</form>';
-
+		$form .= '<div class="profile-info profile-info-other-info clearfix">';
+		$form .= '<div class="profile-update">';
+		$form .= $this->renderProfileRow( 'user-profile-interests-movies', 'movies', $movies );
+		$form .= $this->renderProfileRow( 'user-profile-interests-tv', 'tv', $tv );
+		$form .= $this->renderProfileRow( 'user-profile-interests-music', 'music', $music );
+		$form .= $this->renderProfileRow( 'user-profile-interests-books', 'books', $books );
+		$form .= $this->renderProfileRow( 'user-profile-interests-magazines', 'magazines', $magazines );
+		$form .= $this->renderProfileRow( 'user-profile-interests-videogames', 'videogames', $videogames );
+		$form .= '</div>';
+		$form .= '<div class="profile-info">';
+		$form .= '<p class="profile-update-title">' . $this->msg( 'user-profile-interests-eats' )->escaped() . '</p>';
+		$form .= $this->renderProfileRow( 'user-profile-interests-foodsnacks', 'snacks', $snacks );
+		$form .= $this->renderProfileRow( 'user-profile-interests-drinks', 'drinks', $drinks );
+		$form .= '</div>
+		         <div class="profile-info">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-interests-other' )->escaped() . '</p>';
+		$form .= $this->renderProfileRow( 'user-profile-interests-universes', 'universes', $universes );
+		$form .= $this->renderProfileRow( 'user-profile-interests-pets', 'pets', $pets );
+		$form .= $this->renderProfileRow( 'user-profile-interests-hobbies', 'hobbies', $hobbies );
+		$form .= $this->renderProfileRow( 'user-profile-interests-heroes', 'heroes', $heroes );
+		$form .= '</div>
+				<input type="submit" class="site-button" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" size="20" />
+				</div>
+				<input type="hidden" name="wpEditToken" value="' . htmlspecialchars( $this->getUser()->getEditToken(), ENT_QUOTES ) . '" />
+				</form>';
 		return $form;
 	}
+	private function renderProfileRow( $labelMsgKey, $fieldName, $fieldValue ) {
+		return '<div class="profile-update-row">
+			<p class="profile-update-unit-left">' . $this->msg( $labelMsgKey )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="' . $fieldName . '" id="' . $fieldName . '" rows="3" cols="75">'
+				. htmlspecialchars( $fieldValue ?? '', ENT_QUOTES ) .
+				'</textarea>
+			</p>' . $this->renderEye( 'up_' . $fieldName ) . '</div>';
+	}
+	private function renderTextFieldRow( $labelMsgKey, $fieldName, $fieldValue, $type = 'text', $size = 25 ) {
+		return '<div class="profile-update-row">
+			<p class="profile-update-unit-left">' . $this->msg( $labelMsgKey )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<input type="' . $type . '" name="' . $fieldName . '" id="' . $fieldName . '" size="' . $size . '" value="' . htmlspecialchars( $fieldValue ?? '', ENT_QUOTES ) . '" />
+			</p>' . $this->renderEye( 'up_' . $fieldName ) . '</div>';
+	}
+	private function renderBigTextFieldRow( $labelMsgKey, $fieldName, $fieldValue, $rows = 3, $cols = 75 ) {
+		return '<div class="profile-update-row">
+			<p class="profile-update-unit-left">' . $this->msg( $labelMsgKey )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="' . $fieldName . '" id="' . $fieldName . '" rows="' . $rows . '" cols="' . $cols . '">' .
+					htmlspecialchars( $fieldValue ?? '', ENT_QUOTES ) . '</textarea>
+			</p>' .
+			$this->renderEye( 'up_' . $fieldName ) .
+		'</div>';
+	}
+
+	private function renderCountryDropdownRow(
+		string $labelKey,
+		string $fieldName,
+		string $selectedCountry,
+		array $countries,
+		?string $stateValue = '',
+		bool $hasStateSelector = false
+	): string {
+		$stateValue = (string)$stateValue; 
+		$html = '<div class="profile-update-row">';
+		$html .= '<p class="profile-update-unit-left" id="' . $fieldName . '_label">' .
+			$this->msg( $labelKey )->escaped() . '</p>';
+		$html .= '<p class="profile-update-unit">';
+
+		if ( $hasStateSelector ) {
+			$html .= '<span id="' . $fieldName . '_state_form"></span>';
+			$html .= '<input type="hidden" id="' . $fieldName . '_state_current" value="' . htmlspecialchars( $stateValue, ENT_QUOTES ) . '" />';
+		}
+
+		$html .= '<select name="' . $fieldName . '" id="' . $fieldName . '">';
+		$html .= '<option></option>';
+		foreach ( $countries as $country ) {
+			$html .= Xml::option( $country, $country, $country === $selectedCountry );
+		}
+		$html .= '</select>';
+		$html .= '</p>';
+		$html .= $this->renderEye( 'up_' . $fieldName );
+		$html .= '</div>';
+
+		return $html;
+	}
+	private function renderBirthdayFields( $birthday, $privateBirthYear, $showYOB ): string {
+		$html = '<div class="profile-update">';
+		$html .= '<p class="profile-update-title">' . $this->msg( 'user-profile-personal-birthday' )->escaped() . '</p>';
+		$html .= '<div class="profile-update-row">';
+		$html .= '<p class="profile-update-unit-left" id="birthday-format">' .
+			$this->msg( $showYOB ? 'user-profile-personal-birthdate-with-year' : 'user-profile-personal-birthdate' )->escaped() . '</p>';
+		$html .= '<p class="profile-update-unit"><input type="text"' .
+			( $showYOB ? ' class="long-birthday"' : '' ) .
+			' size="25" name="birthday" id="birthday" value="' . htmlspecialchars( $birthday ?? '', ENT_QUOTES ) . '" /></p>';
+		$html .= $this->renderEye( 'up_birthday' ) . '</div>';
+
+		if ( $privateBirthYear !== null ) {
+			$html .= '<div class="profile-update">';
+			$html .= '<p class="profile-update-title">' . $this->msg( 'nsfwblur-pref-birthyear-title' )->escaped() . '</p>';
+			$html .= '<div class="profile-update-row">';
+			$html .= '<p class="profile-update-unit-left">' . $this->msg( 'nsfwblur-pref-birthyear-label' )->escaped() . '</p>';
+			$html .= '<p class="profile-update-unit">
+				<input type="number" min="1900" max="' . date( 'Y' ) . '" name="private_birthyear" id="private_birthyear" value="' . htmlspecialchars( $privateBirthYear, ENT_QUOTES ) . '" />
+				<span style="font-size:smaller;color:gray;">' . $this->msg( 'nsfwblur-pref-birthyear-help' )->escaped() . '</span>
+			</p>';
+			$html .= '</div> </div>';
+		}
+
+		return $html;
+	}
+
 
 	/**
 	 * Displays the form for toggling notifications related to social tools
@@ -823,6 +918,10 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				<p class="profile-update-row">'
 					. $this->msg( 'user-profile-preferences-emails-friendfoe' )->escaped() .
 					' <input type="checkbox" size="25" class="createbox" name="notify_friend" id="notify_friend" value="1" ' . ( ( $userOptionsLookup->getIntOption( $user, 'notifyfriendrequest', 1 ) == 1 ) ? 'checked' : '' ) . '/>
+				</p>
+				<p class="profile-update-row">'
+					. $this->msg( 'user-profile-preferences-emails-family' )->escaped() .
+					' <input type="checkbox" size="25" class="createbox" name="notify_family" id="notify_family" value="1" ' . ( ( $userOptionsLookup->getIntOption( $user, 'notifyfamilyrequest', 1 ) == 1 ) ? 'checked' : '' ) . '/>
 				</p>
 				<p class="profile-update-row">'
 					. $this->msg( 'user-profile-preferences-emails-gift' )->escaped() .
@@ -924,6 +1023,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 					</p>
 					</div>
 					<div class="visualClear">' . $this->renderEye( 'up_custom_4' ) . '</div>
+					<div id="profile-update-custom5">
+					<p class="profile-update-unit-left">' . $this->msg( 'custom-info-field5' )->inContentLanguage()->parse() . '</p>
+					<p class="profile-update-unit">
+						<textarea name="custom5" id="fav_food" rows="3" cols="75">' . ( isset( $custom5 ) && $custom5 ? htmlspecialchars( $custom5, ENT_QUOTES ) : '' ) . '</textarea>
+					</p>
+					</div>
 				</div>
 			<input type="submit" class="site-button" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" size="20" />
 			</div>
@@ -943,4 +1048,117 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 	private function renderEye( $fieldCode ) {
 		return SPUserSecurity::renderEye( $fieldCode, $this->getUser() );
 	}
+
+	/** Normalize privacy value (accepts strings or ints). Default = public when empty/unknown. */
+	private function normalizePrivacyValue($raw, string $default = 'public'): string {
+		if ($raw === null || $raw === '') {
+			return $default;
+		}
+		if (is_string($raw)) {
+			$lc = strtolower(trim($raw));
+			if (in_array($lc, ['public','friends','hidden'], true)) {
+				return $lc;
+			}
+			if ($lc === 'friend' || $lc === 'friends-only') {
+				return 'friends';
+			}
+			// Unknown string → default
+			return $default;
+		}
+		if (is_numeric($raw)) { // common mapping
+			$int = (int)$raw;
+			if ($int === 0) return 'public';
+			if ($int === 1) return 'friends';
+			if ($int === 2) return 'hidden';
+			return $default;
+		}
+		return $default;
+	}
+
+	/** Collect posted privacy values in a consistent [ 'up_field' => 'public|friends|hidden' ] map. */
+	private function getPostedFieldVisibilities(): array {
+		$req = $this->getRequest();
+		$vis = [];
+
+		// Pattern A: privacy[up_real_name] = public|friends|hidden
+		$map = $req->getArray('privacy', []);
+		if (is_array($map)) {
+			foreach ($map as $k => $v) {
+				if (is_string($k) && preg_match('/^up_/', $k)) {
+					$vis[$k] = $this->normalizePrivacyValue($v, 'public');
+				}
+			}
+		}
+
+		// Pattern B: up_real_name_privacy = ...
+		foreach ($req->getValues() as $k => $v) {
+			if (is_string($k) && preg_match('/^(up_.+)_privacy$/', $k, $m)) {
+				$vis[$m[1]] = $this->normalizePrivacyValue($v, 'public');
+			}
+		}
+
+		// Pattern C: direct up_real_name = ...
+		foreach ($req->getValues() as $k => $v) {
+			if (is_string($k) && preg_match('/^up_/', $k)) {
+				// If we already captured a value from A or B, don't overwrite
+				if (!array_key_exists($k, $vis)) {
+					$vis[$k] = $this->normalizePrivacyValue($v, 'public');
+				}
+			}
+		}
+
+		return $vis;
+	}
+
+	/** Persist privacy directly if SPUserSecurity setter isn't available (row-per-field schema). */
+	private function savePrivacyDirect(int $userId, string $fieldKey, string $visibility): void {
+		$lb  = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$dbw = $lb->getConnection(DB_PRIMARY);
+
+		if (!$dbw->tableExists('user_fields_privacy', __METHOD__)) {
+			// Table missing → nothing to do
+			return;
+		}
+
+		// Try to detect row-per-field columns
+		$hasRowPerField =
+			$dbw->fieldExists('user_fields_privacy', 'ufp_user_id', __METHOD__) &&
+			$dbw->fieldExists('user_fields_privacy', 'ufp_field', __METHOD__) &&
+			$dbw->fieldExists('user_fields_privacy', 'ufp_privacy', __METHOD__);
+
+		if ($hasRowPerField) {
+			$dbw->upsert(
+				'user_fields_privacy',
+				[
+					'ufp_user_id' => $userId,
+					'ufp_field'   => $fieldKey,
+					'ufp_privacy' => $visibility,
+				],
+				[ ['ufp_user_id', 'ufp_field'] ],
+				[ 'ufp_privacy' => $visibility ],
+				__METHOD__
+			);
+			return;
+		}
+
+		// Fallback: column-per-field style, try to update up_privacy_<field>
+		$userCol = null;
+		foreach (['up_user_id','ufp_user_id','user_id'] as $candidate) {
+			if ($dbw->fieldExists('user_fields_privacy', $candidate, __METHOD__)) { $userCol = $candidate; break; }
+		}
+		if ($userCol === null) { return; }
+
+		$col = 'up_privacy_' . preg_replace('/^up_/', '', $fieldKey);
+		if (!$dbw->fieldExists('user_fields_privacy', $col, __METHOD__)) {
+			return;
+		}
+
+		$row = $dbw->selectRow('user_fields_privacy', [$userCol], [$userCol => $userId], __METHOD__);
+		if ($row) {
+			$dbw->update('user_fields_privacy', [ $col => $visibility ], [ $userCol => $userId ], __METHOD__);
+		} else {
+			$dbw->insert('user_fields_privacy', [ $userCol => $userId, $col => $visibility ], __METHOD__);
+		}
+	}
+
 }

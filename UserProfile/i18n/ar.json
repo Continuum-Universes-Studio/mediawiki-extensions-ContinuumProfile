@@ -3,10 +3,10 @@
 		"authors": [
 			"Alnokta",
 			"Alshamiri1",
+			"Cigaryno",
 			"Meno25",
 			"OsamaK",
-			"محمد أحمد عبد الفتاح",
-			"Cigaryno"
+			"محمد أحمد عبد الفتاح"
 		]
 	},
 	"editprofile": "تحرير ملفات تعريف المستخدمين الآخرين",
@@ -98,7 +98,7 @@
 	"user-profile-section-interests": "معلومات أخرى",
 	"user-profile-section-picture": "أفاتر",
 	"user-profile-personal-info": "معلومات",
-	"user-profile-personal-name": "الاسم",
+	"user-profile-personal-name": "اسم",
 	"user-profile-personal-email-needs-auth": "(بريدك الإلكتروني يحتاج إلى أن يتم تأكيده لاستقبال إخطارات الموقع)",
 	"user-profile-personal-location": "موقع",
 	"user-profile-personal-city": "مدينة",

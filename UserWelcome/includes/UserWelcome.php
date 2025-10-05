@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * UserWelcome extension
@@ -157,6 +158,7 @@ class UserWelcome {
 
 		$friendRequestCount = $requestCount->setFriends()->get();
 		$foeRequestCount = $requestCount->setFoes()->get();
+		$familyRequestCount = $requestCount->setFamily()->get();
 
 		$relationship_request_link = SpecialPage::getTitleFor( 'ViewRelationshipRequests' );
 
@@ -179,6 +181,16 @@ class UserWelcome {
 			$output .= '<p>' . $foeIcon .
 				'<span class="profile-on"><a href="' . htmlspecialchars( $relationship_request_link->getFullURL() ) . '" rel="nofollow">'
 				. wfMessage( 'mp-request-new-foe', $foeRequestCount )->parse() . '</a></span>
+			</p>';
+		}
+
+		if ( $familyRequestCount > 0 ) {
+			$userFamilyIcon = new UserActivityIcon( 'family' );
+			$familyIcon = $userFamilyIcon->getIconHTML();
+
+			$output .= '<p>' . $familyIcon .
+				'<span class="profile-on"><a href="' . htmlspecialchars( $relationship_request_link->getFullURL() ) . '" rel="nofollow">'
+				. wfMessage( 'mp-request-new-family', $familyRequestCount )->parse() . '</a></span>
 			</p>';
 		}
 

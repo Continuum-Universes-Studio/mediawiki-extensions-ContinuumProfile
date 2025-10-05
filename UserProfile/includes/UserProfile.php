@@ -1,7 +1,9 @@
 <?php
-use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserIdentity;
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\User\UserIdentity;
+use MediaWiki\User\User;
 /**
  * Class to access profile data for a user
  */
@@ -38,7 +40,9 @@ class UserProfile {
 	 * @see https://phabricator.wikimedia.org/T212290
 	 */
 	public $profile_fields = [
+		'groups',
 		'real_name',
+		'tagline',
 		'location_city',
 		'hometown_city',
 		'hometown_country',
@@ -56,6 +60,11 @@ class UserProfile {
 		'video_games',
 		'snacks',
 		'drinks',
+		'universes',
+		'pets',
+		'hobbies',
+		'heroes',
+		'quote',
 		'custom_1',
 		'custom_2',
 		'custom_3',
@@ -157,6 +166,7 @@ class UserProfile {
 			$profile['birthday'] = $this->formatBirthday( $issetUpBirthday, $showYOB );
 
 			$profile['about'] = $row->up_about ?? '';
+			$profile['tagline'] = $row->up_tagline ?? '';
 			$profile['places_lived'] = $row->up_places_lived ?? '';
 			$profile['websites'] = $row->up_websites ?? '';
 			$profile['relationship'] = $row->up_relationship ?? '';
@@ -170,6 +180,12 @@ class UserProfile {
 			$profile['video_games'] = $row->up_video_games ?? '';
 			$profile['snacks'] = $row->up_snacks ?? '';
 			$profile['drinks'] = $row->up_drinks ?? '';
+			$profile['universes'] = $row->up_universes ?? '';
+			$profile['pets'] = $row->up_pets ?? '';
+			$profile['hobbies'] = $row->up_hobbies ?? '';
+			$profile['heroes'] = $row->up_heroes ?? '';
+			$profile['quote'] = $row->up_quote ?? '';
+			// Custom fields
 			$profile['custom_1'] = $row->up_custom_1 ?? '';
 			$profile['custom_2'] = $row->up_custom_2 ?? '';
 			$profile['custom_3'] = $row->up_custom_3 ?? '';

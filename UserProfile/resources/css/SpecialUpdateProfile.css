@@ -32,18 +32,6 @@
 	margin: -3px 0 0 5px;
 }
 
-.profile-update-unit-left {
-	color: #797979;
-	font-size: 12px;
-	font-weight: 700;
-	float: left;
-	width: 150px;
-}
-
-.profile-update-unit {
-	float: left;
-	width: 450px;
-}
 
 .profile-update-unit-small {
 	color: #797979;
@@ -53,10 +41,20 @@
 }
 
 .profile-update-row {
-	color: #797979;
-	font-weight: 700;
-	font-size: 12px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-bottom: 10px;
 }
+.profile-update-unit-left {
+	width: 150px;
+	font-weight: bold;
+	color: #797979;
+}
+.profile-update-unit {
+	flex: 1;
+}
+
 
 .profile-update-links {
 	margin: 0 0 10px 0;
@@ -128,7 +126,6 @@
 	position: relative;
 	bottom: 250%;
 }
-
 .eye-container {
 	width: 130px;
 	height: 20px;
@@ -140,9 +137,14 @@
 	position: relative;
 	top: -25px;
 	cursor: pointer;
+	align-self: center;
 	box-shadow: 2px 2px 3px -1px darkgray;
 }
-
+.clearfix::after {
+	content: "";
+	display: table;
+	clear: both;
+}
 /** @todo FIXME: this is an awful hack for Special:UpdateProfile (the "personal information" page) */
 div.eye-container[fieldkey="up_real_name"],
 div.eye-container[fieldkey="up_email"],

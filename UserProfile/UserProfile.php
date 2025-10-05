@@ -34,6 +34,7 @@ $wgUserProfileThresholds = [
  * recruits // recruits; see [[mw:Extension:NewSignupPage]]
  * friend-count // friends
  * foe-count // foes
+ * family-count // family members; see [[mw:Extension:UserRelationship]]
  * weekly-wins // @see /UserStats/GenerateTopUsersReport.php
  * monthly-wins // @see /UserStats/GenerateTopUsersReport.php
  * poll-votes // [[mw:Extension:PollNY]] votes
@@ -50,9 +51,11 @@ $wgUserPageChoice = true;
 
 $wgUserProfileDisplay['friends'] = false;
 $wgUserProfileDisplay['foes'] = false;
+$wgUserProfileDisplay['family'] = true; // Display family members on user profiles? This requires the UserRelationship extension
 $wgUserProfileDisplay['gifts'] = true;
 $wgUserProfileDisplay['awards'] = true;
 $wgUserProfileDisplay['profile'] = true;
+$wgUserProfileDisplay['tagline'] = true;
 $wgUserProfileDisplay['board'] = false;
 $wgUserProfileDisplay['stats'] = false; // Display statistics on user profile pages?
 $wgUserProfileDisplay['interests'] = true;
@@ -61,7 +64,9 @@ $wgUserProfileDisplay['personal'] = true;
 $wgUserProfileDisplay['activity'] = false; // Display recent social activity?
 $wgUserProfileDisplay['userboxes'] = false; // If FanBoxes extension is installed, setting this to true will display the user's fanboxes on their profile page
 $wgUserProfileDisplay['games'] = false; // Display casual games created by the user on their profile? This requires three separate social extensions: PictureGame, PollNY and QuizGame
-
+$wgUserProfileDisplay['favorite_universes'] = false; // Display favorite universes on user profiles? This requires the ContinuumProfile extension
+$wgUserProfileDisplay['pets'] = false; // Display pets on user profiles? This requires the ContinuumProfile extension
+$wgUserProfileDisplay['hobbies'] = false; // Display hobbies on user profiles? This requires the ContinuumProfile extension
 $wgUpdateProfileInRecentChanges = false; // Show a log entry in recent changes whenever a user updates their profile?
 $wgUploadAvatarInRecentChanges = false; // Same as above, but for avatar uploading
 

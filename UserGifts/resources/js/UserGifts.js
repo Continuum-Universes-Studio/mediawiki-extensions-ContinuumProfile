@@ -47,18 +47,28 @@ var UserGifts = {
 		document.gift.submit();
 	},
 
-	chooseFriend: function ( friend ) {
-		// Now, this is a rather nasty hack since the original (commented out below) wouldn't work when $wgScriptPath was set
-		// window.location = window.location + "&user=" + friend;
-		window.location = mw.config.get( 'wgServer' ) + mw.config.get( 'wgScript' ) +
-			'?title=Special:GiveGift' + '&user=' + friend;
+	chooseRelationship: function ( userName, relType ) {
+		const relMap = {
+			1: 'friend',
+			2: 'foe',
+			3: 'family'
+		};
+		const relString = relMap[relType] ?? 'friend';
+
+		const url = new mw.Uri( mw.util.getUrl( 'Special:GiveGift' ) );
+		url.extend( {
+			user: userName,
+			relationship: relString
+		} );
+		window.location = url.toString();
 	}
+
 };
 
-$( function () {
+$( () => {
 	// "Select a friend" dropdown menu
 	$( 'div.g-gift-select select' ).on( 'change', function () {
-		UserGifts.chooseFriend( $( this ).val() );
+		UserGifts.chooseRelationship( $( this ).val() );
 	} );
 
 	// Handlers for individual gift images
@@ -97,7 +107,7 @@ $( function () {
 	} );
 
 	// "Send gift" button
-	$( 'input#send-gift-button' ).on( 'click', function () {
+	$( 'input#send-gift-button' ).on( 'click', () => {
 		UserGifts.sendGift();
 	} );
 } );

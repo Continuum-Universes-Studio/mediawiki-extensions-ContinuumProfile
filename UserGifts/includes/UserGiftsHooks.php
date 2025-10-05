@@ -19,7 +19,7 @@ class UserGiftsHooks {
 			'group' => 'interactive',
 			'presentation-model' => 'EchoUserGiftPresentationModel',
 			EchoAttributeManager::ATTR_LOCATORS => [
-				'EchoUserLocator::locateEventAgent'
+				[ 'EchoUserLocator::locateFromEventExtra', [ 'target' ] ],
 			],
 
 			'icon' => 'social-gift-send',
@@ -30,24 +30,8 @@ class UserGiftsHooks {
 		// You just were *sent* a gift, thus you *received* it, ergo you should
 		// be seeing the *received* icon
 		$icons['social-gift-send'] = [
-			'path' => 'SocialProfile/images/notifications-gift-received.svg'
+			'path' => 'ContinuumProfile/images/notifications-gift-received.svg'
 		];
-	}
-
-	/**
-	 * Add user to be notified on Echo event
-	 *
-	 * @param EchoEvent $event
-	 * @param User[] &$users
-	 */
-	public static function onEchoGetDefaultNotifiedUsers( EchoEvent $event, array &$users ) {
-		switch ( $event->getType() ) {
-			case 'social-gift-send':
-				$extra = $event->getExtra();
-				$targetId = $extra['target'];
-				$users[] = User::newFromId( $targetId );
-				break;
-		}
 	}
 
 	/**

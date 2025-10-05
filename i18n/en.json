@@ -2,7 +2,7 @@
 	"@metadata": {
 		"authors": []
 	},
-	"socialprofile-desc": "A set of social tools for MediaWiki",
+	"socialprofile-desc": "Continuum Universes fork of Social Tools. A set of social tools for MediaWiki",
 	"socialprofile-uploads-disabled": "The avatar upload feature is disabled",
 	"apihelp-removeavatar-summary": "Remove an avatar, either yours or if you're privileged, also that of another user.",
 	"apihelp-removeavatar-param-reason": "Optional reason as to why you're removing someone else's avatar.",

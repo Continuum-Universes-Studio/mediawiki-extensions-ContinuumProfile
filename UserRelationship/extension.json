@@ -1,9 +1,11 @@
 {
-	"name": "UserRelationship",
+	"name": "ContinuumUserRelationship",
 	"author": [
 		"Aaron Wright",
 		"David Pean",
-		"Jack Phoenix"
+		"Jack Phoenix",
+		"Christian Daniel Jensen",
+		"Onika"
 	],
 	"license-name": "GPL-2.0-or-later",
 	"descriptionmsg": "userrelationship-desc",
@@ -34,8 +36,7 @@
 		"socialprofile-request-response": "ApiRelationshipResponse"
 	},
 	"Hooks": {
-		"BeforeCreateEchoEvent": "UserRelationshipHooks::onBeforeCreateEchoEvent",
-		"EchoGetDefaultNotifiedUsers": "UserRelationshipHooks::onEchoGetDefaultNotifiedUsers"
+		"BeforeCreateEchoEvent": "UserRelationshipHooks::onBeforeCreateEchoEvent"
 	},
 	"DefaultUserOptions": {
 		"echo-subscriptions-web-social-rel": true,
@@ -59,14 +60,26 @@
 			"messages": [
 				"ur-requests-added-message-friend",
 				"ur-requests-added-message-foe",
+				"ur-requests-added-message-family",
 				"ur-requests-reject-message-friend",
-				"ur-requests-reject-message-foe"
+				"ur-requests-reject-message-foe",
+				"ur-requests-reject-message-family"
 			]
+		},
+		"ext.socialprofile.userprofile.badges": {
+			"styles": [
+				"resources/badges.css"
+			],
+			"targets": ["desktop", "mobile"]
 		}
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "SocialProfile/UserRelationship/resources"
 	},
-	"manifest_version": 1
+	"LoadExtensionSchemaUpdates": [
+    	"SocialProfile\\Hooks::onLoadExtensionSchemaUpdates"
+	],
+
+	"manifest_version": 2
 }

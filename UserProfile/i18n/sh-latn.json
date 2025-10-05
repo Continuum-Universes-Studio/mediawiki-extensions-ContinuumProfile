@@ -1,8 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung",
-			"Aca"
+			"Winston Sung"
 		]
 	},
 	"editprofile": "Uređivanje profila drugih korisnika",
@@ -13,10 +12,10 @@
 	"user-gifts-title": "Pokloni",
 	"user-count-separator": "$1 od $2",
 	"user-view-all": "Prikaži sve",
-	"user-upload-image": "Postavi sliku",
+	"user-upload-image": "Otpremi sliku",
 	"user-edit-this": "Uredi ovo",
 	"user-edit-profile": "Uredi profil",
-	"user-upload-avatar": "Postavi avatar",
+	"user-upload-avatar": "Otpremi avatar",
 	"user-watchlist": "Moj spisak praćenja",
 	"user-meet-people": "Upoznaj ljude",
 	"user-add-friend": "Dodaj kao prijatelja",

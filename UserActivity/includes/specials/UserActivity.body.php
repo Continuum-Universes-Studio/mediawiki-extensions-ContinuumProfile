@@ -144,7 +144,14 @@ class UserHome extends SpecialPage {
 
 		$output .= '<div class="user-home-feed">';
 
-		$rel = new UserActivity( $user, ( ( $rel_type == 1 ) ? ' friends' : 'foes' ), 50 );
+		$relTypes = [
+			1 => 'friends',
+			2 => 'foes',
+			3 => 'family'
+		];
+		$relString = isset( $relTypes[$rel_type] ) ? $relTypes[$rel_type] : 'unknown';
+
+		$rel = new UserActivity( $user, $relString, 50 );
 		$rel->setActivityToggle( 'show_edits', $edits );
 		$rel->setActivityToggle( 'show_votes', $votes );
 		$rel->setActivityToggle( 'show_comments', $comments );

@@ -33,6 +33,7 @@ class UserStatsTrack {
 		'referral_complete' => 'stats_referrals_completed',
 		'friend' => 'stats_friends_count',
 		'foe' => 'stats_foe_count',
+		'family' => 'stats_family_count',
 		'gift_rec' => 'stats_gifts_rec_count',
 		'gift_sent' => 'stats_gifts_sent_count',
 		'challenges' => 'stats_challenges_count',
@@ -293,8 +294,10 @@ class UserStatsTrack {
 			$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 			if ( $relType == 1 ) {
 				$col = 'stats_friends_count';
-			} else {
+			} elseif ( $relType == 2 ) {
 				$col = 'stats_foe_count';
+			} else {
+				$col = 'stats_family_count';
 			}
 			$relationships = $dbw->selectField(
 				'user_relationship',

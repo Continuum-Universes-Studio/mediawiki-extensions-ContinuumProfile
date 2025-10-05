@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 
 /**
@@ -146,6 +147,7 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 		$stats_data = $stats->getUserStats();
 		$friendCount = $stats_data['friend_count'];
 		$foeCount = $stats_data['foe_count'];
+		$familyCount = $stats_data['family_count'];
 
 		$output = '<div class="board-blast-message-form">
 				<h2>' . $this->msg( 'boardblaststep1' )->escaped() . '</h2>
@@ -165,18 +167,25 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 					<a href="javascript:void(0);" class="blast-unselect-all-link">' .
 						$this->msg( 'boardlinkunselectall' )->escaped() . '</a> ';
 
-		if ( $friendCount > 0 && $foeCount > 0 ) {
+		if ( $friendCount > 0 && $foeCount > 0 && $familyCount > 0 ) {
 			$output .= '- <a href="javascript:void(0);" class="blast-select-friends-link">' .
 				$this->msg( 'boardlinkselectfriends' )->escaped() . '</a> -';
 			$output .= '<a href="javascript:void(0);" class="blast-unselect-friends-link">' .
 				$this->msg( 'boardlinkunselectfriends' )->escaped() . '</a>';
 		}
 
-		if ( $foeCount > 0 && $friendCount > 0 ) {
+		if ( $foeCount > 0 && $friendCount > 0 && $familyCount > 0 ) {
 			$output .= '- <a href="javascript:void(0);" class="blast-select-foes-link">' .
 				$this->msg( 'boardlinkselectfoes' )->escaped() . '</a> -';
 			$output .= '<a href="javascript:void(0);" class="blast-unselect-foes-link">' .
 				$this->msg( 'boardlinkunselectfoes' )->escaped() . '</a>';
+		}
+
+		if ( $familyCount > 0 && $friendCount > 0 && $foeCount > 0 ) {
+			$output .= '- <a href="javascript:void(0);" class="blast-select-family-link">' .
+				$this->msg( 'boardlinkselectfamily' )->escaped() . '</a> -';
+			$output .= '<a href="javascript:void(0);" class="blast-unselect-family-link">' .
+				$this->msg( 'boardlinkunselectfamily' )->escaped() . '</a>';
 		}
 		$output .= '</div>
 		</div>';
@@ -196,8 +205,10 @@ class SpecialBoardBlast extends UnlistedSpecialPage {
 				}
 				if ( $relationship['type'] == 1 ) {
 					$class = 'friend';
-				} else {
+				} else if ( $relationship['type'] == 2 ) {
 					$class = 'foe';
+				} else {
+					$class = 'family';
 				}
 				$id = $friendActor->getId();
 				$safeUserName = htmlspecialchars( $friendActor->getName() );
