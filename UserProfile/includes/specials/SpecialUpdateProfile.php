@@ -388,7 +388,6 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( $request->getVal( 'location_country' ) ) {
 			$basicProfileData['up_location_country'] = $request->getVal( 'location_country' );
 		}
-<<<<<<< HEAD
 
 		if ( $request->getVal( 'hometown_city' ) ) {
 			$basicProfileData['up_hometown_city'] = $request->getVal( 'hometown_city' );
@@ -444,8 +443,6 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			/* WHERE */[ 'up_actor' => $user->getActorId() ],
 			__METHOD__
 		);
-=======
->>>>>>> upstream/master
 
 		if ( $request->getVal( 'hometown_city' ) ) {
 			$basicProfileData['up_hometown_city'] = $request->getVal( 'hometown_city' );
@@ -523,28 +520,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$this->initProfile( $user );
 		$request = $this->getRequest();
 
-<<<<<<< HEAD
-		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
-		$dbw->update(
-			'user_profile',
-			/* SET */[
-				'up_custom_1' => $request->getVal( 'custom1' ),
-				'up_custom_2' => $request->getVal( 'custom2' ),
-				'up_custom_3' => $request->getVal( 'custom3' ),
-				'up_custom_4' => $request->getVal( 'custom4' ),
-				'up_custom_5' => $request->getVal( 'custom5' ),
-			],
-			/* WHERE */[ 'up_actor' => $user->getActorId() ],
-			__METHOD__
-		);
-=======
 		$customProfileData = [
 			'up_custom_1' => $request->getVal( 'custom1' ),
 			'up_custom_2' => $request->getVal( 'custom2' ),
 			'up_custom_3' => $request->getVal( 'custom3' ),
 			'up_custom_4' => $request->getVal( 'custom4' )
 		];
->>>>>>> upstream/master
 
 		$spammyFields = [];
 		foreach ( $customProfileData as $key => $val ) {
@@ -742,7 +723,6 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$location_state
 		);
 
-<<<<<<< HEAD
 		$form .= '<div class="profile-update">';
 		$form .= '<p class="profile-update-title">' . $this->msg( 'user-profile-personal-hometown' )->escaped() . '</p>';
 		$form .= $this->renderTextFieldRow( 'user-profile-personal-hometown-city', 'hometown_city', $hometown_city, 'text', 25 );
@@ -755,19 +735,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			true
 		);
 		$form .= '</div>';
-=======
-		foreach ( $countries as $country ) {
-			$form .= Html::element( 'option', [ 'value' => $country, 'selected' => ( $country == $location_country ) ], $country );
-		}
->>>>>>> upstream/master
 
 		$form .= '<div class="profile-update">';
 		$s = $dbr->selectRow('user_profile', [ 'private_birthyear' ], [ 'up_actor' => $user->getActorId() ], __METHOD__ );
 		$private_birthyear = ( $s !== false && isset( $s->private_birthyear ) ) ? $s->private_birthyear : null;
 
-<<<<<<< HEAD
 		$form .= $this->renderBirthdayFields( $birthday, $private_birthyear, $showYOB );
-=======
 		$form .= '<div class="profile-update">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-hometown' )->escaped() . '</p>
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-city' )->escaped() . '</p>
@@ -802,7 +775,6 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			( isset( $birthday ) ? htmlspecialchars( $birthday, ENT_QUOTES ) : '' ) . '" /></p>
 			<div class="visualClear">' . $this->renderEye( 'up_birthday' ) . '</div>
 		</div><div class="visualClear"></div>';
->>>>>>> upstream/master
 
 		$form .= '<div class="profile-update" id="profile-update-personal-aboutme">
 			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-aboutme' )->escaped() . '</p>';
@@ -881,13 +853,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$s = $dbr->selectRow(
 			'user_profile',
 			[
-<<<<<<< HEAD
 				'up_about', 'up_places_lived', 'up_websites', 'up_relationship',
 				'up_occupation', 'up_tagline', 'up_companies', 'up_schools', 'up_movies',
-=======
-				'up_about', 'up_places_lived', 'up_websites',
-				'up_occupation', 'up_schools', 'up_movies',
->>>>>>> upstream/master
 				'up_tv', 'up_music', 'up_books', 'up_video_games',
 				'up_magazines', 'up_snacks', 'up_drinks', 'up_universes',
 				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote'
@@ -1209,7 +1176,6 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		return SPUserSecurity::renderEye( $fieldCode, $this->getUser() );
 	}
 
-<<<<<<< HEAD
 	/** Normalize privacy value (accepts strings or ints). Default = public when empty/unknown. */
 	private function normalizePrivacyValue($raw, string $default = 'public'): string {
 		if ($raw === null || $raw === '') {
@@ -1322,7 +1288,6 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		}
 	}
 
-=======
 	/**
 	 * Run comment through SpamRegex, both the $wg* global configuration variable
 	 * and if installed, the anti-spam extension of the same name as well
@@ -1408,5 +1373,4 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 
 		return false;
 	}
->>>>>>> upstream/master
 }
