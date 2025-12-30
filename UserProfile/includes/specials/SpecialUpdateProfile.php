@@ -180,12 +180,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				}
 			}
 
-<<<<<<< HEAD
-
-=======
 			// Pointless to declare this here, but phan is being whiny, so...
 			$status = Status::newGood();
->>>>>>> upstream/master
 			if ( !$section ) {
 				$section = 'basic';
 			}
