@@ -51,6 +51,7 @@ class RemoveMasterSystemGift extends UnlistedSpecialPage {
 	public function execute( $par ) {
 		$out = $this->getOutput();
 		$request = $this->getRequest();
+		$session = $request->getSession();
 		$user = $this->getUser();
 
 		// make sure user has the correct permissions
@@ -78,7 +79,7 @@ class RemoveMasterSystemGift extends UnlistedSpecialPage {
 		$this->gift_id = $request->getInt( 'gift_id', $par );
 
 		if ( !$this->gift_id ) {
-			$out->setPageTitle( $this->msg( 'ga-error-title' ) );
+			$out->setPageTitle( $this->msg( 'ga-error-title' )->escaped() );
 			$out->addHTML( $this->msg( 'ga-error-message-invalid-link' )->escaped() );
 			return;
 		}
@@ -86,9 +87,9 @@ class RemoveMasterSystemGift extends UnlistedSpecialPage {
 		if (
 			$request->wasPosted() &&
 			$user->matchEditToken( $request->getVal( 'wpEditToken' ) ) &&
-			$_SESSION['alreadysubmitted'] == false
+			$session->get( 'alreadysubmitted' ) == false
 		) {
-			$_SESSION['alreadysubmitted'] = true;
+			$session->set( 'alreadysubmitted', true );
 
 			$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 			$gift = SystemGifts::getGift( $this->gift_id );
@@ -109,7 +110,7 @@ class RemoveMasterSystemGift extends UnlistedSpecialPage {
 			$this->deleteImage( $this->gift_id, 'l' );
 			$this->deleteImage( $this->gift_id, 'ml' );
 
-			$out->setPageTitle( $this->msg( 'ga-remove-success-title', $gift['gift_name'] ) );
+			$out->setPageTitle( $this->msg( 'ga-remove-success-title', $gift['gift_name'] )->parse() );
 
 			$output = '<div class="back-links">
 				<a href="' . htmlspecialchars( SpecialPage::getTitleFor( 'SystemGiftManager' )->getFullURL() ) . '">' .
@@ -122,7 +123,7 @@ class RemoveMasterSystemGift extends UnlistedSpecialPage {
 
 			$out->addHTML( $output );
 		} else {
-			$_SESSION['alreadysubmitted'] = false;
+			$session->set( 'alreadysubmitted', false );
 			$out->addHTML( $this->displayForm() );
 		}
 	}
@@ -138,7 +139,7 @@ class RemoveMasterSystemGift extends UnlistedSpecialPage {
 		$systemGiftIcon = new SystemGiftIcon( $this->gift_id, 'l' );
 		$icon = $systemGiftIcon->getIconHTML();
 
-		$this->getOutput()->setPageTitle( $this->msg( 'ga-remove-title', $gift['gift_name'] ) );
+		$this->getOutput()->setPageTitle( $this->msg( 'ga-remove-title', $gift['gift_name'] )->parse() );
 
 		$output = '<div class="back-links">
 			<a href="' . htmlspecialchars( SpecialPage::getTitleFor( 'SystemGiftManager' )->getFullURL() ) . '">' .

@@ -51,9 +51,9 @@ class ViewSystemGifts extends SpecialPage {
 		 * It will automatically return them to the ViewSystemGifts page
 		 */
 		if ( !$currentUser->isRegistered() && $user_name == '' ) {
-			$out->setPageTitle( $this->msg( 'ga-error-title' ) );
+			$out->setPageTitle( $this->msg( 'ga-error-title' )->escaped() );
 			$login = SpecialPage::getTitleFor( 'Userlogin' );
-			$out->redirect( htmlspecialchars( $login->getFullURL( 'returnto=Special:ViewSystemGifts' ) ) );
+			$out->redirect( $login->getFullURL( 'returnto=Special:ViewSystemGifts' ) );
 			return;
 		}
 
@@ -69,7 +69,7 @@ class ViewSystemGifts extends SpecialPage {
 		 * Error message for username that does not exist (from URL)
 		 */
 		if ( $targetUser->getId() == 0 ) {
-			$out->setPageTitle( $this->msg( 'ga-error-title' ) );
+			$out->setPageTitle( $this->msg( 'ga-error-title' )->escaped() );
 			$out->addHTML( $this->msg( 'ga-error-message-no-user' )->escaped() );
 			return;
 		}
@@ -92,8 +92,12 @@ class ViewSystemGifts extends SpecialPage {
 		/**
 		 * Show gift count for user
 		 */
+<<<<<<< HEAD
 		$out->setPageTitle( $this->msg( 'ga-title', $rel->user_name )->text() );
 
+=======
+		$out->setPageTitle( $this->msg( 'ga-title', $rel->user_name )->escaped() );
+>>>>>>> upstream/master
 
 		$output .= '<div class="back-links">' .
 			$this->msg(

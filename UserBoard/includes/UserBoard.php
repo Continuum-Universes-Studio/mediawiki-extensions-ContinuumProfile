@@ -32,6 +32,28 @@ class UserBoard {
 	}
 
 	/**
+	 * Check the given user-supplied text for spam and other nasty things.
+	 *
+	 * @note You should usually always call this before calling sendBoardMessage()!
+	 * @param string $textualContent The user-supplied text string to check for spam etc.
+	 * @param User|MediaWiki\User\UserIdentity $user The User (object) who is trying to send the message
+	 * @return Status
+	 */
+	public static function checkForSpam( $textualContent, $user ) {
+		$hasSpam = SpecialUpdateProfile::validateSpamRegex( $textualContent );
+		if ( $hasSpam ) {
+			return Status::newFatal( 'spamprotectiontext' );
+		}
+
+		$hasSpam = SpecialUpdateProfile::validateSpamBlacklist( $textualContent, rand(), $user );
+		if ( $hasSpam ) {
+			return Status::newFatal( 'spamprotectiontext' );
+		}
+
+		return Status::newGood();
+	}
+
+	/**
 	 * Sends a user board message to another user.
 	 *
 	 * Performs the insertion to user_board table, sends e-mail notification
@@ -225,22 +247,19 @@ class UserBoard {
 		global $wgOut, $wgTitle;
 
 		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		$res = $dbr->select(
+		$row = $dbr->selectRow(
 			'user_board',
 			'*',
 			[ 'ub_id' => $messageId ],
-			__METHOD__,
-			[ 'LIMIT' => 1 ]
+			__METHOD__
 		);
 
-		$message = [];
-
-		foreach ( $res as $row ) {
+		if ( $row ) {
 			$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 			$message_text = $parser->parse( $row->ub_message, $wgTitle, $wgOut->parserOptions(), true );
-			$message_text = $message_text->getText();
+			$message_text = $message_text->getContentHolderText();
 
-			$message = [
+			return [
 				'id' => $row->ub_id,
 				'timestamp' => wfTimestamp( TS_UNIX, $row->ub_date ),
 				'ub_actor_from' => $row->ub_actor_from,
@@ -250,7 +269,7 @@ class UserBoard {
 			];
 		}
 
-		return $message;
+		return [];
 	}
 
 	/**
@@ -301,12 +320,11 @@ class UserBoard {
 		$res = $dbr->query( $dbr->limitResult( $sql, $limit, $offset ), __METHOD__ );
 
 		$messages = [];
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 
 		foreach ( $res as $row ) {
-			$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 			$message_text = $parser->parse( $row->ub_message, $wgTitle, $wgOut->parserOptions(), true );
-			$message_text = $message_text->getText();
-
+			$message_text = $message_text->getContentHolderText();
 			$messages[] = [
 				'id' => $row->ub_id,
 				'timestamp' => wfTimestamp( TS_UNIX, $row->ub_date ),
@@ -464,17 +482,17 @@ class UserBoard {
 	 */
 	public function dateDiff( $date1, $date2 ) {
 		$dtDiff = $date1 - $date2;
-
 		$totalDays = intval( $dtDiff / ( 24 * 60 * 60 ) );
 		$totalSecs = $dtDiff - ( $totalDays * 24 * 60 * 60 );
-		$dif = [];
-		$dif['w'] = intval( $totalDays / 7 );
-		$dif['d'] = $totalDays;
-		$dif['h'] = $h = intval( $totalSecs / ( 60 * 60 ) );
-		$dif['m'] = $m = intval( ( $totalSecs - ( $h * 60 * 60 ) ) / 60 );
-		$dif['s'] = $totalSecs - ( $h * 60 * 60 ) - ( $m * 60 );
-
-		return $dif;
+		$h = intval( $totalSecs / ( 60 * 60 ) );
+		$m = intval( ( $totalSecs - ( $h * 60 * 60 ) ) / 60 );
+		return [
+			'w' => intval( $totalDays / 7 ),
+			'd' => $totalDays,
+			'h' => $h,
+			'm' => $m,
+			's' => $totalSecs - ( $h * 60 * 60 ) - ( $m * 60 ),
+		];
 	}
 
 	public function getTimeOffset( $time, $timeabrv, $timename ) {

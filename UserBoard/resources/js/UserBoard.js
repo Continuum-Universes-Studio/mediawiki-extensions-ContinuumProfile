@@ -1,24 +1,49 @@
 var UserBoard = {
 	posted: 0,
 
+<<<<<<< HEAD
 	sendMessage: function ( perPage ) {
 		if ( !perPage ) {
 			perPage = 25;
 		}
+=======
+	sendMessage: function () {
+>>>>>>> upstream/master
 		const message = document.getElementById( 'message' ).value,
 			recipient = document.getElementById( 'user_name_to' ).value,
 			sender = document.getElementById( 'user_name_from' ).value;
+
 		if ( message && !UserBoard.posted ) {
 			UserBoard.posted = 1;
+<<<<<<< HEAD
 			const messageType = document.getElementById( 'message_type' ).value;
+=======
+
+			const messageType = document.getElementById( 'message_type' ).value;
+
+>>>>>>> upstream/master
 			( new mw.Api() ).postWithToken( 'csrf', {
 				action: 'socialprofile-send-message',
 				format: 'json',
 				username: recipient,
 				message: message,
 				type: messageType
+<<<<<<< HEAD
 			} ).done( () => {
 				UserBoard.posted = 0;
+=======
+			} ).always( () => {
+				// Always reset this flag so that it becomes possible to e.g. delete spammy parts of a message
+				// deemed to be spam and try again
+				UserBoard.posted = 0;
+			} ).fail( ( errorCode, details ) => {
+				// errorCode is e.g. 'spam' or 'nosend', from ApiSendUserBoardMessage
+				// details.error.info is the human-readable error text
+				if ( details && details.error && details.error.info ) {
+					alert( details.error.info );
+				}
+			} ).done( () => {
+>>>>>>> upstream/master
 				let user_1, user_2;
 				if ( sender ) { // it's a board to board
 					user_1 = sender;
@@ -59,8 +84,8 @@ $( () => {
 	} );
 
 	// Submit button
-	$( 'div.user-page-message-box-button input[type="submit"]' ).on( 'click', function ( e ) {
+	$( 'div.user-page-message-box-button input[type="submit"]' ).on( 'click', ( e ) => {
 		e.preventDefault();
-		UserBoard.sendMessage( $( this ).data( 'per-page' ) );
+		UserBoard.sendMessage();
 	} );
 } );

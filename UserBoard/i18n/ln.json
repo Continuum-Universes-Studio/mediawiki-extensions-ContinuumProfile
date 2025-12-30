@@ -3,5 +3,10 @@
 		"authors": [
 			"BOKOBA VEROLY"
 		]
+<<<<<<< HEAD
 	}
+=======
+	},
+	"apierror-socialprofile-send-message-nosend": "Okoki te kotinda bansango."
+>>>>>>> upstream/master
 }

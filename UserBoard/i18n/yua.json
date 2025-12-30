@@ -3,5 +3,10 @@
 		"authors": [
 			"Anettechan03"
 		]
+<<<<<<< HEAD
 	}
+=======
+	},
+	"apierror-socialprofile-send-message-nosend": "Ma' tu páajtal a túuxtik mensajes."
+>>>>>>> upstream/master
 }

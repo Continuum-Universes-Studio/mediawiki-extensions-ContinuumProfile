@@ -13,7 +13,7 @@ var UserProfilePage = {
 			action: 'smpuserprofiletype',
 			format: 'json',
 			do: 'set'
-		}).done(() => {
+		} ).done( () => {
 			// @todo This works, but is kinda crude. Ideally we'd show a spinner and maybe
 			// even load the requested page's content (wikitext page or social profile)
 			// using AJAX, if possible.
@@ -25,33 +25,33 @@ var UserProfilePage = {
 	// I just don't want to implement the same code and same fixes in two different methods in two different files, when
 	// both basically internally are the same, only the location is different (user profile page vs. Special:UserBoard)
 	sendMessage: function () {
-		const userTo = decodeURIComponent(mw.config.get('wgTitle')), // document.getElementById( 'user_name_to' ).value;
-			encMsg = encodeURIComponent(document.getElementById('message').value),
-			msgType = document.getElementById('message_type').value;
+		const userTo = decodeURIComponent( mw.config.get( 'wgTitle' ) ), // document.getElementById( 'user_name_to' ).value;
+			encMsg = encodeURIComponent( document.getElementById( 'message' ).value ),
+			msgType = document.getElementById( 'message_type' ).value;
 
-		if (document.getElementById('message').value && !UserProfilePage.posted) {
+		if ( document.getElementById( 'message' ).value && !UserProfilePage.posted ) {
 			UserProfilePage.posted = 1;
 
-			(new mw.Api()).postWithToken('csrf', {
+			( new mw.Api() ).postWithToken( 'csrf', {
 				action: 'socialprofile-send-message',
 				format: 'json',
 				username: userTo,
 				message: encMsg,
 				type: msgType
-			}).always(() => {
+			} ).always( () => {
 				// Always reset this flag so that it becomes possible to e.g. delete spammy parts of a message
 				// deemed to be spam and try again
 				UserProfilePage.posted = 0;
-			}).fail((errorCode, details) => {
+			} ).fail( ( errorCode, details ) => {
 				// errorCode is e.g. 'spam' or 'nosend', from ApiSendUserBoardMessage
 				// details.error.info is the human-readable error text
-				if (details && details.error && details.error.info) {
-					alert(details.error.info);
+				if ( details && details.error && details.error.info ) {
+					alert( details.error.info );
 				}
-			}).done((data) => {
-				$(data.result).prependTo('#user-page-board');
-				$('#message').val('');
-			});
+			} ).done( ( data ) => {
+				$( data.result ).prependTo( '#user-page-board' );
+				$( '#message' ).val( '' );
+			} );
 		}
 	},
 
@@ -61,7 +61,7 @@ var UserProfilePage = {
 				action: 'socialprofile-delete-message',
 				format: 'json',
 				id: id
-			}).done(() => {
+			} ).done( () => {
 				// window.location.reload();
 				// 1st parent = span.user-board-red
 				// 2nd parent = div.user-board-message-links
@@ -76,19 +76,19 @@ var UserProfilePage = {
 		document.getElementById('upload-container').style.visibility = 'visible';
 	},
 
-	uploadError: function (message) {
-		document.getElementById('mini-gallery-' + UserProfilePage.replaceID).innerHTML = UserProfilePage.oldHtml;
-		document.getElementById('upload-frame-errors').innerText = message;
-		document.getElementById('imageUpload-frame').src = 'index.php?title=Special:MiniAjaxUpload&wpThumbWidth=75';
+	uploadError: function ( message ) {
+		document.getElementById( 'mini-gallery-' + UserProfilePage.replaceID ).innerHTML = UserProfilePage.oldHtml;
+		document.getElementById( 'upload-frame-errors' ).innerText = message;
+		document.getElementById( 'imageUpload-frame' ).src = 'index.php?title=Special:MiniAjaxUpload&wpThumbWidth=75';
 
 		document.getElementById('upload-container').style.display = 'block';
 		document.getElementById('upload-container').style.visibility = 'visible';
 	},
 
-	textError: function (message) {
-		document.getElementById('upload-frame-errors').innerText = message;
-		document.getElementById('upload-frame-errors').style.display = 'block';
-		document.getElementById('upload-frame-errors').style.visibility = 'visible';
+	textError: function ( message ) {
+		document.getElementById( 'upload-frame-errors' ).innerText = message;
+		document.getElementById( 'upload-frame-errors' ).style.display = 'block';
+		document.getElementById( 'upload-frame-errors' ).style.visibility = 'visible';
 	},
 
 	completeImageUpload: function () {
@@ -97,9 +97,9 @@ var UserProfilePage = {
 		document.getElementById('upload-frame-errors').innerHTML = '';
 		UserProfilePage.oldHtml = document.getElementById('mini-gallery-' + UserProfilePage.replaceID).innerHTML;
 
-		for (let x = 7; x > 0; x--) {
-			document.getElementById('mini-gallery-' + (x)).innerHTML =
-				document.getElementById('mini-gallery-' + (x - 1)).innerHTML.replace('slideShowLink(' + (x - 1) + ')', 'slideShowLink(' + (x) + ')');
+		for ( let x = 7; x > 0; x-- ) {
+			document.getElementById( 'mini-gallery-' + ( x ) ).innerHTML =
+				document.getElementById( 'mini-gallery-' + ( x - 1 ) ).innerHTML.replace( 'slideShowLink(' + ( x - 1 ) + ')', 'slideShowLink(' + ( x ) + ')' );
 		}
 		document.getElementById('mini-gallery-0').innerHTML =
 			'<a><img height="75" width="75" src="' +
@@ -148,15 +148,15 @@ var UserProfilePage = {
 	}
 };
 
-$(() => {
+$( () => {
 	// "Use social profile" / "Use wikitext userpage" button on your own profile
-	$('#profile-toggle-button a').on('click', (e) => {
+	$( '#profile-toggle-button a' ).on( 'click', ( e ) => {
 		e.preventDefault();
 		UserProfilePage.changeUserPageType();
 	});
 
 	// "Send message" button on (other users') profile pages
-	$('div.user-page-message-box-button input[type="submit"]').on('click', (e) => {
+	$( 'div.user-page-message-box-button input[type="submit"]' ).on( 'click', ( e ) => {
 		e.preventDefault();
 		UserProfilePage.sendMessage();
 	});

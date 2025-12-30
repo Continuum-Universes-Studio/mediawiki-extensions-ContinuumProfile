@@ -47,6 +47,7 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 	public function execute( $par ) {
 		$out = $this->getOutput();
 		$request = $this->getRequest();
+		$session = $request->getSession();
 		$user = $this->getUser();
 
 		// Can't use $this->setHeaders(); here because then it'll set the page
@@ -148,9 +149,10 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 			if (
 				$this->getRequest()->wasPosted() &&
 				$user->matchEditToken( $request->getVal( 'wpEditToken' ) ) &&
-				$_SESSION['alreadysubmitted'] == false
+				$session->get( 'alreadysubmitted' ) == false
 			) {
-				$_SESSION['alreadysubmitted'] = true;
+				$session->set( 'alreadysubmitted', true );
+
 				$rel->removeRelationship( $this->user_to, $user );
 				$rel->sendRelationshipRemoveEmail(
 					$this->user_to,
@@ -172,10 +174,9 @@ class SpecialRemoveRelationship extends UnlistedSpecialPage {
 
 				$out->addHTML( $output );
 			} else {
-				$_SESSION['alreadysubmitted'] = false;
+				$session->set( 'alreadysubmitted', false );
 				$out->addHTML( $this->displayForm() );
 			}
-
 		}
 	}
 

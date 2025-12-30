@@ -77,9 +77,5 @@
 		"localBasePath": "resources",
 		"remoteExtPath": "SocialProfile/UserRelationship/resources"
 	},
-	"LoadExtensionSchemaUpdates": [
-    	"SocialProfile\\Hooks::onLoadExtensionSchemaUpdates"
-	],
-
 	"manifest_version": 2
 }

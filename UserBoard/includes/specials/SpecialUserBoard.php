@@ -91,15 +91,9 @@ class SpecialViewUserBoard extends SpecialPage {
 		if ( !$user_name ) {
 			$user_name = $currentUser->getName();
 		}
-		if ( method_exists( MediaWikiServices::class, 'getUserIdentityLookup' ) ) {
-			// MW 1.36+
-			$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
-				->getUserIdentityByName( $user_name );
-			$user_id = $userIdentity ? $userIdentity->getId() : 0;
-		} else {
-			// @phan-suppress-next-line PhanUndeclaredStaticMethod Removed in MW 1.41+
-			$user_id = User::idFromName( $user_name );
-		}
+		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
+			->getUserIdentityByName( $user_name );
+		$user_id = $userIdentity ? $userIdentity->getId() : 0;
 		$user = Title::makeTitle( NS_USER, $user_name );
 
 		// Compare with '' to handle [[User:0]]
@@ -147,12 +141,22 @@ class SpecialViewUserBoard extends SpecialPage {
 			} elseif ( $request->getVal( 'action' ) === 'send' ) {
 				// Sending a message
 				if ( $currentUser->matchEditToken( $request->getVal( 'wpEditToken' ) ) ) {
-					$b->sendBoardMessage(
-						$currentUser,
-						User::newFromName( $request->getVal( 'user_name_to' ) ),
-						urldecode( $request->getVal( 'message' ) ),
-						$request->getInt( 'message_type' )
-					);
+					$messageText = urldecode( $request->getVal( 'message' ) );
+					$spamStatus = UserBoard::checkForSpam( $messageText, $currentUser );
+
+					if ( !$spamStatus->isOK() ) {
+						// Use the generic error message from MW core.
+						// @todo Mildly silly, since we're totally ignoring the Status retval from the
+						// anti-spam method, but oh well.
+						$output .= Html::errorBox( $this->msg( 'spamprotectiontext' )->parse() );
+					} else {
+						$b->sendBoardMessage(
+							$currentUser,
+							User::newFromName( $request->getVal( 'user_name_to' ) ),
+							$messageText,
+							$request->getInt( 'message_type' )
+						);
+					}
 				} else {
 					// CSRF attempt or something...display an informational message in that case
 					$output .= Html::errorBox( $this->msg( 'sessionfailure' )->escaped() );
@@ -349,7 +353,7 @@ class SpecialViewUserBoard extends SpecialPage {
 					<textarea name="message" id="message" cols="63" rows="4"></textarea>
 
 					<div class="user-page-message-box-button">
-						<input type="submit" value="' . $this->msg( 'userboard_sendbutton' )->escaped() . '" class="site-button" data-per-page="' . $per_page . '" />
+						<input type="submit" value="' . $this->msg( 'userboard_sendbutton' )->escaped() . '" class="site-button" />
 					</div>' .
 					Html::hidden( 'wpEditToken', $currentUser->getEditToken() ) .
 				'</form>

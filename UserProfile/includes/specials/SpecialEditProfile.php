@@ -1,14 +1,10 @@
 <?php
 
-use MediaWiki\Config\ConfigException;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserNamePrefixSearch;
-use Wikimedia\Services\NoSuchServiceException;
-use Wikimedia\Services\ContainerDisabledException;
-use Wikimedia\Services\ServiceDisabledException;
-use Wikimedia\Rdbms\DBError;
 
 /**
  * A special page to allow privileged users to update others' social profiles
@@ -90,10 +86,41 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$this->profile_visible_fields = SPUserSecurity::getVisibleFields( $target, $user );
 
 		if ( $request->wasPosted() && $user->matchEditToken( $request->getVal( 'wpEditToken' ) ) ) {
-			$this->saveProfileBasic( $target );
+			$statusBasic = $this->saveProfileBasic( $target );
 			$this->saveBasicSettings( $target );
-			$this->saveProfilePersonal( $target );
-			$this->saveProfileCustom( $target );
+			$statusPersonal = $this->saveProfilePersonal( $target );
+			$statusCustom = $this->saveProfileCustom( $target );
+
+			$problematicSections = [];
+			if ( !$statusBasic->isOK() ) {
+				$problematicSections[] = 'user-personal-info-title';
+			}
+			if ( !$statusPersonal->isOK() ) {
+				$problematicSections[] = 'other-info-title'; // [sic!]
+			}
+			if ( !$statusCustom->isOK() ) {
+				$problematicSections[] = 'custom-info-title';
+			}
+
+			// If there were errors saving one or more of the sections, let the
+			// admin user using this special page know
+			if ( $problematicSections !== [] && count( $problematicSections ) > 3 ) {
+				$out->addHTML( Html::errorBox(
+					// I wanted to use a more descriptive error message here but the i18n was giving me a headache,
+					// so I opted to...not do that.
+					// That's the very reason why $problematicSections uses valid i18n msg keys instead
+					// of plaintext section identifiers like 'basic', 'personal' or 'custom'.
+					// Either way, this should suffice to signal to the end-user (admin) that there's (still) spam
+					// and/or something else that's been blacklisted and which should be removed.
+					$this->msg( 'user-profile-error-spam' )->parse()
+				) );
+			} elseif ( $problematicSections !== [] && count( $problematicSections ) === 3 ) {
+				// ALL sections failed? Wow...do no further processing in that case, then.
+				$out->addHTML( Html::errorBox( $this->msg( 'user-profile-edit-error-all-section' )->parse() ) );
+				// @todo FIXME: this isn't optimal because now we're not displaying the form or anything, so
+				// the end-user's gotta user their browser's address bar to reload the page.
+				return;
+			}
 
 			UserProfile::clearCache( $target );
 
@@ -118,29 +145,14 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 
 			// create the user page if it doesn't exist yet
 			$title = Title::makeTitle( NS_USER, $target->getName() );
-			if ( method_exists( MediaWikiServices::class, 'getWikiPageFactory' ) ) {
-				// MW 1.36+
-				$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
-			} else {
-				$page = new WikiPage( $title );
-			}
+			$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
 			if ( !$page->exists() ) {
-				if ( method_exists( $page, 'doUserEditContent' ) ) {
-					// MW 1.36+
-					$page->doUserEditContent(
-						ContentHandler::makeContent( '', $title ),
-						$this->getUser(),
-						'create user page',
-						EDIT_SUPPRESS_RC
-					);
-				} else {
-					// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
-					$page->doEditContent(
-						ContentHandler::makeContent( '', $title ),
-						'create user page',
-						EDIT_SUPPRESS_RC
-					);
-				}
+				$page->doUserEditContent(
+					ContentHandler::makeContent( '', $title ),
+					$this->getUser(),
+					'create user page',
+					EDIT_SUPPRESS_RC
+				);
 			}
 		}
 
@@ -152,7 +164,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		// Needed because display*Form() functions can and do override our title so
 		// if we don't do this here, the page title ends up being something like
 		// "Other information" and the HTML title ends up being "Tidbits"
-		$out->setPageTitle( $this->msg( 'editprofile' ) );
+		$out->setPageTitle( $this->msg( 'editprofile' )->escaped() );
 		$out->setHTMLTitle( $this->msg( 'pagetitle', $this->msg( 'edit-profiles-title' ) ) );
 	}
 
@@ -296,7 +308,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$form .= '<select name="location_country" id="location_country"><option></option>';
 
 		foreach ( $countries as $country ) {
-			$form .= Xml::option( $country, $country, ( $country == $location_country ) );
+			$form .= Html::element( 'option', [ 'value' => $country, 'selected' => ( $country == $location_country ) ], $country );
 		}
 
 		$form .= '</select>';
@@ -319,7 +331,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$form .= '<select name="hometown_country" id="hometown_country"><option></option>';
 
 		foreach ( $countries as $country ) {
-			$form .= Xml::option( $country, $country, ( $country == $hometown_country ) );
+			$form .= Html::element( 'option', [ 'value' => $country, 'selected' => ( $country == $hometown_country ) ], $country );
 		}
 
 		$form .= '</select>';
@@ -431,8 +443,6 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		if ( $s !== false ) {
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
-			$relationship = $s->up_relationship;
-			$companies = $s->up_companies;
 			$schools = $s->up_schools;
 			$movies = $s->up_movies;
 			$tv = $s->up_tv;
