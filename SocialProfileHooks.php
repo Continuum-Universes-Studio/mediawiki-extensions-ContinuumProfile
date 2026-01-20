@@ -61,6 +61,17 @@ class SocialProfileHooks {
 		$updater->addExtensionTable( 'user_points_monthly', "$dir/UserStats/sql/user_points_monthly$dbExt.sql" );
 		$updater->addExtensionTable( 'user_points_archive', "$dir/UserStats/sql/user_points_archive$dbExt.sql" );
 
+		// Continuum Additions
+		$updater->addExtensionField( 'user_profile', 'up_universes', "$dir/UserProfile/sql/patches/patch-add-column-up_universes$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_pets', "$dir/UserProfile/sql/patches/patch-add-column-up_pets$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_hobbies', "$dir/UserProfile/sql/patches/patch-add-column-up_hobbies$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_heroes', "$dir/UserProfile/sql/patches/patch-add-column-up_heroes$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_obsessed', "$dir/UserProfile/sql/patches/patch-add-column-up_obsessed$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_tools', "$dir/UserProfile/sql/patches/patch-add-column-up_tools$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_quote', "$dir/UserProfile/sql/patches/patch-add-column-up_quote$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_tagline', "$dir/UserProfile/sql/patches/patch-add-column-up_tagline$dbExt.sql" );
+		$updater->addExtensionField( 'user_profile', 'up_rig', "$dir/UserProfile/sql/patches/patch-add-column-up_rig$dbExt.sql" );
+
 		$updater->dropExtensionField( 'user_stats', 'stats_year_id', "$dir/UserStats/sql/patches/patch-drop-column-stats_year_id.sql" );
 		$updater->dropExtensionField( 'user_profile', 'up_last_seen', "$dir/UserProfile/sql/patches/patch-drop-column-up_last_seen.sql" );
 

@@ -413,6 +413,9 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( $request->getVal( 'websites' ) ) {
 			$basicProfileData['up_websites'] = $request->getVal( 'websites' );
 		}
+		if ( $request->getVal( 'rig' ) ) {
+			$basicProfileData['up_rig'] = $request->getVal( 'rig' );
+		}
 		if ( $request->getVal( 'universes' ) ) {
 			$basicProfileData['up_universes'] = $request->getVal( 'universes' );
 		}
@@ -427,6 +430,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		}
 		if ( $request->getVal( 'quote' ) ) {
 			$basicProfileData['up_quote'] = $request->getVal( 'quote' );
+		}
+		if ( $request->getVal( 'obsessed' ) ) {
+			$basicProfileData['up_obsessed'] = $request->getVal( 'obsessed' );
+		}
+				if ( $request->getVal( 'tools' ) ) {
+			$basicProfileData['up_tools'] = $request->getVal( 'tools' );
 		}
 		if ($request->getVal('private_birthyear') !== null) {
 			$basicProfileData['private_birthyear'] = intval($request->getVal('private_birthyear'));
@@ -465,7 +474,10 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( $request->getVal( 'websites' ) ) {
 			$basicProfileData['up_websites'] = $request->getVal( 'websites' );
 		}
-
+		if ( $request->getVal( 'rig' ) ) {
+			$basicProfileData['up_rig'] = $request->getVal( 'rig' );
+		}
+	
 		$spammyFields = [];
 		foreach ( $basicProfileData as $key => $val ) {
 			$hasSpam = self::validateSpamRegex( $val );
@@ -580,7 +592,9 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			'up_universes' => $request->getVal( 'universes' ),
 			'up_pets' => $request->getVal( 'pets' ),
 			'up_hobbies' => $request->getVal( 'hobbies' ),
-			'up_heroes' => $request->getVal( 'heroes' )
+			'up_heroes' => $request->getVal( 'heroes' ),
+			'up_obsessed' => $request->getVal( 'obsessed' ),
+			'up_tools' => $request->getVal( 'tools' )
 
 		];
 
@@ -631,7 +645,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 				'up_location_city', 'up_location_state', 'up_location_country',
 				'up_hometown_city', 'up_hometown_state', 'up_hometown_country',
 				'up_birthday', 'up_occupation', 'up_tagline', 'up_about', 'up_schools',
-				'up_places_lived', 'up_websites', 'private_birthyear', 'up_quote'
+				'up_places_lived', 'up_websites', 'private_birthyear', 'up_quote',
+				'up_rig'
 			],
 			[ 'up_actor' => $user->getActorId() ],
 			__METHOD__
@@ -654,6 +669,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$schools = $s->up_schools;
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
+			$rig = $s->up_rig;
 			$quote = $s->up_quote;
 		}
 
@@ -830,6 +846,15 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			3,
 			75
 		);
+		$form .= '<div class="profile-update" id="profile-update-personal-rig">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-rig' )->escaped() . '</p>';
+		$form .= $this->renderBigTextFieldRow(
+			'user-profile-personal-rig',
+			'rig',
+			$rig,
+			3,
+			25
+		);
 		$form .= '
 			<input type="submit" class="site-button" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" size="20" />
 			</div>
@@ -849,11 +874,12 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$s = $dbr->selectRow(
 			'user_profile',
 			[
-				'up_about', 'up_places_lived', 'up_websites', 'up_relationship',
-				'up_occupation', 'up_tagline', 'up_companies', 'up_schools', 'up_movies',
+				'up_about', 'up_places_lived', 'up_websites',
+				'up_occupation', 'up_tagline', 'up_schools', 'up_movies',
 				'up_tv', 'up_music', 'up_books', 'up_video_games',
 				'up_magazines', 'up_snacks', 'up_drinks', 'up_universes',
-				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote'
+				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote',
+				'up_obsessed', 'up_tools', 'up_rig'
 			],
 			[
 				// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
@@ -865,6 +891,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		if ( $s !== false ) {
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
+			$rig = $s->up_rig;
 			$schools = $s->up_schools;
 			$movies = $s->up_movies;
 			$tv = $s->up_tv;
@@ -878,6 +905,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$pets = $s->up_pets;
 			$hobbies = $s->up_hobbies;
 			$heroes = $s->up_heroes;
+			$obsessed = $s->up_obsessed;
+			$tools = $s->up_tools;
 		}
 
 		$this->getOutput()->setPageTitle( $this->msg( 'user-profile-section-interests' )->escaped() );
@@ -909,6 +938,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$form .= $this->renderProfileRow( 'user-profile-interests-pets', 'pets', $pets );
 		$form .= $this->renderProfileRow( 'user-profile-interests-hobbies', 'hobbies', $hobbies );
 		$form .= $this->renderProfileRow( 'user-profile-interests-heroes', 'heroes', $heroes );
+		$form .= $this->renderProfileRow( 'user-profile-interests-obsessed', 'obsessed', $obsessed );
+		$form .= $this->renderProfileRow( 'user-profile-interests-tools', 'tools', $tools );
 		$form .= '</div>
 				<input type="submit" class="site-button" value="' . $this->msg( 'user-profile-update-button' )->escaped() . '" size="20" />
 				</div>

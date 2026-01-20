@@ -1,9 +1,11 @@
 <?php
+declare( strict_types=1 );
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\User;
+
 /**
  * Class to access profile data for a user
  */
@@ -11,6 +13,41 @@ class UserProfile {
 	/** @var int Cache key version; bump this to force recaching of UserProfile data */
 	public const CACHE_VERSION = 2;
 
+	private const FIELD_TEXT  = 'text';
+	private const FIELD_LIST  = 'list';
+	private const FIELD_QUOTE = 'quote';
+
+	/**
+	 * Render types for fields.
+	 * You can tweak this over time without touching DB schema.
+	 */
+	private const FIELD_TYPES = [
+		// “Listy” fields (newline-separated in DB -> <ul><li>…</li></ul>)
+		// newline-separated => <ul><li>…</li></ul>
+		'places_lived' => self::FIELD_LIST,
+		'schools'      => self::FIELD_LIST,
+		'pets'         => self::FIELD_LIST,
+		'hobbies'      => self::FIELD_LIST,
+		'heroes'       => self::FIELD_LIST,
+
+		// Interests that people naturally enter one-per-line
+		'movies'       => self::FIELD_LIST,
+		'tv'           => self::FIELD_LIST,
+		'music'        => self::FIELD_LIST,
+		'books'        => self::FIELD_LIST,
+		'video_games'  => self::FIELD_LIST,
+		'magazines'    => self::FIELD_LIST,
+		'snacks'       => self::FIELD_LIST,
+		'drinks'       => self::FIELD_LIST,
+		'universes'    => self::FIELD_LIST,
+		'websites' 	   => self::FIELD_LINKLIST,
+		'rig' 		   => self::FIELD_LIST,
+		// blockquote
+		'quote'        => self::FIELD_QUOTE,
+		'obsessed' => self::FIELD_LIST,
+		'tools' => self::FIELD_LIST,
+	];
+	private const FIELD_LINKLIST = 'linklist';
 	/**
 	 * @var User User object whose profile is being viewed
 	 */
@@ -50,6 +87,7 @@ class UserProfile {
 		'about',
 		'places_lived',
 		'websites',
+		'rig',
 		'occupation',
 		'schools',
 		'movies',
@@ -65,10 +103,13 @@ class UserProfile {
 		'hobbies',
 		'heroes',
 		'quote',
+		'obsessed',
+		'tools',
 		'custom_1',
 		'custom_2',
 		'custom_3',
 		'custom_4',
+		'custom_5', // <-- you already load this, so include it here
 		'email'
 	];
 
@@ -79,9 +120,7 @@ class UserProfile {
 
 	/**
 	 * @param User|string $username User object (preferred) or user name (legacy b/c)
-	 * @todo FIXME: will explode horribly if $username is an IP address (can't call
-	 *  the getters here because $this->user is not an object then; adding an
-	 *  instanceof check here will cause getProfile() instead to explode, etc.)
+	 * @todo FIXME: will explode horribly if $username is an IP address
 	 */
 	public function __construct( $username ) {
 		if ( $username instanceof User ) {
@@ -113,7 +152,6 @@ class UserProfile {
 	 */
 	public static function clearCache( $user ) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-
 		$cache->delete( self::getCacheKey( $user ) );
 	}
 
@@ -154,9 +192,16 @@ class UserProfile {
 				$profile['user_page_type'] = 1;
 				$profile['actor'] = 0;
 			}
+
 			$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-			$showYOB = $userOptionsLookup->getIntOption( $this->user, 'showyearofbirth', (int)!isset( $row->up_birthday ) ) == 1;
+			$showYOB = $userOptionsLookup->getIntOption(
+				$this->user,
+				'showyearofbirth',
+				(int)!isset( $row->up_birthday )
+			) == 1;
+
 			$issetUpBirthday = $row->up_birthday ?? '';
+
 			$profile['location_city'] = $row->up_location_city ?? '';
 			$profile['location_state'] = $row->up_location_state ?? '';
 			$profile['location_country'] = $row->up_location_country ?? '';
@@ -169,6 +214,7 @@ class UserProfile {
 			$profile['tagline'] = $row->up_tagline ?? '';
 			$profile['places_lived'] = $row->up_places_lived ?? '';
 			$profile['websites'] = $row->up_websites ?? '';
+			$profile['rig'] = $row->up_rig ?? '';
 			$profile['occupation'] = $row->up_occupation ?? '';
 			$profile['schools'] = $row->up_schools ?? '';
 			$profile['movies'] = $row->up_movies ?? '';
@@ -184,34 +230,109 @@ class UserProfile {
 			$profile['hobbies'] = $row->up_hobbies ?? '';
 			$profile['heroes'] = $row->up_heroes ?? '';
 			$profile['quote'] = $row->up_quote ?? '';
+			$profile['obsessed'] = $row->up_obsessed ?? '';
+			$profile['tools'] = $row->up_tools ?? '';
 			// Custom fields
 			$profile['custom_1'] = $row->up_custom_1 ?? '';
 			$profile['custom_2'] = $row->up_custom_2 ?? '';
 			$profile['custom_3'] = $row->up_custom_3 ?? '';
 			$profile['custom_4'] = $row->up_custom_4 ?? '';
 			$profile['custom_5'] = $row->up_custom_5 ?? '';
+
 			$profile['user_page_type'] = $row->up_type ?? '';
+
 			$cache->set( $key, $profile );
 		}
 
+		// These come from core user fields, not the user_profile table
 		$profile['real_name'] = $this->user->getRealName();
 		$profile['email'] = $this->user->getEmail();
+
+		// Optional: expose groups as a raw newline list so your renderer can listify it.
+		// If you already handle this elsewhere, delete this line.
+		$ugm = MediaWikiServices::getInstance()->getUserGroupManager();
+		$groups = $ugm->getUserGroups( $this->user ); // explicit groups
+		$profile['groups'] = implode( "\n", $groups );
+
 
 		return $profile;
 	}
 
 	/**
+	 * Render a single field value as safe HTML based on its field type.
+	 * This keeps your DB raw, and makes your output nice.
+	 *
+	 * @param string $fieldKey e.g. 'hobbies'
+	 * @param string $raw Raw DB value
+	 * @return string Safe HTML
+	 */
+	public function renderFieldHtml( string $fieldKey, string $raw ): string {
+		$type = $this->getFieldType( $fieldKey );
+
+		if ( $type === self::FIELD_LIST ) {
+			return $this->renderMaybeList( $raw, true );
+		}
+
+		if ( $type === self::FIELD_QUOTE ) {
+			return $this->renderQuote( $raw );
+		}
+
+		return $this->renderMaybeList( $raw, false );
+	}
+
+	private function getFieldType( string $fieldKey ): string {
+		return self::FIELD_TYPES[$fieldKey] ?? self::FIELD_TEXT;
+	}
+
+	private function renderMaybeList( string $raw, bool $asList ): string {
+		$raw = trim( $raw );
+		if ( $raw === '' ) {
+			return '';
+		}
+
+		if ( !$asList ) {
+			// Keep newlines, escape safely
+			return nl2br( htmlspecialchars( $raw, ENT_QUOTES, 'UTF-8' ) );
+		}
+
+		$items = preg_split( "/\r\n|\r|\n/", $raw );
+		$items = array_values( array_filter(
+			array_map( 'trim', $items ),
+			static fn( $x ) => $x !== ''
+		) );
+
+		if ( !$items ) {
+			return '';
+		}
+
+		$out = "<ul class='profile-list'>";
+		foreach ( $items as $item ) {
+			$out .= "<li>" . htmlspecialchars( $item, ENT_QUOTES, 'UTF-8' ) . "</li>";
+		}
+		$out .= "</ul>";
+		return $out;
+	}
+
+	private function renderQuote( string $raw ): string {
+		$raw = trim( $raw );
+		if ( $raw === '' ) {
+			return '';
+		}
+
+		// Preserve line breaks inside the quote.
+		$body = nl2br( htmlspecialchars( $raw, ENT_QUOTES, 'UTF-8' ) );
+
+		return "<blockquote class='profile-quote'>{$body}</blockquote>";
+	}
+
+	/**
 	 * Format the user's birthday.
-	 * "Formatting" here means:
-	 * 1) stripping out the separator dashes
-	 * 2) respecting the "show/hide birth year" user preference
-	 *		This impacts the output of this method!
 	 *
 	 * @param string $birthday Birthday in YYYY-MM-DD format
 	 * @param bool $showYear
-	 * @return string Formatted birthday, either 8 (with year) or 4 (without year) characters long
+	 * @return string
 	 */
-	function formatBirthday( $birthday, $showYear = true ) {
+	public function formatBirthday( $birthday, $showYear = true ) {
 		$dob = explode( '-', $birthday );
 		if ( count( $dob ) == 3 ) {
 			$month = $dob[1];
@@ -221,8 +342,6 @@ class UserProfile {
 					return '';
 				} else {
 					return $month . $day;
-					// old, woefully English-specific code:
-					// return date( 'F jS', mktime( 0, 0, 0, $month, $day ) );
 				}
 			}
 			$year = $dob[0];
@@ -230,8 +349,6 @@ class UserProfile {
 				return '';
 			} else {
 				return $year . $month . $day;
-				// old, woefully English-specific code:
-				// return date( 'F jS, Y', mktime( 0, 0, 0, $month, $day, $year ) );
 			}
 		}
 		return $birthday;
@@ -239,18 +356,17 @@ class UserProfile {
 
 	/**
 	 * How many % of this user's profile is complete?
-	 * Currently unused, I think that this might've been used in some older
-	 * ArmchairGM code, but this looks useful enough to be kept around.
 	 *
 	 * @return float
 	 */
 	public function getProfileComplete() {
 		$complete_count = 0;
+		$this->profile_fields_count = 0;
 
-		// Check all profile fields
 		$profile = $this->getProfile();
 		foreach ( $this->profile_fields as $field ) {
-			if ( $profile[$field] ) {
+			$value = $profile[$field] ?? '';
+			if ( $value !== '' ) {
 				$complete_count++;
 			}
 			$this->profile_fields_count++;
@@ -274,25 +390,24 @@ class UserProfile {
 		foreach ( $lines as $line ) {
 			if ( strpos( $line, '*' ) !== 0 ) {
 				continue;
-			} else {
-				$line = explode( '|', trim( $line, '* ' ), 2 );
-				$page = Title::newFromText( $line[0] );
-				$link_text = $line[1];
-
-				// Maybe it's the name of a system message? (bug #30030)
-				$msgObj = wfMessage( $line[1] );
-				if ( !$msgObj->isDisabled() ) {
-					$link_text = $msgObj->text();
-				}
-
-				$output .= '<div class="profile-tab' . ( ( $current_nav == $link_text ) ? '-on' : '' ) . '">';
-				$output .= $linkRenderer->makeLink( $page, $link_text );
-				$output .= '</div>';
 			}
+
+			$line = explode( '|', trim( $line, '* ' ), 2 );
+			$page = Title::newFromText( $line[0] );
+			$link_text = $line[1];
+
+			// Maybe it's the name of a system message? (bug #30030)
+			$msgObj = wfMessage( $line[1] );
+			if ( !$msgObj->isDisabled() ) {
+				$link_text = $msgObj->text();
+			}
+
+			$output .= '<div class="profile-tab' . ( ( $current_nav == $link_text ) ? '-on' : '' ) . '">';
+			$output .= $linkRenderer->makeLink( $page, $link_text );
+			$output .= '</div>';
 		}
 
 		$output .= '<div class="visualClear"></div></div>';
-
 		return $output;
 	}
 }

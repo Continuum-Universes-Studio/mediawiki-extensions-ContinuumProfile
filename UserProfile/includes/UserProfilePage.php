@@ -4,6 +4,7 @@ use MediaWiki\Html\Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
+
 /**
  * User profile Wiki Page
  *
@@ -13,11 +14,10 @@ use MediaWiki\Title\Title;
  * @copyright Copyright © 2007, Wikia Inc.
  * @license GPL-2.0-or-later
  */
-
 class UserProfilePage extends Article {
 
 	/**
-	 * @var Title
+	 * @var Title|null
 	 */
 	public $title = null;
 
@@ -55,8 +55,7 @@ class UserProfilePage extends Article {
 	public $is_owner;
 
 	/**
-	 * @var array user profile data (interests, etc.) for the user whose
-	 * profile we're viewing
+	 * @var array user profile data (interests, etc.) for the user whose profile we're viewing
 	 */
 	public $profile_data;
 
@@ -65,12 +64,51 @@ class UserProfilePage extends Article {
 	 */
 	public $profile_visible_fields;
 
-	function __construct( $title ) {
+	// --- Field rendering types ---
+	private const FIELD_TEXT  = 'text';
+	private const FIELD_LIST  = 'list';
+	private const FIELD_QUOTE = 'quote';
+
+	/**
+	 * Field render types (key is *profile_data* key, not DB column)
+	 */
+	private const FIELD_TYPES = [
+		// newline-separated => <ul><li>…</li></ul>
+		'places_lived' => self::FIELD_LIST,
+		'schools'      => self::FIELD_LIST,
+		'pets'         => self::FIELD_LIST,
+		'hobbies'      => self::FIELD_LIST,
+		'heroes'       => self::FIELD_LIST,
+
+		// Interests that people naturally enter one-per-line
+		'movies'       => self::FIELD_LIST,
+		'tv'           => self::FIELD_LIST,
+		'music'        => self::FIELD_LIST,
+		'books'        => self::FIELD_LIST,
+		'video_games'  => self::FIELD_LIST,
+		'magazines'    => self::FIELD_LIST,
+		'snacks'       => self::FIELD_LIST,
+		'drinks'       => self::FIELD_LIST,
+		'universes'    => self::FIELD_LIST,
+		'websites'     => self::FIELD_LINKLIST,
+		'rig'          => self::FIELD_LIST,
+		// blockquote
+		'quote'        => self::FIELD_QUOTE,
+		'obsessed' => self::FIELD_LIST,
+		'tools' => self::FIELD_LIST,
+		// leave as text (default) unless you explicitly want otherwise:
+		// 'about'      => self::FIELD_TEXT,
+		// 'tagline'    => self::FIELD_TEXT,
+	];
+
+
+	public function __construct( $title ) {
 		$context = $this->getContext();
 		// This is the user *who is viewing* the page
 		$user = $this->viewingUser = $context->getUser();
 
 		parent::__construct( $title );
+
 		// These vars represent info about the user *whose page is being viewed*
 		$this->profileOwner = User::newFromName( $title->getText() );
 
@@ -80,7 +118,7 @@ class UserProfilePage extends Article {
 		$this->user = $this->profileOwner;
 		$this->user->load();
 
-		$this->is_owner = ( $this->profileOwner->getName() == $user->getName() );
+		$this->is_owner = ( $this->profileOwner->getName() === $user->getName() );
 
 		$profile = new UserProfile( $this->profileOwner );
 		$this->profile_data = $profile->getProfile();
@@ -89,28 +127,21 @@ class UserProfilePage extends Article {
 
 	/**
 	 * Is the current user the owner of the profile page?
-	 * In other words, is the current user's username the same as that of the
-	 * profile's owner's?
 	 *
 	 * @return bool
 	 */
-	function isOwner() {
-		return $this->is_owner;
+	public function isOwner() {
+		return (bool)$this->is_owner;
 	}
 
-	function view() {
+	public function view() {
 		$context = $this->getContext();
 		$out = $context->getOutput();
 		$logger = LoggerFactory::getInstance( 'SocialProfile' );
 
 		$out->setPageTitle( $this->getTitle()->getPrefixedText() );
 
-		// No need to display noarticletext, we use our own message
-		// @todo FIXME: this was basically "!$this->profileOwner" prior to actor.
-		// Now we need to explicitly check for this b/c if we don't and we're viewing
-		// the User: page of a nonexistent user as an anon, that profile page will
-		// display as User:<your IP address> and $this->profileOwner will have been
-		// set to a User object representing that anonymous user (IP address).
+		// If viewing User: of anon/nonexistent, fall back to core behavior.
 		if ( $this->profileOwner->isAnon() ) {
 			parent::view();
 			return '';
@@ -120,16 +151,10 @@ class UserProfilePage extends Article {
 		$out->addHTML( $this->getProfileHeader() );
 		$out->addHTML( '<div class="visualClear"></div></div>' );
 
-		// Add JS -- needed by UserBoard stuff but also by the "change profile type" button
-		// If this were loaded in getUserBoard() as it originally was, then the JS that deals
-		// with the "change profile type" button would *not* work when the user is using a
-		// regular wikitext user page despite that the social profile header would still be
-		// displayed.
-		// @see T202272, T242689
+		// Needed by userboard + change profile type button
 		$out->addModules( 'ext.socialprofile.userprofile.js' );
 
-		// User does not want social profile for User:user_name, so we just
-		// show header + page content
+		// User does not want social profile for User:user_name, so show header + page content
 		if (
 			$this->getTitle()->getNamespace() == NS_USER &&
 			$this->profile_data['actor'] &&
@@ -151,7 +176,7 @@ class UserProfilePage extends Article {
 			] );
 		}
 
-		#$out->addHTML( $this->getUserGroups() );
+		// $out->addHTML( $this->getUserGroups() );
 		$out->addHTML( $this->getRelationships( 1 ) );
 		$out->addHTML( $this->getRelationships( 2 ) );
 		$out->addHTML( $this->getRelationships( 3 ) );
@@ -183,12 +208,14 @@ class UserProfilePage extends Article {
 
 		$out->addHTML( $this->getPersonalInfo() );
 		$out->addHTML( $this->getActivity() );
+
 		// Hook for BlogPage
 		if ( !MediaWikiServices::getInstance()->getHookContainer()->run( 'UserProfileRightSideAfterActivity', [ $this ] ) ) {
 			$logger->debug( "{method}: UserProfileRightSideAfterActivity hook messed up profile!\n", [
 				'method' => __METHOD__
 			] );
 		}
+
 		$out->addHTML( $this->getCasualGames() );
 		$out->addHTML( $this->getUserBoard() );
 
@@ -206,7 +233,7 @@ class UserProfilePage extends Article {
 	 * @param int $value
 	 * @return string HTML
 	 */
-	function getUserStatsRow( $label, int $value ) {
+	public function getUserStatsRow( $label, int $value ) {
 		$output = ''; // Prevent E_NOTICE
 
 		if ( $value != 0 ) {
@@ -223,7 +250,7 @@ class UserProfilePage extends Article {
 		return $output;
 	}
 
-	function getUserStats() {
+	public function getUserStats() {
 		global $wgUserProfileDisplay;
 
 		if ( $wgUserProfileDisplay['stats'] == false ) {
@@ -266,7 +293,8 @@ class UserProfilePage extends Article {
 				) .
 				$this->getUserStatsRow(
 					wfMessage( 'user-stats-comments', $stats_data['comments'] )->escaped(),
-					$stats_data['comments'] ) .
+					$stats_data['comments']
+				) .
 				$this->getUserStatsRow(
 					wfMessage( 'user-stats-recruits', $stats_data['recruits'] )->escaped(),
 					$stats_data['recruits']
@@ -283,12 +311,14 @@ class UserProfilePage extends Article {
 					wfMessage( 'user-stats-quiz-points', $stats_data['quiz_points'] )->escaped(),
 					$stats_data['quiz_points']
 				);
+
 			if ( $stats_data['currency'] != '10000' ) {
 				$output .= $this->getUserStatsRow(
 					wfMessage( 'user-stats-pick-points', $stats_data['currency'] )->escaped(),
 					$stats_data['currency']
 				);
 			}
+
 			$output .= '</div>';
 		}
 
@@ -296,20 +326,16 @@ class UserProfilePage extends Article {
 	}
 
 	/**
-	 * Get three of the polls the user has created and cache the data in
-	 * memcached.
+	 * Get three of the polls the user has created and cache the data in memcached.
 	 *
 	 * @return array
 	 */
-	function getUserPolls() {
+	public function getUserPolls() {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
 		$polls = [];
 		$logger = LoggerFactory::getInstance( 'SocialProfile' );
 
-		// Try cache
-		// @note Keep this cache key in sync with PollNY
-		// (includes/PollNY.hooks.php and includes/specials/SpecialCreatePoll.php)
 		$key = $cache->makeKey( 'user', 'profile', 'polls', 'actor_id', $this->profileOwner->getActorId() );
 		$data = $cache->get( $key );
 
@@ -328,7 +354,7 @@ class UserProfilePage extends Article {
 			$res = $dbr->select(
 				[ 'poll_question', 'page' ],
 				[ 'page_title', 'poll_date' ],
-				/* WHERE */[ 'poll_actor' => $this->profileOwner->getActorId() ],
+				[ 'poll_actor' => $this->profileOwner->getActorId() ],
 				__METHOD__,
 				[ 'ORDER BY' => 'poll_id DESC', 'LIMIT' => 3 ],
 				[ 'page' => [ 'INNER JOIN', 'page_id = poll_page_id' ] ]
@@ -341,22 +367,21 @@ class UserProfilePage extends Article {
 			}
 			$cache->set( $key, $polls );
 		}
+
 		return $polls;
 	}
 
 	/**
-	 * Get three of the quiz games the user has created and cache the data in
-	 * memcached.
+	 * Get three of the quiz games the user has created and cache the data in memcached.
 	 *
 	 * @return array
 	 */
-	function getUserQuiz() {
+	public function getUserQuiz() {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
 		$quiz = [];
 		$logger = LoggerFactory::getInstance( 'SocialProfile' );
 
-		// Try cache
 		$actorId = $this->profileOwner->getActorId();
 		$key = $cache->makeKey( 'user', 'profile', 'quiz', 'actor_id', $actorId );
 		$data = $cache->get( $key );
@@ -378,7 +403,7 @@ class UserProfilePage extends Article {
 				[ 'q_id', 'q_text', 'q_date' ],
 				[
 					'q_actor' => $actorId,
-					'q_flag' => 0 // the same as QuizGameHome::$FLAG_NONE
+					'q_flag' => 0
 				],
 				__METHOD__,
 				[
@@ -400,20 +425,19 @@ class UserProfilePage extends Article {
 	}
 
 	/**
-	 * Get three of the picture games the user has created and cache the data
-	 * in memcached.
+	 * Get three of the picture games the user has created and cache the data in memcached.
 	 *
 	 * @return array
 	 */
-	function getUserPicGames() {
+	public function getUserPicGames() {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
 		$pics = [];
 		$logger = LoggerFactory::getInstance( 'SocialProfile' );
 
-		// Try cache
 		$key = $cache->makeKey( 'user', 'profile', 'picgame', $this->user_id );
 		$data = $cache->get( $key );
+
 		if ( $data ) {
 			$logger->debug( "Got profile picgames for user name {user_name} from cache\n", [
 				'user_name' => $this->profileOwner->getName()
@@ -431,7 +455,7 @@ class UserProfilePage extends Article {
 				[ 'id', 'title', 'img1', 'img2', 'pg_date' ],
 				[
 					'actor' => $this->profileOwner->getActorId(),
-					'flag' => 0 // PictureGameHome::$FLAG_NONE
+					'flag' => 0
 				],
 				__METHOD__,
 				[
@@ -455,13 +479,11 @@ class UserProfilePage extends Article {
 	}
 
 	/**
-	 * Get the casual games (polls, quizzes and picture games) that the user
-	 * has created if $wgUserProfileDisplay['games'] is set to true and the
-	 * PictureGame, PollNY and QuizGame extensions have been installed.
+	 * Get the casual games (polls, quizzes and picture games).
 	 *
-	 * @return string HTML or nothing if this feature isn't enabled
+	 * @return string HTML
 	 */
-	function getCasualGames() {
+	public function getCasualGames() {
 		global $wgUserProfileDisplay;
 
 		if ( $wgUserProfileDisplay['games'] == false ) {
@@ -470,14 +492,13 @@ class UserProfilePage extends Article {
 
 		$output = '';
 
-		// Safe titles
 		$quiz_title = SpecialPage::getTitleFor( 'QuizGameHome' );
 		$pic_game_title = SpecialPage::getTitleFor( 'PictureGameHome' );
 
-		// Combine the queries
 		$combined_array = [];
 
 		$registry = ExtensionRegistry::getInstance();
+
 		if ( $registry->isLoaded( 'QuizGame' ) ) {
 			$quizzes = $this->getUserQuiz();
 			foreach ( $quizzes as $quiz ) {
@@ -536,12 +557,12 @@ class UserProfilePage extends Article {
 			$x = 1;
 
 			if ( method_exists( MediaWikiServices::class, 'getRepoGroup' ) ) {
-				// MediaWiki 1.34+
 				$repoGroup = MediaWikiServices::getInstance()->getRepoGroup();
 			} else {
 				// @phan-suppress-next-line PhanUndeclaredStaticMethod
 				$repoGroup = RepoGroup::singleton();
 			}
+
 			foreach ( $combined_array as $item ) {
 				$output .= ( ( $x == 1 ) ? '<p class="item-top">' : '<p>' );
 
@@ -595,7 +616,6 @@ class UserProfilePage extends Article {
 				}
 
 				$output .= '</p>';
-
 				$x++;
 			}
 
@@ -605,7 +625,7 @@ class UserProfilePage extends Article {
 		return $output;
 	}
 
-	static function sortItems( $x, $y ) {
+	public static function sortItems( $x, $y ) {
 		if ( $x['timestamp'] == $y['timestamp'] ) {
 			return 0;
 		} elseif ( $x['timestamp'] > $y['timestamp'] ) {
@@ -615,29 +635,39 @@ class UserProfilePage extends Article {
 		}
 	}
 
-	function getProfileSection( $label, $value, $required = true ) {
+	public function getProfileSection( $label, $value, $required = true, ?string $fieldKey = null ) {
 		$context = $this->getContext();
-		$out = $context->getOutput();
 		$user = $context->getUser();
 
 		$output = '';
-		if ( $value || $required ) {
-			if ( !$value ) {
+		$value = (string)$value;
+
+		if ( $value !== '' || $required ) {
+			if ( $value === '' ) {
 				if ( $user->getName() == $this->getTitle()->getText() ) {
-					$value = wfMessage( 'profile-updated-personal' )->escaped();
+					$valueHtml = wfMessage( 'profile-updated-personal' )->escaped();
 				} else {
-					$value = wfMessage( 'profile-not-provided' )->escaped();
+					$valueHtml = wfMessage( 'profile-not-provided' )->escaped();
+				}
+			} else {
+				if ( $fieldKey !== null ) {
+					$valueHtml = $this->renderProfileValue( $fieldKey, $value );
+				} else {
+					$valueHtml = $context->getOutput()->parseAsInterface( trim( $value ), false );
 				}
 			}
 
-			$value = $out->parseAsInterface( trim( $value ), false );
-
-			$output = "<div><b>{$label}</b>{$value}</div>";
+			$output = Html::rawElement(
+				'div',
+				[],
+				Html::rawElement( 'b', [], $label ) . $valueHtml
+			);
 		}
+
 		return $output;
 	}
 
-	function getPersonalInfo() {
+	public function getPersonalInfo() {
 		global $wgUserProfileDisplay;
 
 		if ( $wgUserProfileDisplay['personal'] == false ) {
@@ -649,106 +679,55 @@ class UserProfilePage extends Article {
 
 		$defaultCountry = wfMessage( 'user-profile-default-country' )->inContentLanguage()->text();
 
-		// Current location
-		$location = $profile_data['location_city'] . ', ' . $profile_data['location_state'];
-		if ( $profile_data['location_country'] != $defaultCountry ) {
-			if ( $profile_data['location_city'] && $profile_data['location_state'] ) { // city AND state
-				$location = $profile_data['location_city'] . ', ' .
-							$profile_data['location_state'] . ', ' .
-							$profile_data['location_country'];
-				// Privacy
-				$location = '';
-				if ( in_array( 'up_location_city', $this->profile_visible_fields ) ) {
-					$location .= $profile_data['location_city'] . ', ';
-				}
-				$location .= $profile_data['location_state'];
-				if ( in_array( 'up_location_country', $this->profile_visible_fields ) ) {
-					$location .= ', ' . $profile_data['location_country'] . ', ';
-				}
-			} elseif ( $profile_data['location_city'] && !$profile_data['location_state'] ) { // city, but no state
-				$location = '';
-				if ( in_array( 'up_location_city', $this->profile_visible_fields ) ) {
-					$location .= $profile_data['location_city'] . ', ';
-				}
-				if ( in_array( 'up_location_country', $this->profile_visible_fields ) ) {
-					$location .= $profile_data['location_country'];
-				}
-			} elseif ( $profile_data['location_state'] && !$profile_data['location_city'] ) { // state, but no city
-				$location = $profile_data['location_state'];
-				if ( in_array( 'up_location_country', $this->profile_visible_fields ) ) {
-					$location .= ', ' . $profile_data['location_country'];
-				}
-			} else {
-				$location = '';
-				if ( in_array( 'up_location_country', $this->profile_visible_fields ) ) {
-					$location .= $profile_data['location_country'];
-				}
-			}
-		}
+		$location = $this->buildCityStateCountry(
+			(string)$profile_data['location_city'],
+			(string)$profile_data['location_state'],
+			(string)$profile_data['location_country'],
+			$defaultCountry,
+			'up_location_city',
+			'up_location_country'
+		);
 
-		if ( $location == ', ' ) {
-			$location = '';
-		}
+		$hometown = $this->buildCityStateCountry(
+			(string)$profile_data['hometown_city'],
+			(string)$profile_data['hometown_state'],
+			(string)$profile_data['hometown_country'],
+			$defaultCountry,
+			'up_hometown_city',
+			'up_hometown_country'
+		);
 
-		// Hometown
-		$hometown = $profile_data['hometown_city'] . ', ' . $profile_data['hometown_state'];
-		if ( $profile_data['hometown_country'] != $defaultCountry ) {
-			if ( $profile_data['hometown_city'] && $profile_data['hometown_state'] ) { // city AND state
-				$hometown = $profile_data['hometown_city'] . ', ' .
-							$profile_data['hometown_state'] . ', ' .
-							$profile_data['hometown_country'];
-				$hometown = '';
-				if ( in_array( 'up_hometown_city', $this->profile_visible_fields ) ) {
-					$hometown .= $profile_data['hometown_city'] . ', ' . $profile_data['hometown_state'];
-				}
-				if ( in_array( 'up_hometown_country', $this->profile_visible_fields ) ) {
-					$hometown .= ', ' . $profile_data['hometown_country'];
-				}
-			} elseif ( $profile_data['hometown_city'] && !$profile_data['hometown_state'] ) { // city, but no state
-				$hometown = '';
-				if ( in_array( 'up_hometown_city', $this->profile_visible_fields ) ) {
-					$hometown .= $profile_data['hometown_city'] . ', ';
-				}
-				if ( in_array( 'up_hometown_country', $this->profile_visible_fields ) ) {
-					$hometown .= $profile_data['hometown_country'];
-				}
-			} elseif ( $profile_data['hometown_state'] && !$profile_data['hometown_city'] ) { // state, but no city
-				$hometown = $profile_data['hometown_state'];
-				if ( in_array( 'up_hometown_country', $this->profile_visible_fields ) ) {
-					$hometown .= ', ' . $profile_data['hometown_country'];
-				}
-			} else {
-				$hometown = '';
-				if ( in_array( 'up_hometown_country', $this->profile_visible_fields ) ) {
-					$hometown .= $profile_data['hometown_country'];
-				}
-			}
-		}
+		$joined_data =
+			$profile_data['real_name'] . $location . $hometown .
+			$profile_data['birthday'] . $profile_data['occupation'] .
+			$profile_data['websites'] . $profile_data['places_lived'] .
+			$profile_data['schools'] . $profile_data['about'] .
+			$profile_data['quote'] . $profile_data['rig'];
 
-		if ( $hometown == ', ' ) {
-			$hometown = '';
-		}
-
-		$joined_data = $profile_data['real_name'] . $location . $hometown .
-						$profile_data['birthday'] . $profile_data['occupation'] .
-						$profile_data['websites'] . $profile_data['places_lived'] .
-						$profile_data['schools'] . $profile_data['about'] .
-						$profile_data['quote'];
 		$edit_info_link = SpecialPage::getTitleFor( 'UpdateProfile' );
 
-		// Privacy fields holy shit!
 		$personal_output = '';
-		if ( in_array( 'up_real_name', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-real-name' )->escaped(), $profile_data['real_name'], false );
+
+		if ( in_array( 'up_real_name', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-real-name' )->escaped(),
+				$profile_data['real_name'],
+				false
+			);
 		}
 
-		$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-location' )->escaped(), $location, false );
-		$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-hometown' )->escaped(), $hometown, false );
+		$personal_output .= $this->getProfileSection(
+			wfMessage( 'user-personal-info-location' )->escaped(),
+			$location,
+			false
+		);
+		$personal_output .= $this->getProfileSection(
+			wfMessage( 'user-personal-info-hometown' )->escaped(),
+			$hometown,
+			false
+		);
 
-		if ( in_array( 'up_birthday', $this->profile_visible_fields ) && $profile_data['birthday'] !== '' ) {
-			// $profile_data['birthday'] contains the user-supplied birthdate either with or without
-			// the year, hence why its output can be either 8 or 4 characters long, and thus we need to
-			// pad it accordingly with a sufficient amount of zeros.
+		if ( in_array( 'up_birthday', $this->profile_visible_fields, true ) && $profile_data['birthday'] !== '' ) {
 			$personal_output .= $this->getProfileSection(
 				wfMessage( 'user-personal-info-birthday' )->escaped(),
 				$this->getContext()->getLanguage()->date( str_pad( $profile_data['birthday'], 14, '0' ) ),
@@ -756,30 +735,68 @@ class UserProfilePage extends Article {
 			);
 		}
 
-		if ( in_array( 'up_occupation', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-occupation' )->escaped(), $profile_data['occupation'], false );
+		if ( in_array( 'up_occupation', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-occupation' )->escaped(),
+				$profile_data['occupation'],
+				false
+			);
 		}
 
-		if ( in_array( 'up_websites', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-websites' )->escaped(), $profile_data['websites'], false );
+		if ( in_array( 'up_websites', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-websites' )->escaped(),
+				$profile_data['websites'],
+				false,
+				'websites'
+			);
+		}
+		if ( in_array( 'up_rig', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-rig' )->escaped(),
+				$profile_data['rig'],
+				false,
+				'rig'
+			);
+		}
+		if ( in_array( 'up_places_lived', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-places-lived' )->escaped(),
+				$profile_data['places_lived'],
+				false,
+				'places_lived'
+			);
 		}
 
-		if ( in_array( 'up_places_lived', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-places-lived' )->escaped(), $profile_data['places_lived'], false );
+		if ( in_array( 'up_schools', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-schools' )->escaped(),
+				$profile_data['schools'],
+				false,
+				'schools'
+			);
 		}
 
-		if ( in_array( 'up_schools', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-schools' )->escaped(), $profile_data['schools'], false );
+		if ( in_array( 'up_about', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-about-me' )->escaped(),
+				$profile_data['about'],
+				false,
+				'about'
+			);
 		}
 
-		if ( in_array( 'up_about', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-about-me' )->escaped(), $profile_data['about'], false );
+		if ( in_array( 'up_quote', $this->profile_visible_fields, true ) ) {
+			$personal_output .= $this->getProfileSection(
+				wfMessage( 'user-personal-info-quote' )->escaped(),
+				$profile_data['quote'],
+				false,
+				'quote'
+			);
 		}
-		
-		if ( in_array( 'up_quote', $this->profile_visible_fields ) ) {
-			$personal_output .= $this->getProfileSection( wfMessage( 'user-personal-info-quote' )->escaped(), $profile_data['quote'], false );
-		}
+
 		$output = '';
+
 		if ( $joined_data ) {
 			$output .= '<div class="user-section-heading">
 				<div class="user-section-title">' .
@@ -787,10 +804,12 @@ class UserProfilePage extends Article {
 				'</div>
 				<div class="user-section-actions">
 					<div class="action-right">';
+
 			if ( $this->viewingUser->getName() == $this->profileOwner->getName() ) {
 				$output .= '<a href="' . htmlspecialchars( $edit_info_link->getFullURL() ) . '">' .
 					wfMessage( 'user-edit-this' )->escaped() . '</a>';
 			}
+
 			$output .= '</div>
 					<div class="visualClear"></div>
 				</div>
@@ -823,11 +842,47 @@ class UserProfilePage extends Article {
 	}
 
 	/**
+	 * Build "City, State, Country" with privacy + default country handling.
+	 */
+	private function buildCityStateCountry(
+		string $city,
+		string $state,
+		string $country,
+		string $defaultCountry,
+		string $cityVisibilityKey,
+		string $countryVisibilityKey
+	): string {
+		$city = trim( $city );
+		$state = trim( $state );
+		$country = trim( $country );
+
+		$showCity = in_array( $cityVisibilityKey, $this->profile_visible_fields, true );
+		$showCountry = in_array( $countryVisibilityKey, $this->profile_visible_fields, true ) && $country !== '' && $country !== $defaultCountry;
+
+		$parts = [];
+
+		if ( $showCity && $city !== '' ) {
+			$parts[] = $city;
+		}
+
+		// State has no explicit privacy flag in SP; keep existing behavior (always include if set)
+		if ( $state !== '' ) {
+			$parts[] = $state;
+		}
+
+		if ( $showCountry ) {
+			$parts[] = $country;
+		}
+
+		return implode( ', ', $parts );
+	}
+
+	/**
 	 * Get the custom info (site-specific stuff) for a given user.
 	 *
 	 * @return string HTML
 	 */
-	function getCustomInfo() {
+	public function getCustomInfo() {
 		global $wgUserProfileDisplay;
 
 		if ( $wgUserProfileDisplay['custom'] == false ) {
@@ -843,16 +898,16 @@ class UserProfilePage extends Article {
 		$edit_info_link = SpecialPage::getTitleFor( 'UpdateProfile' );
 
 		$custom_output = '';
-		if ( in_array( 'up_custom_1', $this->profile_visible_fields ) ) {
+		if ( in_array( 'up_custom_1', $this->profile_visible_fields, true ) ) {
 			$custom_output .= $this->getProfileSection( wfMessage( 'custom-info-field1' )->escaped(), $profile_data['custom_1'], false );
 		}
-		if ( in_array( 'up_custom_2', $this->profile_visible_fields ) ) {
+		if ( in_array( 'up_custom_2', $this->profile_visible_fields, true ) ) {
 			$custom_output .= $this->getProfileSection( wfMessage( 'custom-info-field2' )->escaped(), $profile_data['custom_2'], false );
 		}
-		if ( in_array( 'up_custom_3', $this->profile_visible_fields ) ) {
+		if ( in_array( 'up_custom_3', $this->profile_visible_fields, true ) ) {
 			$custom_output .= $this->getProfileSection( wfMessage( 'custom-info-field3' )->escaped(), $profile_data['custom_3'], false );
 		}
-		if ( in_array( 'up_custom_4', $this->profile_visible_fields ) ) {
+		if ( in_array( 'up_custom_4', $this->profile_visible_fields, true ) ) {
 			$custom_output .= $this->getProfileSection( wfMessage( 'custom-info-field4' )->escaped(), $profile_data['custom_4'], false );
 		}
 
@@ -900,12 +955,11 @@ class UserProfilePage extends Article {
 	}
 
 	/**
-	 * Get the interests (favorite movies, TV shows, music, etc.) for a given
-	 * user.
+	 * Get the interests (favorite movies, TV shows, music, etc.) for a given user.
 	 *
 	 * @return string HTML
 	 */
-	function getInterests() {
+	public function getInterests() {
 		global $wgUserProfileDisplay;
 
 		if ( $wgUserProfileDisplay['interests'] == false ) {
@@ -921,48 +975,53 @@ class UserProfilePage extends Article {
 						$profile_data['magazines'] . $profile_data['drinks'] .
 						$profile_data['snacks'] . $profile_data['universes'] .
 						$profile_data['pets'] . $profile_data['hobbies'] .
-						$profile_data['heroes'];
+						$profile_data['heroes'] . $profile_data['obsessed'] . 
+						$profile_data['tools'];
 		$edit_info_link = SpecialPage::getTitleFor( 'UpdateProfile' );
 
 		$interests_output = '';
-		if ( in_array( 'up_movies', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-movies' )->escaped(), $profile_data['movies'], false );
+		if ( in_array( 'up_movies', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-movies' )->escaped(), $profile_data['movies'], false, 'movies' );
 		}
-		if ( in_array( 'up_tv', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-tv' )->escaped(), $profile_data['tv'], false );
+		if ( in_array( 'up_tv', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-tv' )->escaped(), $profile_data['tv'], false, 'tv' );
 		}
-		if ( in_array( 'up_music', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-music' )->escaped(), $profile_data['music'], false );
+		if ( in_array( 'up_music', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-music' )->escaped(), $profile_data['music'], false, 'music' );
 		}
-		if ( in_array( 'up_books', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-books' )->escaped(), $profile_data['books'], false );
+		if ( in_array( 'up_books', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-books' )->escaped(), $profile_data['books'], false, 'books' );
 		}
-		if ( in_array( 'up_video_games', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-video-games' )->escaped(), $profile_data['video_games'], false );
+		if ( in_array( 'up_video_games', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-video-games' )->escaped(), $profile_data['video_games'], false, 'video_games' );
 		}
-		if ( in_array( 'up_magazines', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-magazines' )->escaped(), $profile_data['magazines'], false );
+		if ( in_array( 'up_magazines', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-magazines' )->escaped(), $profile_data['magazines'], false, 'magazines' );
 		}
-		if ( in_array( 'up_snacks', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-snacks' )->escaped(), $profile_data['snacks'], false );
+		if ( in_array( 'up_snacks', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-snacks' )->escaped(), $profile_data['snacks'], false, 'snacks' );
 		}
-		if ( in_array( 'up_drinks', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-drinks' )->escaped(), $profile_data['drinks'], false );
+		if ( in_array( 'up_drinks', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-drinks' )->escaped(), $profile_data['drinks'], false, 'drinks' );
 		}
-		if ( in_array( 'up_universes', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-universes' )->escaped(), $profile_data['universes'], false );
+		if ( in_array( 'up_universes', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-universes' )->escaped(), $profile_data['universes'], false, 'universes' );
 		}
-		if ( in_array( 'up_pets', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-pets' )->escaped(), $profile_data['pets'], false );
+		if ( in_array( 'up_pets', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-pets' )->escaped(), $profile_data['pets'], false, 'pets' );
 		}
-		if ( in_array( 'up_hobbies', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-hobbies' )->escaped(), $profile_data['hobbies'], false );
+		if ( in_array( 'up_hobbies', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-hobbies' )->escaped(), $profile_data['hobbies'], false, 'hobbies' );
 		}
-		if ( in_array( 'up_heroes', $this->profile_visible_fields ) ) {
-			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-heroes' )->escaped(), $profile_data['heroes'], false );
+		if ( in_array( 'up_heroes', $this->profile_visible_fields, true ) ) {
+			$interests_output .= $this->getProfileSection( wfMessage( 'other-info-heroes' )->escaped(), $profile_data['heroes'], false, 'heroes' );
 		}
-
-
+		if ( in_array('up_obsessed', $this->profile_visible_fields, true)) {
+			$interests_output .= $this->getProfileSection(wfMessage( 'other-info-obsessed' )->escaped(), $profile_data['obsessed'], false, 'obsessed');
+		}
+		if ( in_array('up_tools', $this->profile_visible_fields, true)) {
+			$interests_output .= $this->getProfileSection(wfMessage( 'other-info-tools' )->escaped(), $profile_data['tools'], false, 'tools');
+		}
 		$output = '';
 		if ( $joined_data ) {
 			$output .= '<div class="user-section-heading">
@@ -1002,17 +1061,16 @@ class UserProfilePage extends Article {
 				wfMessage( 'other-no-info' )->escaped() .
 			'</div>';
 		}
+
 		return $output;
 	}
 
 	/**
-	 * Get the header for the social profile page, which includes the user's
-	 * points and user level (if enabled in the site configuration) and lots
-	 * more.
+	 * Get the header for the social profile page.
 	 *
 	 * @return string HTML suitable for output
 	 */
-	function getProfileHeader() {
+	public function getProfileHeader() {
 		global $wgUserLevels;
 
 		$context = $this->getContext();
@@ -1026,7 +1084,6 @@ class UserProfilePage extends Article {
 		$this->initializeProfileData();
 		$profile_data = $this->profile_data;
 
-		// Safe URLs
 		$give_gift = SpecialPage::getTitleFor( 'GiveGift', $this->profileOwner->getName() );
 		$update_profile = SpecialPage::getTitleFor( 'UpdateProfile' );
 		$watchlist = SpecialPage::getTitleFor( 'Watchlist' );
@@ -1043,6 +1100,7 @@ class UserProfilePage extends Article {
 				$this->viewingUser
 			);
 		}
+
 		$avatar = new wAvatar( $this->profileOwner->getId(), 'l' );
 
 		$logger = LoggerFactory::getInstance( 'SocialProfile' );
@@ -1052,11 +1110,9 @@ class UserProfilePage extends Article {
 
 		$output = '';
 
-		// Show the link for changing user page type for the user whose page
-		// it is
 		if ( $this->isOwner() ) {
 			$toggle_title = SpecialPage::getTitleFor( 'ToggleUserPage' );
-			// Cast it to an int because PHP is stupid.
+
 			if (
 				(int)$profile_data['user_page_type'] == 1 ||
 				$profile_data['user_page_type'] === ''
@@ -1065,6 +1121,7 @@ class UserProfilePage extends Article {
 			} else {
 				$toggleMessage = wfMessage( 'user-type-toggle-new' )->escaped();
 			}
+
 			$output .= '<div id="profile-toggle-button">
 				<a href="' . htmlspecialchars( $toggle_title->getFullURL() ) . '" rel="nofollow">' .
 					$toggleMessage . '</a>
@@ -1072,14 +1129,9 @@ class UserProfilePage extends Article {
 		}
 
 		$output .= '<div id="profile-image">' . $avatar->getAvatarURL();
-		// Expose the link to the avatar removal page in the UI when the user has
-		// uploaded a custom avatar
+
 		$canRemoveOthersAvatars = $this->viewingUser->isAllowed( 'avatarremove' );
 		if ( !$avatar->isDefault() && ( $canRemoveOthersAvatars || $this->isOwner() ) ) {
-			// Different URLs for privileged and regular users
-			// Need to specify the user for people who are able to remove anyone's avatar
-			// via the special page; for regular users, it doesn't matter because they
-			// can't remove anyone else's but their own avatar via RemoveAvatar
 			if ( $canRemoveOthersAvatars ) {
 				$removeAvatarURL = SpecialPage::getTitleFor( 'RemoveAvatar', $this->profileOwner->getName() )->getFullURL();
 			} else {
@@ -1092,13 +1144,12 @@ class UserProfilePage extends Article {
 		$output .= '</div>';
 
 		$output .= '<div id="profile-right">';
-
 		$output .= '<div id="profile-title-container">';
 
 		// Username + badges + tagline (as one block)
-		$badgesHtml  = $this->renderGroupBadges();                  // string (prefer inline <span> badges)
-		$taglineHtml = $this->renderTagline( $profile_data['tagline'] ); // string (make this a <span> if you want same line)
-		$usernameHtml = $this->buildUsernameLine();                 // string: <h1 class="sp-username">… (aka …)</h1>
+		$badgesHtml   = $this->renderGroupBadges();
+		$taglineHtml  = $this->renderTagline( (string)$profile_data['tagline'], false );
+		$usernameHtml = $this->buildUsernameLine();
 
 		$profileTitle = Html::rawElement(
 			'div',
@@ -1108,8 +1159,6 @@ class UserProfilePage extends Article {
 			. ( $badgesHtml ? $badgesHtml : '' )
 		);
 
-		// Show tagline if it exists
-		// Let existing hook modify/replace the whole title if it wants
 		MediaWikiServices::getInstance()->getHookContainer()->run(
 			'UserProfileGetProfileTitle',
 			[ $this, &$profileTitle ]
@@ -1117,8 +1166,6 @@ class UserProfilePage extends Article {
 
 		$output .= $profileTitle;
 
-		// Show the user's level and the amount of points they have if
-		// UserLevels has been configured
 		if ( $wgUserLevels ) {
 			$output .= '<div id="points-level">
 					<a href="' . htmlspecialchars( $level_link->getFullURL() ) . '">' .
@@ -1132,11 +1179,13 @@ class UserProfilePage extends Article {
 						<a href="' . htmlspecialchars( $level_link->getFullURL() ) . '" rel="nofollow">(' . htmlspecialchars( $user_level->getLevelName() ) . ')</a>
 					</div>';
 		}
+
 		$output .= '<div class="visualClear"></div>
 			</div>
 			<div class="profile-actions">';
 
 		$profileLinks = [];
+
 		if ( $this->isOwner() ) {
 			$profileLinks['user-edit-profile'] =
 				'<a href="' . htmlspecialchars( $update_profile->getFullURL() ) . '">' . wfMessage( 'user-edit-profile' )->escaped() . '</a>';
@@ -1145,28 +1194,14 @@ class UserProfilePage extends Article {
 			$profileLinks['user-watchlist'] =
 				'<a href="' . htmlspecialchars( $watchlist->getFullURL() ) . '">' . wfMessage( 'user-watchlist' )->escaped() . '</a>';
 		} elseif ( $this->viewingUser->isRegistered() ) {
-			// Support for friendly-by-default URLs (T191157)
-			$add_friend = SpecialPage::getTitleFor(
-				'AddRelationship',
-				$this->profileOwner->getName() . '/friend'
-			);
-			$add_foe = SpecialPage::getTitleFor(
-				'AddRelationship',
-				$this->profileOwner->getName() . '/foe'
-			);
-			$add_family = SpecialPage::getTitleFor(
-				'AddRelationship',
-				$this->profileOwner->getName() . '/family'
-			);
-			$remove_relationship = SpecialPage::getTitleFor(
-				'RemoveRelationship',
-				$this->profileOwner->getName()
-			);
+			$add_friend = SpecialPage::getTitleFor( 'AddRelationship', $this->profileOwner->getName() . '/friend' );
+			$add_foe = SpecialPage::getTitleFor( 'AddRelationship', $this->profileOwner->getName() . '/foe' );
+			$add_family = SpecialPage::getTitleFor( 'AddRelationship', $this->profileOwner->getName() . '/family' );
+			$remove_relationship = SpecialPage::getTitleFor( 'RemoveRelationship', $this->profileOwner->getName() );
 
 			if ( $relationship == false ) {
 				$profileLinks['user-add-friend'] =
 					'<a href="' . htmlspecialchars( $add_friend->getFullURL() ) . '" rel="nofollow">' . wfMessage( 'user-add-friend' )->escaped() . '</a>';
-
 				$profileLinks['user-add-foe'] =
 					'<a href="' . htmlspecialchars( $add_foe->getFullURL() ) . '" rel="nofollow">' . wfMessage( 'user-add-foe' )->escaped() . '</a>';
 				$profileLinks['user-add-family'] =
@@ -1195,6 +1230,7 @@ class UserProfilePage extends Article {
 					] ) ) . '" rel="nofollow">' .
 					wfMessage( 'user-send-message' )->escaped() . '</a>';
 			}
+
 			$profileLinks['user-send-gift'] =
 				'<a href="' . htmlspecialchars( $give_gift->getFullURL() ) . '" rel="nofollow">' .
 				wfMessage( 'user-send-gift' )->escaped() . '</a>';
@@ -1204,7 +1240,6 @@ class UserProfilePage extends Article {
 			'<a href="' . htmlspecialchars( $contributions->getFullURL() ) . '" rel="nofollow">' .
 				wfMessage( 'user-contributions' )->escaped() . '</a>';
 
-		// Links to User:user_name from User_profile:
 		if (
 			$this->getTitle()->getNamespace() == NS_USER_PROFILE &&
 			$this->profile_data['actor'] &&
@@ -1215,7 +1250,6 @@ class UserProfilePage extends Article {
 					wfMessage( 'user-page-link' )->escaped() . '</a>';
 		}
 
-		// Links to User:user_name from User_profile:
 		if (
 			$this->getTitle()->getNamespace() == NS_USER &&
 			$this->profile_data['actor'] &&
@@ -1237,29 +1271,152 @@ class UserProfilePage extends Article {
 					wfMessage( 'user-wiki-link' )->escaped() . '</a>';
 		}
 
-		// Provide a hook point for adding links to the profile header
-		// or maybe even removing them
-		// @see https://phabricator.wikimedia.org/T152930
-		MediaWikiServices::getInstance()->getHookContainer()->run( 'UserProfileGetProfileHeaderLinks', [ $this, &$profileLinks ] );
+		MediaWikiServices::getInstance()->getHookContainer()->run(
+			'UserProfileGetProfileHeaderLinks',
+			[ $this, &$profileLinks ]
+		);
 
 		$output .= $language->pipeList( $profileLinks );
 		$output .= '</div>
-
 		</div>';
 
 		return $output;
 	}
 
 	/**
-	 * Get the relationships for a given user.
+	 * Build inline user-group badges for the profile owner.
+	 * Keeps implicit/noisy groups out by default.
 	 *
-	 * @param int $rel_type
-	 * - 1 for friends
-	 * - 2 (or anything else than 1) for foes
-	 * - 3 for family
-	 * 
-	 * @return string
+	 * @return string HTML
 	 */
+	private function renderGroupBadges(): string {
+		$services = MediaWikiServices::getInstance();
+		$ugm = $services->getUserGroupManager();
+
+		$hide = [ '*', 'user', 'autoconfirmed', 'emailconfirmed' ];
+		$groups = array_diff( $ugm->getUserGroups( $this->profileOwner ), $hide );
+
+		if ( !$groups ) {
+			return '';
+		}
+
+		$badges = '';
+		foreach ( $groups as $group ) {
+			$label = $this->getContext()->msg( "group-$group" )->text();
+			$badges .= Html::element(
+				'span',
+				[ 'class' => "usergroup-badge group-$group", 'title' => $label ],
+				$label
+			) . ' ';
+		}
+
+		return Html::rawElement( 'span', [ 'class' => 'usergroup-badges' ], rtrim( $badges ) );
+	}
+
+	public function renderTagline( $value, $required = true ) {
+		$context = $this->getContext();
+		$out = $context->getOutput();
+
+		$output = '';
+		if ( $value || $required ) {
+			$value = $out->parseAsInterface( trim( (string)$value ), false );
+			$output = "<span class=\"user-profile-tagline\">{$value}</span>";
+		}
+		return $output;
+	}
+
+	private function buildUsernameLine(): string {
+		$this->initializeProfileData();
+
+		$username = htmlspecialchars( $this->profileOwner->getName(), ENT_QUOTES, 'UTF-8' );
+		$akaHtml  = '';
+
+		if ( in_array( 'up_real_name', $this->profile_visible_fields, true ) ) {
+			$real = trim( (string)( $this->profile_data['real_name'] ?? '' ) );
+
+			if ( $real === '' ) {
+				$real = trim( (string)$this->profileOwner->getRealName() );
+			}
+
+			if ( $real !== '' && $real !== $this->profileOwner->getName() ) {
+				$akaText = wfMessage( 'user-profile-aka' )->params( $real )->escaped();
+				$akaHtml = Html::rawElement( 'span', [ 'class' => 'sp-user-aka' ], $akaText );
+			}
+		}
+
+		return Html::rawElement(
+			'div',
+			[ 'class' => 'sp-username' ],
+			$username . ( $akaHtml ? ' ' . $akaHtml : '' )
+		);
+	}
+	private const FIELD_LINKLIST = 'linklist';
+	/**
+	 * Render profile field values as safe HTML.
+	 * Keeps current behavior (wikitext allowed) but upgrades list/quote rendering.
+	 */
+	private function renderProfileValue( string $fieldKey, string $raw ): string {
+		$raw = trim( $raw );
+		if ( $raw === '' ) {
+			return '';
+		}
+
+		$type = self::FIELD_TYPES[$fieldKey] ?? self::FIELD_TEXT;
+
+		if ( $type === self::FIELD_LIST ) {
+			return $this->renderProfileList( $raw );
+		}
+		if ( $type === self::FIELD_LINKLIST ) {
+			return $this->renderProfileLinkList( $raw );
+		}
+		if ( $type === self::FIELD_QUOTE ) {
+			return $this->renderProfileQuote( $raw );
+		}
+
+		return $this->renderProfileText( $raw );
+	}
+
+	private function renderProfileText( string $raw ): string {
+		$out = $this->getContext()->getOutput();
+		return (string)$out->parseAsInterface( $raw, false );
+	}
+
+	private function renderProfileQuote( string $raw ): string {
+		$inner = $this->renderProfileText( $raw );
+		$inner = $this->stripOuterPTags( $inner );
+		return Html::rawElement( 'blockquote', [ 'class' => 'profile-quote' ], $inner );
+	}
+
+	private function renderProfileList( string $raw ): string {
+		$out = $this->getContext()->getOutput();
+		$items = preg_split( "/\r\n|\r|\n/", $raw );
+		$items = array_values( array_filter( array_map( 'trim', $items ), static fn( $x ) => $x !== '' ) );
+
+		if ( !$items ) {
+			return '';
+		}
+
+		$lis = '';
+		foreach ( $items as $item ) {
+			$parsed = (string)$out->parseAsInterface( $item, false );
+			$parsed = $this->stripOuterPTags( $parsed );
+			$lis .= Html::rawElement( 'li', [], $parsed );
+		}
+
+		return Html::rawElement( 'ul', [ 'class' => 'profile-list' ], $lis );
+	}
+
+	/**
+	 * Strip a single wrapping <p>…</p> (parser often adds it for single lines).
+	 */
+	private function stripOuterPTags( string $html ): string {
+		$html = trim( $html );
+		if ( preg_match( '~^<p>(.*)</p>\s*$~s', $html, $m ) ) {
+			return trim( $m[1] );
+		}
+		return $html;
+	}
+
 	function getRelationships( $rel_type ) {
 		global $wgUserProfileDisplay;
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
@@ -2147,98 +2304,32 @@ class UserProfilePage extends Article {
 
 		return $output;
 	}
+
+
+	private function renderProfileLinkList( string $raw ): string {
+		$lines = preg_split( "/\r\n|\r|\n/", $raw );
+		$lines = array_values( array_filter( array_map( 'trim', $lines ), static fn( $x ) => $x !== '' ) );
+		if ( !$lines ) {
+			return '';
+		}
+
+		$lis = '';
+		foreach ( $lines as $line ) {
+			// Let wikitext still work if they use [https://... Label]
+			$parsed = $this->renderProfileText( $line );
+			$parsed = $this->stripOuterPTags( $parsed );
+			$lis .= Html::rawElement( 'li', [], $parsed );
+		}
+
+		return Html::rawElement( 'ul', [ 'class' => 'profile-list profile-linklist' ], $lis );
+	}
+	
 	/**
 	 * Build inline user-group badges for the profile owner.
 	 * Keeps implicit/noisy groups out by default.
 	 *
 	 * @return string HTML
 	 */
-	private function renderGroupBadges(): string {
-		$services = MediaWikiServices::getInstance();
-		$ugm = $services->getUserGroupManager();
-
-		// Hide noisy/implicit groups; tweak if you want.
-		$hide = [ '*', 'user', 'autoconfirmed', 'emailconfirmed' ];
-
-		$groups = array_diff( $ugm->getUserGroups( $this->profileOwner ), $hide );
-		if ( !$groups ) {
-			return '';
-		}
-
-		$badges = '';
-		foreach ( $groups as $group ) {
-			$label = $this->getContext()->msg( "group-$group" )->text();
-			$badges .= Html::element(
-				'span',
-				[ 'class' => "usergroup-badge group-$group", 'title' => $label ],
-				$label
-			) . ' ';
-		}
-
-		return Html::rawElement( 'span', [ 'class' => 'usergroup-badges' ], rtrim( $badges ) );
-	}
-	function renderTagline( $value, $required = true ) {
-		$context = $this->getContext();
-		$out = $context->getOutput();
-
-		$output = '';
-		if ( $value || $required ) {
-			$value = $out->parseAsInterface( trim( $value ), false );
-			$output = "<span class=\"user-profile-tagline\">{$value}</span>";
-		}
-		return $output;
-	}
-
-	private function buildUsernameLine(): string {
-		// Owner & viewer as User (not UserIdentity), because SPUserSecurity expects User
-		$ownerUser = $this->user instanceof User ? $this->user : \RequestContext::getMain()->getUser();
-		$viewerUser = method_exists( $this, 'getContext' )
-			? $this->getContext()->getUser()
-			: \RequestContext::getMain()->getUser();
-
-		$username = htmlspecialchars( $ownerUser->getName() );
-		$akaHtml  = '';
-
-		// Use the same privacy logic Interests uses
-		if ( \SPUserSecurity::isFieldVisible( $ownerUser, 'up_real_name', $viewerUser ) ) {
-			$real = '';
-
-			// Prefer SocialProfile field value
-			if ( method_exists( $this, 'getProfileField' ) ) {
-				$real = (string)$this->getProfileField( 'up_real_name' );
-			} elseif ( class_exists( '\UserProfile' ) ) {
-				$up = new \UserProfile( $ownerUser );
-				if ( method_exists( $up, 'getProfile' ) ) {
-					$prof = $up->getProfile();
-					if ( is_array( $prof ) && isset( $prof['up_real_name'] ) ) {
-						$real = (string)$prof['up_real_name'];
-					}
-				}
-			}
-
-			// Optional policy: fall back to core real name if SP field is blank
-			if ( $real === '' ) {
-				$rn = trim( (string)$ownerUser->getRealName() );
-				if ( $rn !== '' ) {
-					$real = $rn;
-				}
-			}
-
-			$real = trim( $real );
-			if ( $real !== '' && $real !== $ownerUser->getName() ) {
-				$akaText = \wfMessage( 'user-profile-aka' )->params( $real )->escaped();
-				$akaHtml = \Html::rawElement( 'span', [ 'class' => 'sp-user-aka' ], $akaText );
-			}
-		}
-
-		return \Html::rawElement(
-			'div',
-			[ 'class' => 'sp-username' ],
-			$username . ( $akaHtml ? ' ' . $akaHtml : '' )
-		);
-	}
-
-
 
 	/**
 	 * Initialize UserProfile data for the given user if that hasn't been done
@@ -2250,4 +2341,5 @@ class UserProfilePage extends Article {
 			$this->profile_data = $profile->getProfile();
 		}
 	}
+	
 }

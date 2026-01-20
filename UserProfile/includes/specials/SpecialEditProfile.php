@@ -217,7 +217,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 				'up_location_city', 'up_location_state', 'up_location_country',
 				'up_hometown_city', 'up_hometown_state', 'up_hometown_country',
 				'up_birthday', 'up_occupation', 'up_about', 'up_schools',
-				'up_places_lived', 'up_websites', 'up_quote'
+				'up_places_lived', 'up_websites', 'up_quote', 'up_rig'
 			],
 			[ 'up_actor' => $tar->getActorId() ],
 			__METHOD__
@@ -236,6 +236,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			$schools = $s->up_schools;
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
+			$rig = $s->up_rig;
 			$quote = $s->up_quote;
 		}
 
@@ -404,6 +405,14 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			</p>
 			<div class="visualClear"></div>
 		</div>
+		<div class="profile-update" id="profile-update-personal-rig">
+			<p class="profile-update-title">' . $this->msg( 'user-profile-personal-rig' )->escaped() . '</p>
+			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-personal-rig' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="rig" id="rig" rows="2" cols="75">' . ( isset( $rig ) && in_array( 'up_rig', $this->profile_visible_fields ) ? htmlspecialchars( $rig, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+		</div>
 		<div class="visualClear"></div>';
 
 		$form .= '</div>';
@@ -427,11 +436,12 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		$s = $dbr->selectRow(
 			'user_profile',
 			[
-				'up_about', 'up_places_lived', 'up_websites', 'up_relationship',
-				'up_occupation', 'up_companies', 'up_schools', 'up_movies',
+				'up_about', 'up_places_lived', 'up_websites',
+				'up_occupation', 'up_schools', 'up_movies',
 				'up_magazines', 'up_snacks', 'up_drinks',  'up_video_games',
 				'up_tv', 'up_music', 'up_books', 'up_universes',
-				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote'
+				'up_pets', 'up_hobbies', 'up_heroes', 'up_quote',
+				'up_obsessed', 'up_tools', 'up_rig'
 			],
 			[
 				// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
@@ -443,6 +453,7 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 		if ( $s !== false ) {
 			$places = $s->up_places_lived;
 			$websites = $s->up_websites;
+			$rig = $s->up_rig;
 			$schools = $s->up_schools;
 			$movies = $s->up_movies;
 			$tv = $s->up_tv;
@@ -457,6 +468,8 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			$hobbies = $s->up_hobbies;
 			$heroes = $s->up_heroes;
 			$quote = $s->up_quote;
+			$obsessed = $s->up_obssesed;
+			$tools = $s->up_tools;
 		}
 
 		$this->getOutput()->setPageTitle( $this->msg( 'user-profile-section-interests' )->escaped() );
@@ -531,6 +544,16 @@ class SpecialEditProfile extends SpecialUpdateProfile {
 			<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-heroes' )->escaped() . '</p>
 			<p class="profile-update-unit">
 				<textarea name="heroes" id="heroes" rows="3" cols="75">' . ( isset( $heroes ) && in_array( 'up_heroes', $this->profile_visible_fields ) ? htmlspecialchars( $heroes, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+						<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-obsessed' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="obsessed" id="obsessed" rows="3" cols="75">' . ( isset( $obsessed ) && in_array( 'up_obsessed', $this->profile_visible_fields ) ? htmlspecialchars( $obsessed, ENT_QUOTES ) : '' ) . '</textarea>
+			</p>
+			<div class="visualClear"></div>
+						<p class="profile-update-unit-left">' . $this->msg( 'user-profile-interests-tools' )->escaped() . '</p>
+			<p class="profile-update-unit">
+				<textarea name="tools" id="tools" rows="3" cols="75">' . ( isset( $tools ) && in_array( 'up_tools', $this->profile_visible_fields ) ? htmlspecialchars( $tools, ENT_QUOTES ) : '' ) . '</textarea>
 			</p>
 			<div class="visualClear"></div>
 			</div>

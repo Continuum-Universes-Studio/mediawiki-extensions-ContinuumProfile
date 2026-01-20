@@ -15,6 +15,32 @@ h1.firstHeading {
 	flex-wrap: wrap;
 	gap: 2vw;
 }
+/* 1) Keep the whole profile from going ultra-wide on big monitors */
+.mw-special-UserProfile .profile-container,
+.mw-special-UserProfile #user-profile {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* 2) Make each section feel like a distinct panel */
+.mw-special-UserProfile .profile-section,
+.mw-special-UserProfile .profile-box {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 0 14px 0;
+  background: rgba(0,0,0,0.08);
+}
+
+/* 3) Make long text readable */
+.mw-special-UserProfile .profile-section .profile-content,
+.mw-special-UserProfile .profile-box .profile-content,
+.mw-special-UserProfile .profile-info {
+  max-width: 80ch;      /* key readability magic */
+  white-space: pre-wrap; /* preserves newlines for your list-ish fields */
+  overflow-wrap: anywhere;
+}
 
 /* User page left/right as flex children instead of floats */
 #user-page-left,
@@ -538,3 +564,14 @@ h1.firstHeading {
 	font-size: 35px;
 }
 .usergroup-badge.group-sysop { font-weight: 600; }
+.mw-special-UserProfile .avatar-remove,
+.mw-special-UserProfile .user-profile-avatar-remove {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+.profile-list { margin: 0.25em 0 0.25em 1.2em; }
+.profile-list li { margin: 0.15em 0; }
+.profile-quote { margin: 0.5em 0; padding-left: 0.8em; opacity: 0.95; }
