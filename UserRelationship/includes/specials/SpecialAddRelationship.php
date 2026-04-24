@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
+
 /**
  * A special page for adding friends/foe requests for existing users in the wiki
  *

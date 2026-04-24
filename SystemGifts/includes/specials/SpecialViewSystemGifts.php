@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
 /**
  * A special page to view the list of system gifts (awards) a user has.
  *

@@ -1,5 +1,7 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserActivity;
+
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 

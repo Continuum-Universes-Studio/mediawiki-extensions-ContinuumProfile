@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Api\ApiBase;
+
 /**
  * API module for removing a user's avatar.
  *
@@ -8,6 +13,7 @@
  */
 
 use MediaWiki\ParamValidator\TypeDef\UserDef;
+use MediaWiki\User\User;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class ApiRemoveAvatar extends ApiBase {

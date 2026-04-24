@@ -1,4 +1,7 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
 /**
  * Protect against register_globals vulnerabilities.
  * This line must be present before any global variable is referenced.
@@ -9,6 +12,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
 /**
  * For the UserLevels (points) functionality to work, you will need to

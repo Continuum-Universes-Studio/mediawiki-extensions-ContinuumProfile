@@ -1,6 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 /**
  * Object for easily querying the system_gift and user_system_gift tables

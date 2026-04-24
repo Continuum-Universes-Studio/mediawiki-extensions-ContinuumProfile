@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
 /**
  * A special page for viewing open relationship requests for the current
  * logged-in user

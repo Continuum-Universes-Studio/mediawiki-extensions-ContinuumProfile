@@ -1,9 +1,15 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\Html\Html;
+use MediaWiki\Exception\UserBlockedError;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
+use MediaWiki\User\User;
 use MediaWiki\User\UserNamePrefixSearch;
 
 /**

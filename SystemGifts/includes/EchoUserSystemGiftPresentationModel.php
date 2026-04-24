@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
+
+
 /**
  * Formatter for award notifications ('social-award')
  */

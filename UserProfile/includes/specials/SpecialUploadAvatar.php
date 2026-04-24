@@ -1,6 +1,13 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+
 use MediaWiki\Html\Html;
+use MediaWiki\Specials\SpecialUpload;
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
+use MediaWiki\Logging\LogPage;
+use UploadFromUrl;
 
 /**
  * A special page for uploading avatars
@@ -75,7 +82,9 @@ class SpecialUploadAvatar extends SpecialUpload {
 			// Cancel redirect
 			$out->redirect( '' );
 
-			$this->showSuccess( $this->mUpload->mExtension );
+				/** @var UploadAvatar|UploadAvatarFromUrl $upload */
+				$upload = $this->mUpload;
+				$this->showSuccess( $upload->getExtension() );
 			// Run a hook on avatar change
 			$this->getHookContainer()->run( 'NewAvatarUploaded', [ $this->getUser() ] );
 		}
@@ -236,7 +245,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 		$output = UserProfile::getEditProfileNav( $this->msg( 'user-profile-section-picture' )->plain() );
 		$output .= '<div class="profile-info">';
 
-		if ( $this->getAvatar( 'l' ) != '' ) {
+		if ( $this->getAvatar( 'xl' ) != '' ) {
 			$output .= '<table>
 				<tr>
 					<td>
@@ -246,7 +255,7 @@ class SpecialUploadAvatar extends SpecialUpload {
 					</td>
 				</tr>';
 				$output .= '<tr>
-					<td>' . $this->getAvatar( 'l' ) . '</td>
+					<td>' . $this->getAvatar( 'xl' ) . '</td>
 				</tr>
 			</table>';
 		}

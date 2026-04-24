@@ -1,0 +1,209 @@
+{
+	"name": "UserProfile",
+	"author": [
+		"Aaron Wright",
+		"David Pean",
+		"Jack Phoenix",
+		"Christian Daniel Jensen",
+		"Anita"
+	],
+	"license-name": "GPL-2.0-or-later",
+	"descriptionmsg": "socialprofile-desc",
+	"type": "other",
+	"MessagesDirs": {
+		"SocialProfile": [
+			"../i18n"
+		],
+		"UserProfile": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"SocialProfileAlias": "../SocialProfile.alias.php",
+		"SocialProfileNamespaces": "../SocialProfile.namespaces.php",
+		"AvatarMagic": "includes/avatar/Avatar.i18n.magic.php"
+	},
+	"AutoloadClasses": {
+		"SocialProfileFileBackend": "../SocialProfileFileBackend.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\AvatarParserFunction": "includes/parser/AvatarParserFunction.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiRemoveAvatar": "includes/api/ApiRemoveAvatar.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiUploadAvatar": "includes/api/ApiUploadAvatar.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiUserProfilePrivacy": "includes/api/ApiUserProfilePrivacy.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiUserProfileType": "includes/api/ApiUserProfileType.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\NewUsersList": "includes/parser/NewUsersList.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\RandomUsersWithAvatars": "includes/parser/RandomUsersWithAvatars.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\RemoveAvatar": "includes/specials/SpecialRemoveAvatar.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\SPUserSecurity": "includes/SPUserSecurity.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialEditProfile": "includes/specials/SpecialEditProfile.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialPopulateUserProfiles": "includes/specials/SpecialPopulateExistingUsersProfiles.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialToggleUserPage": "includes/specials/SpecialToggleUserPageType.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialUpdateProfile": "includes/specials/SpecialUpdateProfile.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialUploadAvatar": "includes/specials/SpecialUploadAvatar.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\UploadAvatar": "includes/avatar/UploadAvatar.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\UploadAvatarFromUrl": "includes/avatar/UploadAvatarFromUrl.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\UploadAvatarTrait": "includes/avatar/UploadAvatarTrait.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfile": "includes/UserProfile.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks": "includes/UserProfileHooks.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfilePage": "includes/UserProfilePage.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\wAvatar": "includes/avatar/Avatar.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\MigrateOldUserProfileUserColumnToActor": "maintenance/migrateOldUserProfileUserColumnToActor.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserProfile\\MigrateOldUserFieldPrivacyUserColumnToActor": "maintenance/migrateOldUserFieldPrivacyUserColumnToActor.php"
+	},
+	"APIModules": {
+		"removeavatar": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiRemoveAvatar",
+		"smpuserprivacy": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiUserProfilePrivacy",
+		"smpuserprofiletype": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiUserProfileType",
+		"uploadavatar": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\ApiUploadAvatar"
+	},
+	"Hooks": {
+		"ArticleFromTitle": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onArticleFromTitle",
+		"ApiCheckCanExecute": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onApiCheckCanExecute",
+		"CustomEditor": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onCustomEditor",
+		"DifferenceEngineNewHeader": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onDifferenceEngineNewHeader",
+		"DifferenceEngineOldHeader": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onDifferenceEngineOldHeader",
+		"DifferenceEngineShowDiff": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onDifferenceEngineShowDiff",
+		"LoadExtensionSchemaUpdates": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onLoadExtensionSchemaUpdates",
+		"OutputPageBodyAttributes": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onOutputPageBodyAttributes",
+		"ParserFirstCallInit": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onParserFirstCallInit",
+		"TitleIsAlwaysKnown": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onTitleIsAlwaysKnown"
+	},
+	"DefaultUserOptions": {
+		"echo-subscriptions-web-social-rel": true,
+		"echo-subscriptions-email-social-rel": false
+	},
+	"AvailableRights": [
+		"avatarremove",
+		"editothersprofiles",
+		"editothersprofiles-private",
+		"populate-user-profiles"
+	],
+	"GroupPermissions": {
+		"staff": {
+			"editothersprofiles": true,
+			"editothersprofiles-private": true,
+			"populate-user-profiles": true
+		},
+		"sysop": {
+			"avatarremove": true
+		}
+	},
+	"SpecialPages": {
+		"EditProfile": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialEditProfile",
+		"PopulateUserProfiles": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialPopulateUserProfiles",
+		"RemoveAvatar": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\RemoveAvatar",
+		"ToggleUserPage": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialToggleUserPage",
+		"UpdateProfile": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialUpdateProfile",
+		"UploadAvatar": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialUploadAvatar"
+	},
+	"LogTypes": [
+		"profile",
+		"avatar"
+	],
+	"LogNames": {
+		"profile": "profilelogpage",
+		"avatar": "avatarlogpage"
+	},
+	"LogHeaders": {
+		"profile": "profilelogpagetext",
+		"avatar": "avatarlogpagetext"
+	},
+	"LogActions": {
+		"profile/profile": "profilelogentry",
+		"avatar/avatar": "avatarlogentry"
+	},
+	"config": {
+		"UserProfileAvatarsInDiffs": {
+			"value": false
+		},
+		"UserProfileThresholds": {
+			"value": []
+		},
+		"UserPageChoice": {
+			"value": true
+		},
+		"UserProfileDisplay": {
+			"value": {
+				"friends": false,
+				"foes": false,
+				"family": true,
+				"gifts": true,
+				"awards": true,
+				"profile": true,
+				"tagline": true,
+				"board": false,
+				"stats": false,
+				"interests": true,
+				"custom": true,
+				"personal": true,
+				"activity": false,
+				"userboxes": false,
+				"games": false,
+				"favorite_universes": false,
+				"pets": false,
+				"hobbies": false,
+				"avatar": true
+			}
+		},
+		"UpdateProfileInRecentChanges": {
+			"value": false
+		},
+		"UploadAvatarInRecentChanges": {
+			"value": false
+		},
+		"UserBoard": {
+			"value": true
+		},
+		"FriendingEnabled": {
+			"value": true
+		},
+		"SocialProfileFileBackend": {
+			"value": ""
+		}
+	},
+	"ResourceModules": {
+		"ext.socialprofile.userprofile.css": {
+			"styles": "less/UserProfile.less"
+		},
+		"ext.socialprofile.userprofile.js": {
+			"scripts": "resources/js/UserProfilePage.js",
+			"messages": [
+				"user-board-confirm-delete"
+			],
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.util"
+			]
+		},
+		"ext.userProfile.updateProfile": {
+			"scripts": "resources/js/UpdateProfile.js",
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.util",
+				"jquery.ui"
+			]
+		},
+		"ext.socialprofile.userprofile.diff": {
+			"styles": "less/AvatarsInDiffs.less"
+		},
+		"ext.socialprofile.userprofile.tabs.css": {
+			"styles": "less/ProfileTabs.less"
+		},
+		"ext.socialprofile.special.uploadavatar.css": {
+			"styles": "less/SpecialUploadAvatar.less"
+		},
+		"ext.socialprofile.special.uploadavatar.js": {
+			"scripts": "resources/js/UploadAvatar.js"
+		},
+		"ext.socialprofile.special.updateprofile.css": {
+			"styles": "less/SpecialUpdateProfile.less"
+		},
+		"ext.socialprofile.userprofile.randomfeatureduser.styles": {
+			"styles": "less/RandomUsersWithAvatars.less"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "ContinuumProfile/UserProfile/resources"
+	},
+	"manifest_version": 2
+}

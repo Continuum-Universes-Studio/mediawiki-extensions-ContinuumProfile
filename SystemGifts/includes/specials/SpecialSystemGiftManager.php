@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
 /**
  * Special:SystemGiftManager -- a special page to create new system gifts
  * (awards)

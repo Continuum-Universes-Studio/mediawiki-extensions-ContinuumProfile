@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
+
 class UserLevel {
 	/** @var int */
 	public $level_number = 0;

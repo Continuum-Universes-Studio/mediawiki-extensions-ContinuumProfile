@@ -1,7 +1,12 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
 use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use SocialProfileFileBackend;
 
 /**
  * RandomUsersWithAvatars - displays a number of randomly selected users
@@ -34,7 +39,7 @@ class RandomUsersWithAvatars {
 
 		$count = ( isset( $args['count'] ) && is_numeric( $args['count'] ) ) ? intval( $args['count'] ) : 10;
 		$perRow = ( isset( $args['row'] ) && is_numeric( $args['row'] ) ) ? intval( $args['row'] ) : 4;
-		$allowedSizes = [ 's', 'm', 'ml', 'l' ];
+		$allowedSizes = [ 's', 'm', 'ml', 'l', 'xl' ];
 
 		if ( isset( $args['size'] ) && in_array( strtolower( $args['size'] ), $allowedSizes ) ) {
 			$size = strtolower( $args['size'] );

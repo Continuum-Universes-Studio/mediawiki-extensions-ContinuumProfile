@@ -1,7 +1,14 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
+
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserNamePrefixSearch;
+use MediaWiki\User\User;
+use SocialProfileFileBackend;
 
 /**
  * A special page for removing avatars.

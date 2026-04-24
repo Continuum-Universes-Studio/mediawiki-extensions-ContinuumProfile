@@ -1,7 +1,11 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
 
 /**
  * wAvatar class - used to display avatars
@@ -9,7 +13,7 @@ use MediaWiki\MediaWikiServices;
  * Example usage:
  * @code
  *	$context = RequestContext::getMain();
- *	$avatar = new wAvatar( $context->getUser()->getId(), 'l' );
+ *	$avatar = new wAvatar( $context->getUser()->getId(), 'xl' );
  *	$context->getOutput()->addHTML( $avatar->getAvatarURL() );
  * @endcode
  * This would display the current user's largest avatar on the page.
@@ -26,7 +30,7 @@ class wAvatar {
 	/** @var int */
 	public $user_id;
 
-	/** @var string Avatar size (abbreviation): s/m/ml/l */
+	/** @var string Avatar size (abbreviation): s/m/ml/l/xl */
 	public $avatar_size;
 
 	/**
@@ -36,6 +40,7 @@ class wAvatar {
 	 * - 'm' for medium (30x30px)
 	 * - 'ml' for medium-large (50x50px)
 	 * - 'l' for large (75x75px)
+	 * - 'xl' for extra large (120x120px)
 	 */
 	public function __construct( $userId, $size ) {
 		$this->user_id = $userId;
@@ -79,9 +84,10 @@ class wAvatar {
 	 */
 	public function getAvatarImage() {
 		global $wgAvatarKey;
+		$avatarSize = $this->getNormalizedAvatarSize();
 
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$key = $cache->makeKey( 'user', 'profile', 'avatar', $this->user_id, $this->avatar_size );
+		$key = $cache->makeKey( 'user', 'profile', 'avatar', $this->user_id, $avatarSize );
 		$data = $cache->get( $key );
 
 		// Load from memcached if possible
@@ -91,30 +97,20 @@ class wAvatar {
 			// @todo FIXME: This seems unnecessarily intensive since this really
 			// should be done at install time and never again afterwards.
 			// Move this to SocialProfileHooks#onLoadExtensionSchemaUpdates or something?
-			if ( !$this->defaultAvatarExists( 'l' ) ) {
-				$this->uploadDefaultAvatars( 'l' );
+			foreach ( [ 'l', 'm', 'ml', 's' ] as $size ) {
+				if ( !$this->defaultAvatarExists( $size ) ) {
+					$this->uploadDefaultAvatars( $size );
+				}
 			}
 
-			if ( !$this->defaultAvatarExists( 'm' ) ) {
-				$this->uploadDefaultAvatars( 'm' );
-			}
-
-			if ( !$this->defaultAvatarExists( 'ml' ) ) {
-				$this->uploadDefaultAvatars( 'ml' );
-			}
-
-			if ( !$this->defaultAvatarExists( 's' ) ) {
-				$this->uploadDefaultAvatars( 's' );
-			}
-
-			$avatar_filename = 'default_' . $this->avatar_size . '.gif';
+			$avatar_filename = 'default_' . $avatarSize . '.gif';
 
 			$backend = new SocialProfileFileBackend( 'avatars' );
 			$extensions = [ 'png', 'gif', 'jpg', 'jpeg' ];
 			foreach ( $extensions as $ext ) {
-				if ( $backend->fileExists( $wgAvatarKey . '_', $this->user_id, $this->avatar_size, $ext ) ) {
+				if ( $backend->fileExists( $wgAvatarKey . '_', $this->user_id, $avatarSize, $ext ) ) {
 					$avatar_filename = $backend->getFileName(
-						$wgAvatarKey . '_', $this->user_id, $this->avatar_size, $ext
+						$wgAvatarKey . '_', $this->user_id, $avatarSize, $ext
 					);
 
 					// @phan-suppress-next-line PhanTypeArraySuspiciousNullable Not sure why phan is unhappy
@@ -131,6 +127,11 @@ class wAvatar {
 		}
 
 		return $avatar_filename;
+	}
+
+	private function getNormalizedAvatarSize(): string {
+		$allowedSizes = [ 's', 'm', 'ml', 'l', 'xl' ];
+		return in_array( $this->avatar_size, $allowedSizes, true ) ? $this->avatar_size : 'm';
 	}
 
 	/**

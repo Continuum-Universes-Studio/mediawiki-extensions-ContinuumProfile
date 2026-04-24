@@ -1,10 +1,10 @@
 <?php
-namespace SocialProfile\UserProfile;
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
 
 use MediaWiki\MediaWikiServices;
 use Html;
 use MessageLocalizer;
-use User;
+use MediaWiki\User\User;
 
 class UserGroupBadges {
 	private MessageLocalizer $msg;

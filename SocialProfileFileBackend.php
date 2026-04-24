@@ -10,10 +10,11 @@
  * @file
  * @ingroup Extensions
  */
-
+namespace ContinuumUniverses\ContinuumProfile;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\WikiMap\WikiMap;
-
+use Wikimedia\FileBackend\FSFileBackend;
+use NullLockManager;
 class SocialProfileFileBackend {
 
 	/** @var string The name of the container to use */

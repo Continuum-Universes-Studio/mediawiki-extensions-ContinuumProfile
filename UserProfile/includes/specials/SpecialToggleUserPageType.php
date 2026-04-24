@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
 /**
  * A special page for updating a user's userpage preference
  * (If they want a wiki user page or social profile user page

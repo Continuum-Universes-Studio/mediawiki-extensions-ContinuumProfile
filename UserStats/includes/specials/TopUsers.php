@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
+
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 

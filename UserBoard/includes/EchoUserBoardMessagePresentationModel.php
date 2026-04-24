@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserBoard;
+
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
+
+
 /**
  * Formatter for user board message notifications ('social-msg-send')
  */

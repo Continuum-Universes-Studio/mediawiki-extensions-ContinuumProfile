@@ -19,37 +19,37 @@
 	"AutoloadClasses": {
 		"MigrateOldGiftsUserColumnsToActor": "maintenance/migrateOldGiftsUserColumnsToActor.php",
 		"MigrateOldUserGiftsUserColumnsToActor": "maintenance/migrateOldUserGiftsUserColumnsToActor.php",
-		"Gifts": "includes/Gifts.php",
-		"UserGiftCount": "includes/UserGiftCount.php",
-		"UserGiftIcon": "includes/UserGiftIcon.php",
-		"UserGiftListLookup": "includes/UserGiftListLookup.php",
-		"UserGifts": "includes/UserGifts.php",
-		"UserGiftsHooks": "includes/UserGiftsHooks.php",
-		"GiveGift": "includes/specials/SpecialGiveGift.php",
-		"ViewGifts": "includes/specials/SpecialViewGifts.php",
-		"ViewGift": "includes/specials/SpecialViewGift.php",
-		"GiftManager": "includes/specials/SpecialGiftManager.php",
-		"GiftManagerLogo": "includes/specials/SpecialGiftManagerLogo.php",
-		"RemoveMasterGift": "includes/specials/SpecialRemoveMasterGift.php",
-		"RemoveGift": "includes/specials/SpecialRemoveGift.php",
-		"EchoUserGiftPresentationModel": "includes/EchoUserGiftPresentationModel.php"
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\Gifts": "includes/Gifts.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGiftCount": "includes/UserGiftCount.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGiftIcon": "includes/UserGiftIcon.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGiftListLookup": "includes/UserGiftListLookup.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGifts": "includes/UserGifts.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGiftsHooks": "includes/UserGiftsHooks.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\GiveGift": "includes/specials/SpecialGiveGift.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\ViewGifts": "includes/specials/SpecialViewGifts.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\ViewGift": "includes/specials/SpecialViewGift.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\GiftManager": "includes/specials/SpecialGiftManager.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\GiftManagerLogo": "includes/specials/SpecialGiftManagerLogo.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\RemoveMasterGift": "includes/specials/SpecialRemoveMasterGift.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\RemoveGift": "includes/specials/SpecialRemoveGift.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserGifts\\EchoUserGiftPresentationModel": "includes/EchoUserGiftPresentationModel.php"
 	},
 	"Hooks": {
-		"BeforeCreateEchoEvent": "UserGiftsHooks::onBeforeCreateEchoEvent",
-		"EchoGetBundleRules": "UserGiftsHooks::onEchoGetBundleRules"
+		"BeforeCreateEchoEvent": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGiftsHooks::onBeforeCreateEchoEvent",
+		"EchoGetBundleRules": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\UserGiftsHooks::onEchoGetBundleRules"
 	},
 	"DefaultUserOptions": {
 		"echo-subscriptions-web-social-gift": true,
 		"echo-subscriptions-email-social-gift": false
 	},
 	"SpecialPages": {
-		"GiveGift": "GiveGift",
-		"ViewGifts": "ViewGifts",
-		"ViewGift": "ViewGift",
-		"GiftManager": "GiftManager",
-		"GiftManagerLogo": "GiftManagerLogo",
-		"RemoveMasterGift": "RemoveMasterGift",
-		"RemoveGift": "RemoveGift"
+		"GiveGift": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\GiveGift",
+		"ViewGifts": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\ViewGifts",
+		"ViewGift": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\ViewGift",
+		"GiftManager": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\GiftManager",
+		"GiftManagerLogo": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\GiftManagerLogo",
+		"RemoveMasterGift": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\RemoveMasterGift",
+		"RemoveGift": "ContinuumUniverses\\ContinuumProfile\\UserGifts\\RemoveGift"
 	},
 	"ResourceModules": {
 		"ext.socialprofile.usergifts.css": {

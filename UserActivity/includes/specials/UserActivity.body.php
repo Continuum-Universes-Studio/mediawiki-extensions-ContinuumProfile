@@ -8,6 +8,10 @@
  * @ingroup Extensions
  */
 
+namespace ContinuumUniverses\ContinuumProfile\UserActivity;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
 class UserHome extends SpecialPage {
 
 	public function __construct() {

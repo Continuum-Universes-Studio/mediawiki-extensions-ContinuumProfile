@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
 /**
  * Special:TopAwards -- a special page to show the awards with the most
  * recipients (I think)

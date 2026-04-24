@@ -1,5 +1,7 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserActivity;
+
 use MediaWiki\Html\Html;
 
 /**

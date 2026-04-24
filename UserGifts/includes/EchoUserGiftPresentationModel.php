@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserGifts;
+
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
+
+
 use MediaWiki\Title\Title;
 
 /**

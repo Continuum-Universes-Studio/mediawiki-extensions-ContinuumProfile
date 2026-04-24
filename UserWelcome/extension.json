@@ -14,10 +14,10 @@
 		]
 	},
 	"AutoloadClasses": {
-		"UserWelcome": "includes/UserWelcome.php"
+		"ContinuumUniverses\\ContinuumProfile\\UserWelcome\\UserWelcome": "includes/UserWelcome.php"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": "UserWelcome::onParserFirstCallInit"
+		"ParserFirstCallInit": "ContinuumUniverses\\ContinuumProfile\\UserWelcome\\UserWelcome::onParserFirstCallInit"
 	},
 	"ResourceModules": {
 		"ext.socialprofile.userwelcome.css": {

@@ -62,27 +62,6 @@
 	"ur-requests-message-friend": "[[User:$1|$1]] quere ter unha amizade contigo.",
 	"ur-accept": "Aceptar",
 	"ur-reject": "Rexeitar",
-<<<<<<< HEAD
-	"ur-no-requests-message": "Non ten solicitudes de amigo ou inimigo.",
-	"ur-requests-added-message-foe": "Engadiu a $1 como o seu inimigo.",
-	"ur-requests-added-message-friend": "Engadiu a $1 como o seu amigo.",
-	"ur-requests-reject-message-friend": "Rexeitou a $1 como o seu amigo.",
-	"ur-requests-reject-message-foe": "Rexeitou a $1 como o seu inimigo.",
-	"ur-title-foe": "Lista de inimigos de $1",
-	"ur-title-friend": "Lista de amigos de $1",
-	"friend_request_subject": "$1 engadiuno como amigo en {{SITENAME}}!",
-	"friend_request_body": "Ola $1:\n\n$2 engdiuno como amigo seu en {{SITENAME}}.  Queremos estar seguros de que vostedes dous son amigos actualmente.\n\nPor favor, faga clic nesta ligazón para confirmar a súa amizade:\n$3\n\nGrazas\n\n---\n\nQuere deixar de recibir correos electrónicos nosos?\n\nFaga clic $4\ne troque as súas configuracións para deshabilitar as notificacións por correo electrónico.",
-	"foe_request_subject": "É a guerra! $1 engadiuno como inimigo seu en {{SITENAME}}!",
-	"foe_request_body": "Ola $1:\n\n$2 engdiuno como inimigo seu en {{SITENAME}}.  Queremos estar seguros de que vostedes dous son inimigos mortais actualmente ou que teñen, polo menos, un argumento.\n\nPor favor, faga clic nesta ligazón para confirmar a súa inimizade:\n$3\n\nGrazas\n\n---\n\nQuere deixar de recibir correos electrónicos nosos?\n\nFaga clic $4\ne troque as súas configuracións para deshabilitar as notificacións por correo electrónico.",
-	"friend_accept_subject": "$1 aceptou a súa solicitude de amizade en {{SITENAME}}!",
-	"friend_accept_body": "Ola $1:\n\n$2 aceptou a súa solicitude de amizade en {{SITENAME}}!\n\nComprobe a páxina de $2 en $3\n\nGrazas\n\n---\n\nQuere deixar de recibir correos electrónicos nosos?\n\nFaga clic $4\ne troque as súas configuracións para deshabilitar as notificacións por correo electrónico.",
-	"foe_accept_subject": "A cousa está que arde! $1 aceptou a súa solicitude de inimizade en {{SITENAME}}!",
-	"foe_accept_body": "Ola $1:\n\n$2 aceptou a súa solicitude de inimizade en {{SITENAME}}!\n\nComprobe a páxina de $2 en $3\n\nGrazas\n\n---\n\nQuere deixar de recibir correos electrónicos nosos?\n\nFaga clic $4\ne troque as súas configuracións para deshabilitar as notificacións por correo electrónico.",
-	"friend_removed_subject": "Non! $1 eliminouno dos seus amigos en {{SITENAME}}!",
-	"friend_removed_body": "Ola $1:\n\n$2 eliminouno dos seus amigos en {{SITENAME}}!\n\nGrazas.\n\n\nO equipo de {{SITENAME}}\n\n---\n\nQuere deixar de recibir correos electrónicos nosos?\n\nPrema $4\ne troque as súas configuracións para deshabilitar as notificacións por correo electrónico.",
-	"foe_removed_subject": "Ben! $1 eliminouno dos seus inimigos en {{SITENAME}}!",
-	"foe_removed_body": "Ola $1:\n\n$2 eliminouno dos seus inimigos en {{SITENAME}}!\n\nTalvez esteades no bo camiño para retomar esa amizade?\n\nGrazas.\n\n\nO equipo de {{SITENAME}}\n\n---\n\nQuere deixar de recibir correos electrónicos nosos?\n\nPrema $4\ne troque as súas configuracións para deshabilitar as notificacións por correo electrónico."
-=======
 	"ur-no-requests-message": "Non tes solicitudes de amizade nin de inimizade.",
 	"ur-requests-added-message-foe": "Engadiches a $1 ás inimizades.",
 	"ur-requests-added-message-friend": "Engadiches a $1 ás amizades.",
@@ -122,5 +101,4 @@
 	"apihelp-socialprofile-request-response-summary": "Resposta ás solicitudes de relación entre usuarios (amizade/inimizade).",
 	"apihelp-socialprofile-request-response-param-response": "Resposta ás solicitudes de relación entre usuarios; «1» para aceptar, «-1» para rexeitar.",
 	"apihelp-socialprofile-request-response-param-id": "Identificador único da solicitude de relación"
->>>>>>> upstream/master
 }

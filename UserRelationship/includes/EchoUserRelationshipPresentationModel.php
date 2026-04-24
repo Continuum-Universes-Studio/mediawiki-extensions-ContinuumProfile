@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
+
+
 /**
  * Formatter for user relationship (friend/foe) notifications ('social-rel-*')
  */

@@ -1,7 +1,11 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
 use MediaWiki\Title\Title;
 
 class UserProfileHooks {
@@ -14,8 +18,8 @@ class UserProfileHooks {
 	 * @param Parser $parser
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
-		$parser->setHook( 'randomuserswithavatars', [ 'RandomUsersWithAvatars', 'getRandomUsersWithAvatars' ] );
-		$parser->setHook( 'newusers', [ 'NewUsersList', 'getNewUsers' ] );
+		$parser->setHook( 'randomuserswithavatars', [ RandomUsersWithAvatars::class, 'getRandomUsersWithAvatars' ] );
+		$parser->setHook( 'newusers', [ NewUsersList::class, 'getNewUsers' ] );
 	}
 
 	/**
@@ -145,7 +149,7 @@ class UserProfileHooks {
 			if ( $show_user_page ) {
 				$out->disableClientCache();
 
-				$hookContainer->register( 'ParserLimitReportPrepare', 'UserProfileHooks::onParserLimitReportPrepare' );
+				$hookContainer->register( 'ParserLimitReportPrepare', 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\UserProfileHooks::onParserLimitReportPrepare' );
 			}
 
 			$out->addModuleStyles( [
@@ -375,7 +379,7 @@ class UserProfileHooks {
 			return;
 		}
 
-		$avatar = new wAvatar( $uid, 'l' );
+		$avatar = new wAvatar( $uid, 'xl' );
 		$avatarElement = $avatar->getAvatarURL( [
 			'alt' => $username,
 			'title' => $username,
@@ -438,7 +442,7 @@ class UserProfileHooks {
 			return;
 		}
 
-		$avatar = new wAvatar( $uid, 'l' );
+		$avatar = new wAvatar( $uid, 'xl' );
 		$avatarElement = $avatar->getAvatarURL( [
 			'alt' => $username,
 			'title' => $username,

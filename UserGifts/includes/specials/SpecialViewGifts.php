@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserGifts;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
+
 /**
  * Special:ViewGifts -- a special page for viewing the list of user-to-user
  * gifts a given user has received

@@ -1,4 +1,7 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
 /**
  * Aliases for special pages
  *

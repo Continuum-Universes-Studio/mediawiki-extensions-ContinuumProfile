@@ -1,4 +1,8 @@
 <?php
+namespace ContinuumUniverses\ContinuumProfile;
+
+use MediaWiki\Output\OutputPage;
+
 /**
  * Hooked functions used by SocialProfile.
  *

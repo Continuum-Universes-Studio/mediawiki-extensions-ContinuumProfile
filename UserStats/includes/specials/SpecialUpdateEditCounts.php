@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
+
 use MediaWiki\Html\Html;
 
 /**

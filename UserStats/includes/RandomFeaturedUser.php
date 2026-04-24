@@ -1,4 +1,7 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
 /**
  * RandomFeaturedUser - adds <randomfeatureduser> parser hook
  * to display a randomly chosen 'featured' user and some info regarding the

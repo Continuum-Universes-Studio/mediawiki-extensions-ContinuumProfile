@@ -1,4 +1,7 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
 /**
  * Provides functions for managing user profile fields' visibility
  *
@@ -9,6 +12,7 @@
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 class SPUserSecurity {
 	/**
@@ -79,7 +83,7 @@ class SPUserSecurity {
 	 * @return string HTML suitable for output
 	 */
 	public static function renderEye( $fieldKey, User $user ) {
-		$dbw = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$s = $dbw->selectRow(
 			'user_fields_privacy',
 			[ '*' ],

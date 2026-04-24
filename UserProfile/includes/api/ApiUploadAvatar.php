@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Api\ApiBase;
+
 /**
  * The API version of Special:UploadAvatar.
  *
@@ -9,6 +14,8 @@
  */
 
 use Wikimedia\ParamValidator\ParamValidator;
+use MediaWiki\User\User;
+use SocialProfileFileBackend;
 
 /**
  * @ingroup API
@@ -109,7 +116,9 @@ class ApiUploadAvatar extends ApiBase {
 		if ( $status->isGood() ) {
 			$backend = new SocialProfileFileBackend( 'avatars' );
 			$uid = $user->getId();
-			$ext = $this->mUpload->mExtension;
+			/** @var UploadAvatar|UploadAvatarFromUrl $upload */
+			$upload = $this->mUpload;
+			$ext = $upload->getExtension();
 			// The cache-busting variable
 			$ts = rand();
 

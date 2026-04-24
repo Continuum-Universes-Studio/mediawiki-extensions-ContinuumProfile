@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserBoard;
+
+
 use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;
 

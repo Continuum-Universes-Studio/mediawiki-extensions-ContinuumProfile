@@ -1,6 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
+use MediaWiki\User\User;
 
 /**
  * NewUsersList parser hook extension -- adds <newusers> parser tag to retrieve

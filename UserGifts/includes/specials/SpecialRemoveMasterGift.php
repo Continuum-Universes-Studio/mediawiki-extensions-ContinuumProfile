@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserGifts;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
+
 use MediaWiki\MediaWikiServices;
 
 class RemoveMasterGift extends UnlistedSpecialPage {

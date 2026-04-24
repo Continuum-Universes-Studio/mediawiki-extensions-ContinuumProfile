@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+
 class UserRelationshipHooks {
 	/**
 	 * For the Echo extension.
@@ -18,7 +21,7 @@ class UserRelationshipHooks {
 			'category' => 'social-rel',
 			'group' => 'interactive',
 			'presentation-model' => 'EchoUserRelationshipPresentationModel',
-			EchoAttributeManager::ATTR_LOCATORS => [
+			\EchoAttributeManager::ATTR_LOCATORS => [
 				[ 'EchoUserLocator::locateFromEventExtra', [ 'target' ] ],
 			],
 			'icon' => 'gratitude',
@@ -28,7 +31,7 @@ class UserRelationshipHooks {
 			'category' => 'social-rel',
 			'group' => 'interactive',
 			'presentation-model' => 'EchoUserRelationshipPresentationModel',
-			EchoAttributeManager::ATTR_LOCATORS => [
+			\EchoAttributeManager::ATTR_LOCATORS => [
 				[ 'EchoUserLocator::locateFromEventExtra', [ 'target' ] ],
 			],
 			'icon' => 'gratitude',

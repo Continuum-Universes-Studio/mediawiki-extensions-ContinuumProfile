@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserGifts;
+
+
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 

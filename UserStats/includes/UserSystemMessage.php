@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
+
 use MediaWiki\MediaWikiServices;
 
 /**

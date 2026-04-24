@@ -1,10 +1,15 @@
 <?php
 declare( strict_types=1 );
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\User;
+
+use SocialProfileFileBackend;
 
 /**
  * Class to access profile data for a user
@@ -374,7 +379,7 @@ class UserProfile {
 
 		// Check if the user has a non-default avatar
 		$this->profile_fields_count++;
-		$avatar = new wAvatar( $this->user->getId(), 'l' );
+		$avatar = new wAvatar( $this->user->getId(), 'xl' );
 		if ( !$avatar->isDefault() ) {
 			$complete_count++;
 		}

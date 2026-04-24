@@ -1,6 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserGifts;
+
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 /**
  * UserGifts class

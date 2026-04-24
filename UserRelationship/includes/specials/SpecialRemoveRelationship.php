@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
+
 /**
  * A special page for removing existing friends/foes for the current logged in user
  *

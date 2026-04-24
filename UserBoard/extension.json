@@ -15,30 +15,30 @@
 	},
 	"AutoloadClasses": {
 		"MigrateOldUserBoardUserColumnsToActor": "maintenance/migrateOldUserBoardUserColumnsToActor.php",
-		"EchoUserBoardMessagePresentationModel": "includes/EchoUserBoardMessagePresentationModel.php",
-		"SpecialBoardBlast": "includes/specials/SpecialSendBoardBlast.php",
-		"SpecialViewUserBoard": "includes/specials/SpecialUserBoard.php",
-		"UserBoard": "includes/UserBoard.php",
-		"UserBoardHooks": "includes/UserBoardHooks.php",
-		"UserBoardMessageCount": "includes/UserBoardMessageCount.php",
-		"ApiDeleteUserBoardMessage": "includes/api/ApiDeleteUserBoardMessage.php",
-		"ApiSendUserBoardMessage": "includes/api/ApiSendUserBoardMessage.php"
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\EchoUserBoardMessagePresentationModel": "includes/EchoUserBoardMessagePresentationModel.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\SpecialBoardBlast": "includes/specials/SpecialSendBoardBlast.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\SpecialViewUserBoard": "includes/specials/SpecialUserBoard.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\UserBoard": "includes/UserBoard.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\UserBoardHooks": "includes/UserBoardHooks.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\UserBoardMessageCount": "includes/UserBoardMessageCount.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\ApiDeleteUserBoardMessage": "includes/api/ApiDeleteUserBoardMessage.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserBoard\\ApiSendUserBoardMessage": "includes/api/ApiSendUserBoardMessage.php"
 	},
 	"APIModules": {
-		"socialprofile-delete-message": "ApiDeleteUserBoardMessage",
-		"socialprofile-send-message": "ApiSendUserBoardMessage"
+		"socialprofile-delete-message": "ContinuumUniverses\\ContinuumProfile\\UserBoard\\ApiDeleteUserBoardMessage",
+		"socialprofile-send-message": "ContinuumUniverses\\ContinuumProfile\\UserBoard\\ApiSendUserBoardMessage"
 	},
 	"Hooks": {
-		"BeforeCreateEchoEvent": "UserBoardHooks::onBeforeCreateEchoEvent",
-		"EchoGetBundleRules": "UserBoardHooks::onEchoGetBundleRules"
+		"BeforeCreateEchoEvent": "ContinuumUniverses\\ContinuumProfile\\UserBoard\\UserBoardHooks::onBeforeCreateEchoEvent",
+		"EchoGetBundleRules": "ContinuumUniverses\\ContinuumProfile\\UserBoard\\UserBoardHooks::onEchoGetBundleRules"
 	},
 	"DefaultUserOptions": {
 		"echo-subscriptions-web-social-msg": true,
 		"echo-subscriptions-email-social-msg": false
 	},
 	"SpecialPages": {
-		"SendBoardBlast": "SpecialBoardBlast",
-		"UserBoard": "SpecialViewUserBoard"
+		"SendBoardBlast": "ContinuumUniverses\\ContinuumProfile\\UserBoard\\SpecialBoardBlast",
+		"UserBoard": "ContinuumUniverses\\ContinuumProfile\\UserBoard\\SpecialViewUserBoard"
 	},
 	"ResourceModules": {
 		"ext.socialprofile.userboard.js": {

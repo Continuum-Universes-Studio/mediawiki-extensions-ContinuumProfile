@@ -1,7 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserActivity;
+
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
 
 class SiteActivityHook {
 

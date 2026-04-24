@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
 /**
  * A special page for initializing social profiles for existing wikis
  * This is to be run once if you want to preserve existing user pages at User:xxx (otherwise
@@ -13,6 +18,7 @@
 
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 class SpecialPopulateUserProfiles extends SpecialPage {
 

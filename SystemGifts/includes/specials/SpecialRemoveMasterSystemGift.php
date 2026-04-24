@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
+
 use MediaWiki\MediaWikiServices;
 
 /**

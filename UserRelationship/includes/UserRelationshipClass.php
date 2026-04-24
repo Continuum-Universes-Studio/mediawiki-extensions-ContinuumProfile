@@ -1,6 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 /**
  * Functions for managing relationship data

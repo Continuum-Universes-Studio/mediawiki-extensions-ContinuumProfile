@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Parser\Parser;
+use MediaWiki\User\User;
+
 /**
  * Allows rendering an avatar based on a given
  * username and size through a parser function,
@@ -19,11 +24,11 @@ class AvatarParserFunction {
 	 *
 	 * @param Parser $parser
 	 * @param string $username Username of user to show avatar for
-	 * @param string $givenSize Size of avatar to return (s/m/ml/l), or px value (100px, 10px, etc)
+	 * @param string $givenSize Size of avatar to return (s/m/ml/l/xl), or px value (100px, 10px, etc)
 	 * @return array Output of function, and options for the parser
 	 */
 	public static function renderAvatarParserFunction( $parser, $username = '', $givenSize = 'm' ) {
-		$sizes = [ 's', 'm', 'ml', 'l' ];
+		$sizes = [ 's', 'm', 'ml', 'l', 'xl' ];
 
 		// if given size is a code,
 		// use code, and leave px value empty
@@ -53,9 +58,9 @@ class AvatarParserFunction {
 				$size = 'ml';
 
 			// if given px value is bigger then medium large,
-			// use the large avatar and the given `px` value
+			// use the extra large avatar and the given `px` value
 			} else {
-				$size = 'l';
+				$size = 'xl';
 			}
 
 		// size value is not code or px

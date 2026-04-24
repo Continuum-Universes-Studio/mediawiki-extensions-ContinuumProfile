@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
+
+use MediaWiki\Api\ApiBase;
+
+
 use MediaWiki\MediaWikiServices;
 
 class ApiRelationshipResponse extends ApiBase {

@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
+use MediaWiki\Parser\Parser;
+
+
 class UserStatsHooks {
 
 	/**
@@ -8,7 +13,7 @@ class UserStatsHooks {
 	 * @param Parser $parser
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
-		$parser->setHook( 'randomfeatureduser', [ 'RandomFeaturedUser', 'getRandomUser' ] );
+		$parser->setHook( 'randomfeatureduser', [ RandomFeaturedUser::class, 'getRandomUser' ] );
 	}
 
 	/**
@@ -28,7 +33,7 @@ class UserStatsHooks {
 			'category' => 'social-level-up',
 			'group' => 'interactive',
 			'presentation-model' => 'EchoUserLevelAdvancePresentationModel',
-			EchoAttributeManager::ATTR_LOCATORS => [
+			\EchoAttributeManager::ATTR_LOCATORS => [
 				'EchoUserLocator::locateEventAgent'
 			],
 			'canNotifyAgent' => true,

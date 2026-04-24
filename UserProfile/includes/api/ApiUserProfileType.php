@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Api\ApiBase;
+
+
 /**
  * API module for setting the type of user profile, i.e. should a social profile
  * page or the wikitext page be shown by default when [[User:Foo]] is accessed
@@ -11,6 +16,7 @@
 
 use MediaWiki\Language\RawMessage;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 class ApiUserProfileType extends ApiBase {
 

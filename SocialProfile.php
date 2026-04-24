@@ -6,7 +6,7 @@
 if ( !defined( 'MEDIAWIKI' ) ) {
 	die(
 		'This is the setup file for the SocialProfile extension to MediaWiki.' .
-		'Please see https://www.mediawiki.org/wiki/Extension:SocialProfile for' .
+		'Please see https://continuum-universes-wiki.com/Extension:ContinuumProfile for' .
 		' more information about this extension.'
 	);
 }
@@ -36,6 +36,7 @@ $wgExtensionMessagesFiles['AvatarMagic'] = __DIR__ . '/UserProfile/includes/avat
 // Based on Installer::includeExtensions()
 if ( defined( 'MEDIAWIKI_INSTALL' ) ) {
 	$subext = [
+		__DIR__ . '/UserProfile/extension.json' => 1,
 		__DIR__ . '/SystemGifts/extension.json' => 1,
 		__DIR__ . '/UserActivity/extension.json' => 1,
 		__DIR__ . '/UserBoard/extension.json' => 1,
@@ -59,77 +60,23 @@ if ( defined( 'MEDIAWIKI_INSTALL' ) ) {
 }
 
 // Classes to be autoloaded
-$wgAutoloadClasses['SocialProfileFileBackend'] = __DIR__ . '/SocialProfileFileBackend.php';
-$wgAutoloadClasses['SpecialEditProfile'] = __DIR__ . '/UserProfile/includes/specials/SpecialEditProfile.php';
-$wgAutoloadClasses['SpecialPopulateUserProfiles'] = __DIR__ . '/UserProfile/includes/specials/SpecialPopulateExistingUsersProfiles.php';
-$wgAutoloadClasses['SpecialToggleUserPage'] = __DIR__ . '/UserProfile/includes/specials/SpecialToggleUserPageType.php';
-$wgAutoloadClasses['SpecialUpdateProfile'] = __DIR__ . '/UserProfile/includes/specials/SpecialUpdateProfile.php';
-$wgAutoloadClasses['SpecialUploadAvatar'] = __DIR__ . '/UserProfile/includes/specials/SpecialUploadAvatar.php';
-$wgAutoloadClasses['UploadAvatar'] = __DIR__ . '/UserProfile/includes/avatar/UploadAvatar.php';
-$wgAutoloadClasses['UploadAvatarFromUrl'] = __DIR__ . '/UserProfile/includes/avatar/UploadAvatarFromUrl.php';
-$wgAutoloadClasses['UploadAvatarTrait'] = __DIR__ . '/UserProfile/includes/avatar/UploadAvatarTrait.php';
-$wgAutoloadClasses['RemoveAvatar'] = __DIR__ . '/UserProfile/includes/specials/SpecialRemoveAvatar.php';
-$wgAutoloadClasses['UserProfile'] = __DIR__ . '/UserProfile/includes/UserProfile.php';
-$wgAutoloadClasses['UserProfileHooks'] = __DIR__ . '/UserProfile/includes/UserProfileHooks.php';
-$wgAutoloadClasses['UserProfilePage'] = __DIR__ . '/UserProfile/includes/UserProfilePage.php';
-$wgAutoloadClasses['wAvatar'] = __DIR__ . '/UserProfile/includes/avatar/Avatar.php';
-$wgAutoloadClasses['AvatarParserFunction'] = __DIR__ . '/UserProfile/includes/parser/AvatarParserFunction.php';
-$wgAutoloadClasses['SPUserSecurity'] = __DIR__ . '/UserProfile/includes/SPUserSecurity.php';
-$wgAutoloadClasses['RandomUsersWithAvatars'] = __DIR__ . '/UserProfile/includes/parser/RandomUsersWithAvatars.php';
-$wgAutoloadClasses['NewUsersList'] = __DIR__ . '/UserProfile/includes/parser/NewUsersList.php';
-
-$wgAutoloadClasses['MigrateOldUserProfileUserColumnToActor'] = __DIR__ . '/UserProfile/maintenance/migrateOldUserProfileUserColumnToActor.php';
-$wgAutoloadClasses['MigrateOldUserFieldPrivacyUserColumnToActor'] = __DIR__ . '/UserProfile/maintenance/migrateOldUserFieldPrivacyUserColumnToActor.php';
-
-// API modules
-$wgAutoloadClasses['ApiUserProfilePrivacy'] = __DIR__ . '/UserProfile/includes/api/ApiUserProfilePrivacy.php';
-$wgAPIModules['smpuserprivacy'] = 'ApiUserProfilePrivacy';
-
-$wgAutoloadClasses['ApiRemoveAvatar'] = __DIR__ . '/UserProfile/includes/api/ApiRemoveAvatar.php';
-$wgAPIModules['removeavatar'] = 'ApiRemoveAvatar';
-
-$wgAutoloadClasses['ApiUploadAvatar'] = __DIR__ . '/UserProfile/includes/api/ApiUploadAvatar.php';
-$wgAPIModules['uploadavatar'] = 'ApiUploadAvatar';
-
-$wgAutoloadClasses['ApiUserProfileType'] = __DIR__ . '/UserProfile/includes/api/ApiUserProfileType.php';
-$wgAPIModules['smpuserprofiletype'] = 'ApiUserProfileType';
-
+$wgAutoloadClasses['ContinuumUniverses\\ContinuumProfile\\SocialProfileFileBackend'] = __DIR__ . '/SocialProfileFileBackend.php';
 $wgDefaultUserOptions['echo-subscriptions-web-social-rel'] = true;
 $wgDefaultUserOptions['echo-subscriptions-email-social-rel'] = false;
 
 // New special pages
-$wgSpecialPages['EditProfile'] = 'SpecialEditProfile';
-$wgSpecialPages['PopulateUserProfiles'] = 'SpecialPopulateUserProfiles';
-$wgSpecialPages['RemoveAvatar'] = 'RemoveAvatar';
-$wgSpecialPages['ToggleUserPage'] = 'SpecialToggleUserPage';
-$wgSpecialPages['UpdateProfile'] = 'SpecialUpdateProfile';
-$wgSpecialPages['UploadAvatar'] = 'SpecialUploadAvatar';
+$wgSpecialPages['EditProfile'] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialEditProfile';
+$wgSpecialPages['PopulateUserProfiles'] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialPopulateUserProfiles';
+$wgSpecialPages['RemoveAvatar'] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\RemoveAvatar';
+$wgSpecialPages['ToggleUserPage'] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialToggleUserPage';
+$wgSpecialPages['UpdateProfile'] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialUpdateProfile';
+$wgSpecialPages['UploadAvatar'] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\SpecialUploadAvatar';
 
 // file backend to use defaults to FileSystem
 // this allows you to use e.g. swift.
 // to setup your own file backend see
 // https://www.mediawiki.org/wiki/Manual:$wgFileBackends
 $wgSocialProfileFileBackend = '';
-
-// What to display on social profile pages by default?
-$wgUserProfileDisplay['board'] = true;
-$wgUserProfileDisplay['foes'] = true;
-$wgUserProfileDisplay['friends'] = true;
-$wgUserProfileDisplay['family'] = true; // Family is a custom field that can be added to user profiles
-$wgUserProfileDisplay['avatar'] = true; // If set to false, disables both avatar display and upload
-
-// Should we display UserBoard-related things on social profile pages?
-$wgUserBoard = true;
-
-// Whether to enable friending or not -- this doesn't do very much actually, so don't rely on it
-$wgFriendingEnabled = true;
-
-// Prefix SocialProfile will use to store avatars
-// for global avatars on a wikifarm or groups of wikis,
-// set this to something static.
-// Use GLOBALS to access wgDBname as for some reason
-// accessing the config directly doesn't work under MW 1.40.
-$wgAvatarKey = $GLOBALS['wgDBname'];
 
 // Extension credits that show up on Special:Version
 $wgExtensionCredits['other'][] = [
@@ -142,11 +89,10 @@ $wgExtensionCredits['other'][] = [
 ];
 
 // Hooked functions
-$wgAutoloadClasses['SocialProfileHooks'] = __DIR__ . '/SocialProfileHooks.php';
+$wgAutoloadClasses['ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks'] = __DIR__ . '/SocialProfileHooks.php';
 
-// Loader files
-require_once __DIR__ . '/UserProfile/UserProfile.php'; // Profile page configuration loader file
 wfLoadExtensions( [
+	'ContinuumProfile/UserProfile',
 	'ContinuumProfile/SystemGifts', // SystemGifts (awards functionality)
 	'ContinuumProfile/UserActivity', // UserActivity - recent social changes
 	'ContinuumProfile/UserBoard',
@@ -155,10 +101,10 @@ wfLoadExtensions( [
 	'ContinuumProfile/UserGifts',
 ] );
 
-$wgHooks['BeforePageDisplay'][] = 'SocialProfileHooks::onBeforePageDisplay';
-$wgHooks['CanonicalNamespaces'][] = 'SocialProfileHooks::onCanonicalNamespaces';
-$wgHooks['LoadExtensionSchemaUpdates'][] = 'SocialProfileHooks::onLoadExtensionSchemaUpdates';
-$wgHooks['ParserFirstCallInit'][] = 'AvatarParserFunction::setupAvatarParserFunction';
+$wgHooks['BeforePageDisplay'][] = 'ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks::onBeforePageDisplay';
+$wgHooks['CanonicalNamespaces'][] = 'ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks::onCanonicalNamespaces';
+$wgHooks['LoadExtensionSchemaUpdates'][] = 'ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks::onLoadExtensionSchemaUpdates';
+$wgHooks['ParserFirstCallInit'][] = 'ContinuumUniverses\\ContinuumProfile\\UserProfile\\AvatarParserFunction::setupAvatarParserFunction';
 
 // ResourceLoader module definitions for certain components which do not have
 // their own loader file

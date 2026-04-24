@@ -1,4 +1,7 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
 /**
  * Internationalization file for the {{#avatar}} parser function.
  *

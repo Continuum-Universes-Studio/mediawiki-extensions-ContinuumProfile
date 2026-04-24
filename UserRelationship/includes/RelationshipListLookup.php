@@ -1,7 +1,10 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
+namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
 
+
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 /**
  * Object for easily querying the user_relationship
  * and user_relationship_request tables

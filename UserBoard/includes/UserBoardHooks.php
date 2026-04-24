@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserBoard;
+
+
 class UserBoardHooks {
 	/**
 	 * For the Echo extension.
@@ -18,7 +21,7 @@ class UserBoardHooks {
 			'category' => 'social-msg',
 			'group' => 'interactive',
 			'presentation-model' => 'EchoUserBoardMessagePresentationModel',
-			EchoAttributeManager::ATTR_LOCATORS => [
+			\EchoAttributeManager::ATTR_LOCATORS => [
 				[ 'EchoUserLocator::locateFromEventExtra', [ 'target' ] ],
 			],
 

@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserBoard;
+
+use MediaWiki\Maintenance\LoggedUpdateMaintenance;
+
 /**
  * @file
  * @ingroup Maintenance

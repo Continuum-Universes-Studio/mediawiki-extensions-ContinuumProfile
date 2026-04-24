@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+
 class UserSystemGiftsHooks {
 	/**
 	 * For the Echo extension.
@@ -18,7 +21,7 @@ class UserSystemGiftsHooks {
 			'category' => 'social-award',
 			'group' => 'interactive',
 			'presentation-model' => 'EchoUserSystemGiftPresentationModel',
-			EchoAttributeManager::ATTR_LOCATORS => [
+			\EchoAttributeManager::ATTR_LOCATORS => [
 				[ 'EchoUserLocator::locateFromEventExtra', [ 'target' ] ],
 				'EchoUserLocator::locateEventAgent'
 			],

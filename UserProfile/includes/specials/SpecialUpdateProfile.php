@@ -1,15 +1,22 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStats;
 use MediaWiki\Extension\SpamBlacklist\BaseBlacklist;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Log\LogPage;
 use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Exception\UserBlockedError;
 use MediaWiki\Status\Status;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use function Eris\Generator\int;
-
+use MediaWiki\Xml\Xml;
 /**
  * A special page to allow users to update their social profile
  *

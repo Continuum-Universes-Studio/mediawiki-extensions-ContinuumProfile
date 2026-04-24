@@ -1,10 +1,16 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Maintenance\LoggedUpdateMaintenance;
+
 /**
  * @file
  * @ingroup Maintenance
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {

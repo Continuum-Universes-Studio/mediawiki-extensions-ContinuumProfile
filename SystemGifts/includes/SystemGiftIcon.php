@@ -1,7 +1,10 @@
 <?php
 
-use MediaWiki\Html\Html;
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
+
+use MediaWiki\Html\Html;
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
 /**
  * Object for easily constructing new system gift icons.
  */

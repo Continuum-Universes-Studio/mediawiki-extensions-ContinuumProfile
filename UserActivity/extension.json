@@ -17,16 +17,16 @@
 		"UserActivityAlias": "includes/UserActivity.alias.php"
 	},
 	"AutoloadClasses": {
-		"SiteActivityHook": "includes/SiteActivityHook.php",
-		"UserActivity": "includes/UserActivity.php",
-		"UserActivityIcon": "includes/UserActivityIcon.php",
-		"UserHome": "includes/specials/UserActivity.body.php"
+		"ContinuumUniverses\\ContinuumProfile\\UserActivity\\SiteActivityHook": "includes/SiteActivityHook.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserActivity\\UserActivity": "includes/UserActivity.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserActivity\\UserActivityIcon": "includes/UserActivityIcon.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserActivity\\UserHome": "includes/specials/UserActivity.body.php"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": "SiteActivityHook::onParserFirstCallInit"
+		"ParserFirstCallInit": "ContinuumUniverses\\ContinuumProfile\\UserActivity\\SiteActivityHook::onParserFirstCallInit"
 	},
 	"SpecialPages": {
-		"UserActivity": "UserHome"
+		"UserActivity": "ContinuumUniverses\\ContinuumProfile\\UserActivity\\UserHome"
 	},
 	"ResourceModules": {
 		"ext.socialprofile.useractivity.css": {

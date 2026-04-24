@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+
 /**
  * Reusable avatar backend magic code shared by both the local upload class (UploadAvatar) and the upload-from-URL
  * class.
@@ -8,7 +11,11 @@
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
-
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
+use MWFileProps;
+use UploadBase;
+use MediaWiki\Status\Status;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStatsTrack;
 trait UploadAvatarTrait {
 	/** @var string */
 	public $mExtension;
@@ -231,12 +238,16 @@ trait UploadAvatarTrait {
 			$stats->incStatField( 'user_image' );
 		}
 
+		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgAvatarKey . '_' . $uid . '_xl', 120 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgAvatarKey . '_' . $uid . '_l', 75 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgAvatarKey . '_' . $uid . '_ml', 50 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgAvatarKey . '_' . $uid . '_m', 30 );
 		$this->createThumbnail( $this->mTempPath, $imageInfo, $wgAvatarKey . '_' . $uid . '_s', 16 );
 
 		if ( $ext != 'jpg' ) {
+			if ( is_file( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_xl.jpg' ) ) {
+				unlink( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_xl.jpg' );
+			}
 			if ( is_file( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_s.jpg' ) ) {
 				unlink( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_s.jpg' );
 			}
@@ -251,6 +262,9 @@ trait UploadAvatarTrait {
 			}
 		}
 		if ( $ext != 'gif' ) {
+			if ( is_file( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_xl.gif' ) ) {
+				unlink( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_xl.gif' );
+			}
 			if ( is_file( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_s.gif' ) ) {
 				unlink( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_s.gif' );
 			}
@@ -265,6 +279,9 @@ trait UploadAvatarTrait {
 			}
 		}
 		if ( $ext != 'png' ) {
+			if ( is_file( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_xl.png' ) ) {
+				unlink( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_xl.png' );
+			}
 			if ( is_file( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_s.png' ) ) {
 				unlink( wfTempDir() . '/' . $wgAvatarKey . '_' . $uid . '_s.png' );
 			}
@@ -330,6 +347,15 @@ trait UploadAvatarTrait {
 		$mwProps = new MWFileProps( MediaWikiServices::getInstance()->getMimeAnalyzer() );
 		$this->mFileProps = $mwProps->getPropsFromPath( $this->mTempPath, $this->mFinalExtension );
 		return [ 'status' => UploadBase::OK ];
+	}
+
+	/**
+	 * Get the uploaded file extension chosen during performUpload().
+	 *
+	 * @return string
+	 */
+	public function getExtension(): string {
+		return (string)( $this->mExtension ?? '' );
 	}
 
 	/**

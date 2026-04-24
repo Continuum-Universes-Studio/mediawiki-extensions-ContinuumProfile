@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserBoard;
+
+use MediaWiki\SpecialPage\SpecialPage;
+
+
 use MediaWiki\Html\Html;
 use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;

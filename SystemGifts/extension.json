@@ -18,33 +18,33 @@
 	},
 	"AutoloadClasses": {
 		"MigrateOldSystemGiftsUserColumnsToActor": "maintenance/migrateOldSystemGiftsUserColumnsToActor.php",
-		"SystemGiftCount": "includes/SystemGiftCount.php",
-		"SystemGiftIcon": "includes/SystemGiftIcon.php",
-		"SystemGiftListLookup": "includes/SystemGiftListLookup.php",
-		"SystemGifts": "includes/SystemGifts.php",
-		"UserSystemGifts": "includes/UserSystemGifts.php",
-		"UserSystemGiftsHooks": "includes/UserSystemGiftsHooks.php",
-		"TopAwards": "includes/specials/TopAwards.php",
-		"ViewSystemGifts": "includes/specials/SpecialViewSystemGifts.php",
-		"ViewSystemGift": "includes/specials/SpecialViewSystemGift.php",
-		"SystemGiftManager": "includes/specials/SpecialSystemGiftManager.php",
-		"SystemGiftManagerLogo": "includes/specials/SpecialSystemGiftManagerLogo.php",
-		"RemoveMasterSystemGift": "includes/specials/SpecialRemoveMasterSystemGift.php",
-		"PopulateAwards": "includes/specials/SpecialPopulateAwards.php",
-		"EchoUserSystemGiftPresentationModel": "includes/EchoUserSystemGiftPresentationModel.php"
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftCount": "includes/SystemGiftCount.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftIcon": "includes/SystemGiftIcon.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftListLookup": "includes/SystemGiftListLookup.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGifts": "includes/SystemGifts.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\UserSystemGifts": "includes/UserSystemGifts.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\UserSystemGiftsHooks": "includes/UserSystemGiftsHooks.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\TopAwards": "includes/specials/TopAwards.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\ViewSystemGifts": "includes/specials/SpecialViewSystemGifts.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\ViewSystemGift": "includes/specials/SpecialViewSystemGift.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftManager": "includes/specials/SpecialSystemGiftManager.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftManagerLogo": "includes/specials/SpecialSystemGiftManagerLogo.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\RemoveMasterSystemGift": "includes/specials/SpecialRemoveMasterSystemGift.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\PopulateAwards": "includes/specials/SpecialPopulateAwards.php",
+		"ContinuumUniverses\\ContinuumProfile\\SystemGifts\\EchoUserSystemGiftPresentationModel": "includes/EchoUserSystemGiftPresentationModel.php"
 	},
 	"Hooks": {
-		"BeforeCreateEchoEvent": "UserSystemGiftsHooks::onBeforeCreateEchoEvent",
-		"EchoGetBundleRules": "UserSystemGiftsHooks::onEchoGetBundleRules"
+		"BeforeCreateEchoEvent": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\UserSystemGiftsHooks::onBeforeCreateEchoEvent",
+		"EchoGetBundleRules": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\UserSystemGiftsHooks::onEchoGetBundleRules"
 	},
 	"SpecialPages": {
-		"TopAwards": "TopAwards",
-		"ViewSystemGifts": "ViewSystemGifts",
-		"ViewSystemGift": "ViewSystemGift",
-		"SystemGiftManager": "SystemGiftManager",
-		"SystemGiftManagerLogo": "SystemGiftManagerLogo",
-		"RemoveMasterSystemGift": "RemoveMasterSystemGift",
-		"PopulateAwards": "PopulateAwards"
+		"TopAwards": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\TopAwards",
+		"ViewSystemGifts": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\ViewSystemGifts",
+		"ViewSystemGift": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\ViewSystemGift",
+		"SystemGiftManager": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftManager",
+		"SystemGiftManagerLogo": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\SystemGiftManagerLogo",
+		"RemoveMasterSystemGift": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\RemoveMasterSystemGift",
+		"PopulateAwards": "ContinuumUniverses\\ContinuumProfile\\SystemGifts\\PopulateAwards"
 	},
 	"DefaultUserOptions": {
 		"echo-subscriptions-web-social-award": true,

@@ -1,5 +1,10 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserBoard;
+
+use MediaWiki\Api\ApiBase;
+
+
 use MediaWiki\MediaWikiServices;
 
 class ApiDeleteUserBoardMessage extends ApiBase {

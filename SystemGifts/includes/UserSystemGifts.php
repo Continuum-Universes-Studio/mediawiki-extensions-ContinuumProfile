@@ -1,7 +1,10 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
+
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 /**
  * Class for managing awards (a.k.a system gifts)
  */

@@ -207,17 +207,11 @@
 	"profilelogpagetext": "Este é un rexistro de edicións do perfil de usuario",
 	"user-profile-edit-profile": "editou o perfil de $1",
 	"avatarlogpage": "Rexistro de avatares",
-<<<<<<< HEAD
-	"avatarlogpagetext": "Este é un rexistro de cargas e retiradas de avatares de usuario.",
-	"user-profile-picture-log-entry": "cargou un novo avatar",
-	"user-profile-picture-log-delete-entry": "borrou o avatar de $1",
-=======
 	"avatarlogpagetext": "Este é un rexistro de subidas e eliminacións de avatares de usuario.",
 	"user-profile-picture-log-entry": "subiu un novo avatar",
 	"user-profile-picture-log-delete-entry": "eliminou o avatar de $1",
 	"user-profile-picture-log-delete-entry-with-reason": "eliminou o avatar de $1; motivo: $2",
 	"user-profile-remove-avatar": "eliminar",
->>>>>>> upstream/master
 	"right-avatarremove": "Eliminar os avatares dun usuario",
 	"right-editothersprofiles": "Actualizar os perfís sociais doutros usuarios",
 	"right-editothersprofiles-private": "Ver e actualizar a información privada (enderezo de correo electrónico) nos perfís sociais doutros usuarios",

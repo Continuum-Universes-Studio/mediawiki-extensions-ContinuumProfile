@@ -14,42 +14,42 @@
 		]
 	},
 	"AutoloadClasses": {
-		"MigrateOldUserPointsArchiveUserColumnToActor": "maintenance/migrateOldUserPointsArchiveUserColumnToActor.php",
-		"MigrateOldUserPointsMonthlyUserColumnToActor": "maintenance/migrateOldUserPointsMonthlyUserColumnToActor.php",
-		"MigrateOldUserPointsWeeklyUserColumnToActor": "maintenance/migrateOldUserPointsWeeklyUserColumnToActor.php",
-		"MigrateOldUserStatsUserColumnsToActor": "maintenance/migrateOldUserStatsUserColumnsToActor.php",
-		"MigrateOldUserSystemMessagesUserColumnToActor": "maintenance/migrateOldUserSystemMessagesUserColumnToActor.php",
-		"UpdateUserStats": "maintenance/updateUserStats.php",
-		"EchoUserLevelAdvancePresentationModel": "includes/EchoUserLevelAdvancePresentationModel.php",
-		"GenerateTopUsersReport": "includes/specials/GenerateTopUsersReport.php",
-		"TopFansByStat": "includes/specials/TopFansByStat.php",
-		"TopFansRecent": "includes/specials/TopFansRecent.php",
-		"TopUsersPoints": "includes/specials/TopUsers.php",
-		"RandomFeaturedUser": "includes/RandomFeaturedUser.php",
-		"TopUsersListLookup": "includes/TopUsersListLookup.php",
-		"UpdateEditCounts": "includes/specials/SpecialUpdateEditCounts.php",
-		"UserLevel": "includes/UserLevel.php",
-		"UserStatsTrack": "includes/UserStatsTrack.php",
-		"UserStats": "includes/UserStats.php",
-		"UserStatsHooks": "includes/UserStatsHooks.php",
-		"UserStatsUpdater": "includes/UserStatsUpdater.php",
-		"UserSystemMessage": "includes/UserSystemMessage.php"
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\MigrateOldUserPointsArchiveUserColumnToActor": "maintenance/migrateOldUserPointsArchiveUserColumnToActor.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\MigrateOldUserPointsMonthlyUserColumnToActor": "maintenance/migrateOldUserPointsMonthlyUserColumnToActor.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\MigrateOldUserPointsWeeklyUserColumnToActor": "maintenance/migrateOldUserPointsWeeklyUserColumnToActor.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\MigrateOldUserStatsUserColumnsToActor": "maintenance/migrateOldUserStatsUserColumnsToActor.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\MigrateOldUserSystemMessagesUserColumnToActor": "maintenance/migrateOldUserSystemMessagesUserColumnToActor.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UpdateUserStats": "maintenance/updateUserStats.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\EchoUserLevelAdvancePresentationModel": "includes/EchoUserLevelAdvancePresentationModel.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\GenerateTopUsersReport": "includes/specials/GenerateTopUsersReport.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\TopFansByStat": "includes/specials/TopFansByStat.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\TopFansRecent": "includes/specials/TopFansRecent.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\TopUsersPoints": "includes/specials/TopUsers.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\RandomFeaturedUser": "includes/RandomFeaturedUser.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\TopUsersListLookup": "includes/TopUsersListLookup.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UpdateEditCounts": "includes/specials/SpecialUpdateEditCounts.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UserLevel": "includes/UserLevel.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStatsTrack": "includes/UserStatsTrack.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStats": "includes/UserStats.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStatsHooks": "includes/UserStatsHooks.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStatsUpdater": "includes/UserStatsUpdater.php",
+		"ContinuumUniverses\\ContinuumProfile\\UserStats\\UserSystemMessage": "includes/UserSystemMessage.php"
 	},
 	"Hooks": {
-		"BeforeCreateEchoEvent": "UserStatsHooks::onBeforeCreateEchoEvent",
-		"EchoGetBundleRules": "UserStatsHooks::onEchoGetBundleRules",
-		"ParserFirstCallInit": "UserStatsHooks::onParserFirstCallInit"
+		"BeforeCreateEchoEvent": "ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStatsHooks::onBeforeCreateEchoEvent",
+		"EchoGetBundleRules": "ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStatsHooks::onEchoGetBundleRules",
+		"ParserFirstCallInit": "ContinuumUniverses\\ContinuumProfile\\UserStats\\UserStatsHooks::onParserFirstCallInit"
 	},
 	"DefaultUserOptions": {
 		"echo-subscriptions-web-social-level-up": true,
 		"echo-subscriptions-email-social-level-up": false
 	},
 	"SpecialPages": {
-		"GenerateTopUsersReport": "GenerateTopUsersReport",
-		"TopFansByStatistic": "TopFansByStat",
-		"TopUsers": "TopUsersPoints",
-		"TopUsersRecent": "TopFansRecent",
-		"UpdateEditCounts": "UpdateEditCounts"
+		"GenerateTopUsersReport": "ContinuumUniverses\\ContinuumProfile\\UserStats\\GenerateTopUsersReport",
+		"TopFansByStatistic": "ContinuumUniverses\\ContinuumProfile\\UserStats\\TopFansByStat",
+		"TopUsers": "ContinuumUniverses\\ContinuumProfile\\UserStats\\TopUsersPoints",
+		"TopUsersRecent": "ContinuumUniverses\\ContinuumProfile\\UserStats\\TopFansRecent",
+		"UpdateEditCounts": "ContinuumUniverses\\ContinuumProfile\\UserStats\\UpdateEditCounts"
 	},
 	"config": {
 		"UserStatsTrackWeekly": {

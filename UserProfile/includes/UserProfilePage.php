@@ -1,10 +1,26 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Page\Article;
 use MediaWiki\Html\Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStats;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserLevel;
+use ContinuumUniverses\ContinuumProfile\UserGifts\UserGifts;
+use ContinuumUniverses\ContinuumProfile\UserRelationship\UserRelationship;
+use ContinuumUniverses\ContinuumProfile\UserRelationship\RelationshipListLookup;
+use ContinuumUniverses\ContinuumProfile\SystemGifts\UserSystemGifts;
+use ContinuumUniverses\ContinuumProfile\SystemGifts\SystemGiftListLookup;
+use ContinuumUniverses\ContinuumProfile\SystemGifts\SystemGiftIcon;
+use ExtensionRegistry;
+use ContinuumUniverses\ContinuumProfile\UserBoard\UserBoard;
+use MediaWiki\FileRepo\RepoGroup;
 
+use MediaWiki\SpecialPage\SpecialPage;
 /**
  * User profile Wiki Page
  *
@@ -556,12 +572,7 @@ class UserProfilePage extends Article {
 
 			$x = 1;
 
-			if ( method_exists( MediaWikiServices::class, 'getRepoGroup' ) ) {
-				$repoGroup = MediaWikiServices::getInstance()->getRepoGroup();
-			} else {
-				// @phan-suppress-next-line PhanUndeclaredStaticMethod
-				$repoGroup = RepoGroup::singleton();
-			}
+			$repoGroup = MediaWikiServices::getInstance()->getRepoGroup();
 
 			foreach ( $combined_array as $item ) {
 				$output .= ( ( $x == 1 ) ? '<p class="item-top">' : '<p>' );
@@ -1101,7 +1112,7 @@ class UserProfilePage extends Article {
 			);
 		}
 
-		$avatar = new wAvatar( $this->profileOwner->getId(), 'l' );
+		$avatar = new wAvatar( $this->profileOwner->getId(), 'xl' );
 
 		$logger = LoggerFactory::getInstance( 'SocialProfile' );
 		$logger->debug( "profile type: {user_profile_type} \n", [
@@ -2059,7 +2070,7 @@ class UserProfilePage extends Article {
 		}
 
 		$output .= '<div id="user-page-board">';
-		$b = new UserBoard( $this->viewingUser );
+		$b = new \UserBoard( $this->viewingUser );
 		$output .= $b->displayMessages( $this->profileOwner, 0, 10 );
 		$output .= '</div>';
 

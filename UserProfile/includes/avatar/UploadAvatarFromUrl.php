@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use UploadFromUrl;
+
 /**
  * Based on QuizGame's QuizFileUploadFromUrl (which I also wrote) as of 6 October 2021,
  * but modified to remove the "prefix file name with current time()" stuff.

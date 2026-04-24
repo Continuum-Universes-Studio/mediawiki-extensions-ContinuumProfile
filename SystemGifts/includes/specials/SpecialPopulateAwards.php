@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
+
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+
 /**
  * Special:PopulateAwards -- a special page that wraps around
  * SystemGifts#updateSystemGifts()

@@ -1,4 +1,9 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserProfile;
+
+use MediaWiki\Maintenance\Maintenance;
+
 /**
  * Purges cache keys related to SocialProfile's avatars from memcached.
  *
@@ -49,7 +54,7 @@ class PurgeAvatarKeysFromMemcached extends Maintenance {
 				);
 			}
 
-			$sizes = [ 's', 'm', 'ml', 'l' ];
+			$sizes = [ 's', 'm', 'ml', 'l', 'xl' ];
 			foreach ( $sizes as $size ) {
 				$key = $cache->makeKey( 'user', 'profile', 'avatar', $uid, $size );
 				$cache->delete( $key );
@@ -85,7 +90,7 @@ class PurgeAvatarKeysFromMemcached extends Maintenance {
 
 				// User has a custom avatar? Oh goody!
 				if ( !$avatar->isDefault() ) {
-					$sizes = [ 's', 'm', 'ml', 'l' ];
+					$sizes = [ 's', 'm', 'ml', 'l', 'xl' ];
 					foreach ( $sizes as $size ) {
 						$key = $cache->makeKey( 'user', 'profile', 'avatar', $uid, $size );
 						$cache->delete( $key );

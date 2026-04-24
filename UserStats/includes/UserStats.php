@@ -1,7 +1,11 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
+
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 
 class UserStats {
 	/**

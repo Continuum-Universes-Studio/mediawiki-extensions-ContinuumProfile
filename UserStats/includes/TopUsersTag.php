@@ -1,4 +1,7 @@
 <?php
+
+namespace ContinuumUniverses\ContinuumProfile\UserStats;
+
 /**
  * A parser hook that allows showing up to 50 weekly or monthly top users.
  *

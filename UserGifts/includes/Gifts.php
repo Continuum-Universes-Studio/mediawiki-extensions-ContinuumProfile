@@ -1,5 +1,8 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserGifts;
+
+
 use MediaWiki\MediaWikiServices;
 
 /**

@@ -1,0 +1,8 @@
+ContinuumProfile is a heavily modified derived fork of the SocialProfile
+extension for MediaWiki.
+
+The original SocialProfile code was licensed under GPL-2.0-or-later.
+Original authors and contributors remain credited.
+
+This project has diverged substantially from upstream and is maintained as
+part of the Continuum Universes extension ecosystem.

@@ -1,7 +1,15 @@
 <?php
 
+namespace ContinuumUniverses\ContinuumProfile\UserWelcome;
+
+use ContinuumUniverses\ContinuumProfile\UserProfile\UserLevel;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStats;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
 /**
  * UserWelcome extension
