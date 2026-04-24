@@ -5,6 +5,10 @@ namespace ContinuumUniverses\ContinuumProfile\UserGifts;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStatsTrack;
+use MediaWiki\Registration\ExtensionRegistry;
+use EchoEvent;
+use SpecialPage;
 
 /**
  * UserGifts class

@@ -13,7 +13,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
-
+use MediaWiki\Page\WikiPage;
 /**
  * For the UserLevels (points) functionality to work, you will need to
  * define $wgUserLevels and require_once() this file in your wiki's

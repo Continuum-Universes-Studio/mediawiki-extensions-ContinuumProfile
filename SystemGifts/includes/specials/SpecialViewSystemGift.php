@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
 use MediaWiki\SpecialPage\UnlistedSpecialPage;
-
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
 /**
  * A special page to view an individual system gift (award).
  *

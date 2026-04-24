@@ -19,7 +19,9 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
-
+use MediaWiki\User\User;
+use MediaWiki\Content\TextContent;
+use MediaWiki\Content\ContentHandler;
 class SpecialToggleUserPage extends UnlistedSpecialPage {
 
 	public function __construct() {

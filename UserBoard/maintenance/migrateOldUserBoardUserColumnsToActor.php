@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserBoard;
 
 use MediaWiki\Maintenance\LoggedUpdateMaintenance;
-
+use MediaWiki\User\User;
 /**
  * @file
  * @ingroup Maintenance

@@ -15,8 +15,14 @@ use MediaWiki\Api\ApiBase;
 
 use Wikimedia\ParamValidator\ParamValidator;
 use MediaWiki\User\User;
-use SocialProfileFileBackend;
-
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiMessage;
+use StatusValue;
+use UploadFromUrl;
+use UploadBase;
+use MediaWiki\Status\Status;
+use MediaWiki\Logging\LogPage;
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
 /**
  * @ingroup API
  */

@@ -4,7 +4,11 @@ namespace ContinuumUniverses\ContinuumProfile\UserBoard;
 
 use MediaWiki\SpecialPage\UnlistedSpecialPage;
 
-
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserRelationship\RelationshipListLookup;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStats;
+use MediaWiki\Exception\UserBlockedError;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 

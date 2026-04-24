@@ -1,0 +1,82 @@
+{
+	"name": "ContinuumProfile",
+	"author": [
+		"Aaron Wright",
+		"David Pean",
+		"Jack Phoenix",
+		"Christian Daniel Jensen",
+		"Anita"
+	],
+	"version": "1.14",
+	"url": "https://www.mediawiki.org/wiki/Extension:SocialProfile",
+	"license-name": "GPL-2.0-or-later",
+	"descriptionmsg": "socialprofile-desc",
+	"type": "other",
+	"requires": {
+		"extensions": {
+			"UserProfile": "*",
+			"SystemGifts": "*",
+			"UserActivity": "*",
+			"UserBoard": "*",
+			"ContinuumUserRelationship": "*",
+			"UserStats": "*",
+			"UserGifts": "*"
+		}
+	},
+	"MessagesDirs": {
+		"SocialProfile": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"SocialProfileNamespaces": "SocialProfile.namespaces.php"
+	},
+	"AutoloadClasses": {
+		"ContinuumUniverses\\ContinuumProfile\\SocialProfileFileBackend": "SocialProfileFileBackend.php",
+		"ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks": "SocialProfileHooks.php"
+	},
+	"Hooks": {
+		"BeforePageDisplay": "ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks::onBeforePageDisplay",
+		"CanonicalNamespaces": "ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks::onCanonicalNamespaces",
+		"LoadExtensionSchemaUpdates": "ContinuumUniverses\\ContinuumProfile\\SocialProfileHooks::onLoadExtensionSchemaUpdates",
+		"ParserFirstCallInit": "ContinuumUniverses\\ContinuumProfile\\UserProfile\\AvatarParserFunction::setupAvatarParserFunction"
+	},
+	"namespaces": [
+		{
+			"id": 200,
+			"constant": "NS_USER_WIKI",
+			"name": "UserWiki"
+		},
+		{
+			"id": 201,
+			"constant": "NS_USER_WIKI_TALK",
+			"name": "UserWiki_talk"
+		},
+		{
+			"id": 202,
+			"constant": "NS_USER_PROFILE",
+			"name": "User_profile"
+		},
+		{
+			"id": 203,
+			"constant": "NS_USER_PROFILE_TALK",
+			"name": "User_profile_talk"
+		}
+	],
+	"ResourceModules": {
+		"ext.socialprofile.clearfix": {
+			"styles": "clearfix.css"
+		},
+		"ext.socialprofile.responsive": {
+			"styles": "responsive.less"
+		},
+		"ext.socialprofile.LightBox": {
+			"scripts": "LightBox.js"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "shared",
+		"remoteExtPath": "ContinuumProfile/shared"
+	},
+	"manifest_version": 2
+}

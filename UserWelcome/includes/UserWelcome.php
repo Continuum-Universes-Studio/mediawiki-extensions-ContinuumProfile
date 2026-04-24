@@ -10,7 +10,8 @@ use MediaWiki\Parser\Parser;
 use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
-
+use ContinuumUniverses\ContinuumProfile\UserActivity\UserActivityIcon;
+use ContinuumUniverses\ContinuumProfile\UserRelationship\RelationshipRequestCount;
 /**
  * UserWelcome extension
  * Adds <welcomeUser/> tag to display user-specific social information

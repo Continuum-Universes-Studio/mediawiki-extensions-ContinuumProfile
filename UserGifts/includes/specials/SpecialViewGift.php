@@ -3,7 +3,9 @@
 namespace ContinuumUniverses\ContinuumProfile\UserGifts;
 
 use MediaWiki\SpecialPage\UnlistedSpecialPage;
-
+use MediaWiki\User\User;
+use MediaWiki\SpecialPage\SpecialPage;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
 
 use MediaWiki\MediaWikiServices;
 

@@ -7,7 +7,8 @@ use MediaWiki\SpecialPage\SpecialPage;
 
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
+use MediaWiki\User\User;
 class TopUsersPoints extends SpecialPage {
 
 	public function __construct() {

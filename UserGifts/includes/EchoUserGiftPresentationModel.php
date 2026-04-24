@@ -6,7 +6,7 @@ use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
 
 
 use MediaWiki\Title\Title;
-
+use MediaWiki\SpecialPage\SpecialPage;
 /**
  * Formatter for user gift notifications ('social-gift-send')
  */

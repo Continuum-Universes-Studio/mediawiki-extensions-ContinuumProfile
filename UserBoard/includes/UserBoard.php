@@ -5,8 +5,17 @@ namespace ContinuumUniverses\ContinuumProfile\UserBoard;
 
 use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;
-
-/**
+use MediaWiki\Context\RequestContext;
+use ContinuumUniverses\ContinuumProfile\UserProfile\SpecialUpdateProfile;
+use MediaWiki\Status\Status;
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStatsTrack;
+use EchoEvent;
+use Elasticsearch\Endpoints\Security\GetUser;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SpecialPage\SpecialPage;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
+/*
  * Functions for managing user board data
  */
 class UserBoard {
@@ -47,7 +56,6 @@ class UserBoard {
 		if ( $hasSpam ) {
 			return Status::newFatal( 'spamprotectiontext' );
 		}
-
 		$hasSpam = SpecialUpdateProfile::validateSpamBlacklist( $textualContent, rand(), $user );
 		if ( $hasSpam ) {
 			return Status::newFatal( 'spamprotectiontext' );

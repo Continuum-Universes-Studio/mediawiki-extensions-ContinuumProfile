@@ -14,6 +14,8 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
+use MediaWiki\Registration\ExtensionRegistry;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
 
 class TopAwards extends UnlistedSpecialPage {
 

@@ -3,8 +3,9 @@
 namespace ContinuumUniverses\ContinuumProfile\UserGifts;
 
 use MediaWiki\SpecialPage\SpecialPage;
-
-
+use MediaWiki\Exception\ErrorPageError;
+use MediaWiki\Exception\UserBlockedError;
+use MediaWiki\User\User;
 use MediaWiki\MediaWikiServices;
 
 /**

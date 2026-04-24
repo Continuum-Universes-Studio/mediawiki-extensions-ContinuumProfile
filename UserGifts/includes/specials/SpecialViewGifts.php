@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserGifts;
 
 use MediaWiki\SpecialPage\SpecialPage;
-
+use MediaWiki\User\User;
 
 /**
  * Special:ViewGifts -- a special page for viewing the list of user-to-user

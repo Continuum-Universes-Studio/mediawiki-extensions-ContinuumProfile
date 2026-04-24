@@ -9,7 +9,10 @@ use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserNamePrefixSearch;
-
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserGifts\Gifts;
+use ContinuumUniverses\ContinuumProfile\UserProfile\SpecialUpdateProfile;
+use ContinuumUniverses\ContinuumProfile\UserRelationship\RelationshipListLookup;
 /**
  * Special:GiveGift -- a special page for sending out user-to-user gifts
  *

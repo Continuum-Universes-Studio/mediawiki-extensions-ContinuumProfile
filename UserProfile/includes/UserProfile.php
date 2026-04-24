@@ -8,7 +8,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\User;
-
+use MediaWiki\Status\StatusValue;
 use SocialProfileFileBackend;
 
 /**
@@ -147,7 +147,7 @@ class UserProfile {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
 		// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
-		return $cache->makeKey( 'user', 'profile', 'info', 'actor_id', $user->getActorId(), self::CACHE_VERSION );
+		return $cache->makeKey( 'user', 'profile', 'info', 'actor_id', $user->getId(), self::CACHE_VERSION );
 	}
 
 	/**

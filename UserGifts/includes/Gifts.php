@@ -4,7 +4,7 @@ namespace ContinuumUniverses\ContinuumProfile\UserGifts;
 
 
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\User\User;
 /**
  * Gifts class
  * Functions for managing individual social gifts

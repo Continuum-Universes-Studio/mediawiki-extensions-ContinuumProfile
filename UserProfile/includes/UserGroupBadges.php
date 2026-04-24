@@ -2,7 +2,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserProfile;
 
 use MediaWiki\MediaWikiServices;
-use Html;
+use MediaWiki\Html\Html;
 use MessageLocalizer;
 use MediaWiki\User\User;
 

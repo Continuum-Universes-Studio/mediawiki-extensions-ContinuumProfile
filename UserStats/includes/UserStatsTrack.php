@@ -7,6 +7,9 @@ use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\User;
 use ContinuumUniverses\ContinuumProfile\SystemGifts\SystemGifts;
+use ContinuumUniverses\ContinuumProfile\SystemGifts\UserSystemGifts;
+use MediaWiki\Registration\ExtensionRegistry;
+use EchoEvent;
 class UserStatsTrack {
 
 	/**

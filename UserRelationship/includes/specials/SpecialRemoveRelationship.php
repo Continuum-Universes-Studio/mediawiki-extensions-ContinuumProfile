@@ -18,7 +18,9 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
  */
 
 use MediaWiki\Title\Title;
-
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
 class SpecialRemoveRelationship extends UnlistedSpecialPage {
 
 	/**

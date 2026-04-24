@@ -4,7 +4,14 @@ namespace ContinuumUniverses\ContinuumProfile\UserActivity;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
-
+use MediaWiki\RecentChanges\RecentChange;
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\SystemGifts\SystemGiftIcon;
+use MediaWiki\SpecialPage\SpecialPage;
+use ContinuumUniverses\ContinuumProfile\UserBoard\UserBoard;
+use ContinuumUniverses\ContinuumProfile\UserGifts\UserGiftIcon;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserSystemMessage;
+use MediaWiki\Registration\ExtensionRegistry;
 /**
  * UserActivity class
  */
@@ -1116,7 +1123,7 @@ class UserActivity {
 		}
 
 		if ( $this->items ) {
-			usort( $this->items, [ 'UserActivity', 'sortItems' ] );
+			usort( $this->items, [ self::class, 'sortItems' ] );
 		}
 		return $this->items;
 	}
@@ -1155,7 +1162,7 @@ class UserActivity {
 		}
 
 		if ( !empty( $this->activityLines ) && is_array( $this->activityLines ) ) {
-			usort( $this->activityLines, [ 'UserActivity', 'sortItems' ] );
+			usort( $this->activityLines, [ self::class, 'sortItems' ] );
 		}
 
 		return $this->activityLines;

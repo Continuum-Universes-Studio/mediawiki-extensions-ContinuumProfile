@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserBoard;
 
 use MediaWiki\Api\ApiBase;
-
+use MediaWiki\User\User;
 
 use MediaWiki\MediaWikiServices;
 

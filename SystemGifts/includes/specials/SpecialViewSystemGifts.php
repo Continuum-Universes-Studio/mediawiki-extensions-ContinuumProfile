@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
 use MediaWiki\SpecialPage\SpecialPage;
-
+use MediaWiki\User\User;
 /**
  * A special page to view the list of system gifts (awards) a user has.
  *

@@ -21,7 +21,10 @@ namespace ContinuumUniverses\ContinuumProfile\UserStats;
 
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\Parser\Parser;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
+use ContinuumUniverses\ContinuumProfile\UserProfile\UserProfile;
+use MediaWiki\User\User;
 class RandomFeaturedUser {
 
 	/**

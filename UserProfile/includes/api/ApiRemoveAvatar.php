@@ -15,7 +15,7 @@ use MediaWiki\Api\ApiBase;
 use MediaWiki\ParamValidator\TypeDef\UserDef;
 use MediaWiki\User\User;
 use Wikimedia\ParamValidator\ParamValidator;
-
+use MediaWiki\Logging\LogPage;
 class ApiRemoveAvatar extends ApiBase {
 
 	public function __construct( $query, $moduleName ) {

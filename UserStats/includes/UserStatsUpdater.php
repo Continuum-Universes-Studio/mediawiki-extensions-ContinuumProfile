@@ -4,7 +4,7 @@ namespace ContinuumUniverses\ContinuumProfile\UserStats;
 
 
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\User\User;
 /**
  * Logic to update or populate the user_stats table
  * Called from the UpdateEditCounts special page and a maintenance script

@@ -16,10 +16,12 @@ use ContinuumUniverses\ContinuumProfile\UserRelationship\RelationshipListLookup;
 use ContinuumUniverses\ContinuumProfile\SystemGifts\UserSystemGifts;
 use ContinuumUniverses\ContinuumProfile\SystemGifts\SystemGiftListLookup;
 use ContinuumUniverses\ContinuumProfile\SystemGifts\SystemGiftIcon;
+use ContinuumUniverses\ContinuumProfile\UserActivity\UserActivity;
 use ExtensionRegistry;
 use ContinuumUniverses\ContinuumProfile\UserBoard\UserBoard;
 use MediaWiki\FileRepo\RepoGroup;
-
+use ContinuumUniverses\ContinuumProfile\UserActivity\UserActivityIcon;
+use ContinuumUniverses\ContinuumProfile\UserGifts\UserGiftIcon;
 use MediaWiki\SpecialPage\SpecialPage;
 /**
  * User profile Wiki Page
@@ -552,7 +554,7 @@ class UserProfilePage extends Article {
 			}
 		}
 
-		usort( $combined_array, [ 'UserProfilePage', 'sortItems' ] );
+		usort( $combined_array, [ self::class, 'sortItems' ] );
 
 		if ( count( $combined_array ) > 0 ) {
 			$output .= '<div class="user-section-heading">
@@ -2070,7 +2072,7 @@ class UserProfilePage extends Article {
 		}
 
 		$output .= '<div id="user-page-board">';
-		$b = new \UserBoard( $this->viewingUser );
+		$b = new UserBoard( $this->viewingUser );
 		$output .= $b->displayMessages( $this->profileOwner, 0, 10 );
 		$output .= '</div>';
 

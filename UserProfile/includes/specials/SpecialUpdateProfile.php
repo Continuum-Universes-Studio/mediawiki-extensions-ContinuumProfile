@@ -7,7 +7,7 @@ use ContinuumUniverses\ContinuumProfile\UserStats\UserStats;
 use MediaWiki\Extension\SpamBlacklist\BaseBlacklist;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Log\LogPage;
+use MediaWiki\Logging\LogPage;
 use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\SpecialPage\SpecialPage;
@@ -17,6 +17,10 @@ use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use function Eris\Generator\int;
 use MediaWiki\Xml\Xml;
+use MediaWiki\User\User;
+use MediaWiki\Content\ContentHandler;
+use Wikimedia\Rdbms\IMaintainableDatabase;
+
 /**
  * A special page to allow users to update their social profile
  *
@@ -48,13 +52,13 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$s = $dbw->selectRow(
 			'user_profile',
 			[ 'up_actor' ],
-			[ 'up_actor' => $user->getActorId() ],
+			[ 'up_actor' => $user->getId() ],
 			__METHOD__
 		);
 		if ( $s === false ) {
 			$dbw->insert(
 				'user_profile',
-				[ 'up_actor' => $user->getActorId() ],
+				[ 'up_actor' => $user->getId() ],
 				__METHOD__
 			);
 		}
@@ -452,7 +456,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 		$dbw->update(
 			'user_profile',
 			/* SET */$basicProfileData,
-			/* WHERE */[ 'up_actor' => $user->getActorId() ],
+			/* WHERE */[ 'up_actor' => $user->getId() ],
 			__METHOD__
 		);
 
@@ -504,7 +508,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$dbw->update(
 				'user_profile',
 				/* SET */$basicProfileData,
-				/* WHERE */[ 'up_actor' => $user->getActorId() ],
+				/* WHERE */[ 'up_actor' => $user->getId() ],
 				__METHOD__
 			);
 
@@ -562,7 +566,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$dbw->update(
 				'user_profile',
 				/* SET */$customProfileData,
-				/* WHERE */[ 'up_actor' => $user->getActorId() ],
+				/* WHERE */[ 'up_actor' => $user->getId() ],
 				__METHOD__
 			);
 
@@ -626,7 +630,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			$dbw->update(
 				'user_profile',
 				/* SET */$interestsData,
-				/* WHERE */[ 'up_actor' => $user->getActorId() ],
+				/* WHERE */[ 'up_actor' => $user->getId() ],
 				__METHOD__
 			);
 
@@ -890,7 +894,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			],
 			[
 				// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
-				'up_actor' => $user->getActorId()
+				'up_actor' => $user->getId()
 			],
 			__METHOD__
 		);
@@ -1132,7 +1136,7 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 			],
 			[
 				// @phan-suppress-next-line PhanUndeclaredMethod Removed in MW 1.41
-				'up_actor' => $user->getActorId()
+				'up_actor' => $user->getId()
 			],
 			__METHOD__
 		);
@@ -1273,7 +1277,8 @@ class SpecialUpdateProfile extends UnlistedSpecialPage {
 
 	/** Persist privacy directly if SPUserSecurity setter isn't available (row-per-field schema). */
 	private function savePrivacyDirect(int $userId, string $fieldKey, string $visibility): void {
-		$lb  = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$lb  = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		/** @var IMaintainableDatabase $dbw */
 		$dbw = $lb->getConnection(DB_PRIMARY);
 
 		if (!$dbw->tableExists('user_fields_privacy', __METHOD__)) {

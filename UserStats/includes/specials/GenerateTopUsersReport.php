@@ -8,7 +8,11 @@ use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
-
+use MediaWiki\User\User;
+use MediaWiki\Exception\UserBlockedError;
+use LogicException;
+use MediaWiki\Content\ContentHandler;
+use MediaWiki\Page\WikiPage;
 /**
  * A special page to generate the report of the users who earned the most
  * points during the past week or month. This is the only way to update the
@@ -115,7 +119,7 @@ class GenerateTopUsersReport extends SpecialPage {
 		$request = $this->getRequest();
 		$user = $this->getUser();
 
-		$contLang = MediaWiki\MediaWikiServices::getInstance()->getContentLanguage();
+		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
 
 		// Make sure that we are actually going to give out some extra points
 		// for weekly and/or monthly wins, depending on which report we're

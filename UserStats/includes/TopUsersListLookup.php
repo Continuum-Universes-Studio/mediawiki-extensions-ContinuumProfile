@@ -4,7 +4,7 @@ namespace ContinuumUniverses\ContinuumProfile\UserStats;
 
 
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\User\User;
 class TopUsersListLookup {
 
 	/**

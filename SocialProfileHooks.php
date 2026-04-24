@@ -2,6 +2,8 @@
 namespace ContinuumUniverses\ContinuumProfile;
 
 use MediaWiki\Output\OutputPage;
+use MediaWiki\Installer\DatabaseUpdater;
+use Wikimedia\Rdbms\IMaintainableDatabase;
 
 /**
  * Hooked functions used by SocialProfile.
@@ -44,6 +46,7 @@ class SocialProfileHooks {
 	public static function onLoadExtensionSchemaUpdates( $updater ) {
 		$dir = __DIR__;
 		$dbExt = '';
+		/** @var IMaintainableDatabase $db */
 		$db = $updater->getDB();
 
 		if ( $db->getType() == 'postgres' ) {
@@ -333,6 +336,25 @@ class SocialProfileHooks {
 			$updater->dropExtensionField( 'user_points_weekly', 'up_user_id', "$dir/UserStats/sql/patches/actor/drop-up_user_id-on-user_points_weekly.sql" );
 			$updater->dropExtensionIndex( 'user_points_weekly', 'upw_up_user_id', "$dir/UserStats/sql/patches/actor/drop-index-upw_up_user_id-on-user_points_weekly.sql" );
 		}
+	}
+	public static function onRegistration(): void {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+
+		if ( !$config->get( 'ContinuumPoweredByBadges' ) ) {
+			return;
+		}
+
+
+		$scriptPath = $GLOBALS['wgScriptPath'] ?? '';
+		$base = rtrim( $scriptPath, '/' ) . '/extensions/ContinuumProfile/resources/assets';
+
+		$GLOBALS['wgFooterIcons']['poweredby'] ??= [];
+
+		$GLOBALS['wgFooterIcons']['poweredby']['continuum-universes'] = [
+			'src' => "$base/poweredby-continuum.svg",
+			'url' => 'https://continuum-universes.com/',
+			'alt' => 'Powered by Continuum',
+		];
 	}
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace ContinuumUniverses\ContinuumProfile\UserGifts;
-
+use EchoEvent;
 
 class UserGiftsHooks {
 	/**

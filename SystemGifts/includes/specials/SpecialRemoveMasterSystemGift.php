@@ -3,7 +3,9 @@
 namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
 use MediaWiki\SpecialPage\UnlistedSpecialPage;
-
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
+use MediaWiki\Exception\UserBlockedError;
+use MediaWiki\SpecialPage\SpecialPage;
 
 use MediaWiki\MediaWikiServices;
 

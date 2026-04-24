@@ -5,6 +5,9 @@ namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\User;
+use MediaWiki\Registration\ExtensionRegistry;
+use EchoEvent;
+use MediaWiki\SpecialPage\SpecialPage;
 /**
  * Class for managing awards (a.k.a system gifts)
  */

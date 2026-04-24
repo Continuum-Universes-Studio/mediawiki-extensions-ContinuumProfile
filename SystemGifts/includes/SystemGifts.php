@@ -5,6 +5,7 @@ namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStatsTrack;
 /**
  * SystemGifts class
  */

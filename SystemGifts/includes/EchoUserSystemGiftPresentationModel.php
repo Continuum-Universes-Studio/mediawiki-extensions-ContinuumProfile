@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\SystemGifts;
 
 use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
-
+use MediaWiki\SpecialPage\SpecialPage;
 
 /**
  * Formatter for award notifications ('social-award')

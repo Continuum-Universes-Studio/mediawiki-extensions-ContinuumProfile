@@ -9,7 +9,11 @@ use MediaWiki\Html\Html;
 use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
-
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStats;
+use MediaWiki\Registration\ExtensionRegistry;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
+use MediaWiki\Exception\PermissionsError;
 /**
  * Display User Board messages for a user
  *

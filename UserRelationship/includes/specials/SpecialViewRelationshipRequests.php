@@ -3,7 +3,8 @@
 namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
 
 use MediaWiki\SpecialPage\SpecialPage;
-
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
 /**
  * A special page for viewing open relationship requests for the current
  * logged-in user

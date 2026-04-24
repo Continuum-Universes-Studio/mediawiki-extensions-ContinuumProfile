@@ -6,7 +6,11 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
 
 
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\User\User;
+use MediaWiki\SpecialPage\SpecialPage;
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
+use MediaWiki\Exception\ErrorPageError;
+use MediaWiki\Exception\UserBlockedError;
 class RemoveMasterGift extends UnlistedSpecialPage {
 
 	/**

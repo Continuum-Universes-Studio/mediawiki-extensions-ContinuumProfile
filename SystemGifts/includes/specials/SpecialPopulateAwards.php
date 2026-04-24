@@ -13,7 +13,7 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
  */
 
 use MediaWiki\Html\Html;
-
+use MediaWiki\Exception\UserBlockedError;
 class PopulateAwards extends UnlistedSpecialPage {
 
 	public function __construct() {

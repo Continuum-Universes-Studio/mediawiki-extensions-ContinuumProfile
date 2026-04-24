@@ -4,7 +4,9 @@ namespace ContinuumUniverses\ContinuumProfile\UserStats;
 
 
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\User\User;
+use MediaWiki\SpecialPage\SpecialPage;
 /**
  * UserSystemMessage class
  * Used to send "You have advanced to level [fill in this]" messages

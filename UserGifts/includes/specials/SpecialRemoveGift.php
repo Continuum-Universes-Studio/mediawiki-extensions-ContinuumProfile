@@ -7,7 +7,7 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
 
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-
+use MediaWiki\User\User;
 class RemoveGift extends UnlistedSpecialPage {
 
 	/**

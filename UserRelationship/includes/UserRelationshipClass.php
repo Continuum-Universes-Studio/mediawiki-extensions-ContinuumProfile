@@ -5,7 +5,10 @@ namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\User;
-
+use MediaWiki\Registration\ExtensionRegistry;
+use EchoEvent;
+use MediaWiki\SpecialPage\SpecialPage;
+use ContinuumUniverses\ContinuumProfile\UserStats\UserStatsTrack;
 /**
  * Functions for managing relationship data
  */

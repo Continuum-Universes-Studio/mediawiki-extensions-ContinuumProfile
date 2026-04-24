@@ -13,7 +13,9 @@ namespace ContinuumUniverses\ContinuumProfile\UserProfile;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\User;
-
+use ContinuumUniverses\ContinuumProfile\UserRelationship\UserRelationship;
+use MediaWiki\Context\RequestContext;
+use ContinuumUniverses\ContinuumProfile\UserRelationship\RelationshipListLookup;
 class SPUserSecurity {
 	/**
 	 * Set the visibility of a given user's given profile field ($fieldKey) to

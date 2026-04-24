@@ -1,7 +1,7 @@
 <?php
 
 namespace ContinuumUniverses\ContinuumProfile\UserBoard;
-
+use EchoEvent;
 
 class UserBoardHooks {
 	/**

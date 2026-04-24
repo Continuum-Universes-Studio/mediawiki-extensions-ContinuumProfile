@@ -21,7 +21,10 @@ use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserNamePrefixSearch;
-
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
+use ContinuumUniverses\ContinuumProfile\UserProfile\wAvatar;
+use ContinuumUniverses\ContinuumProfile\UserProfile\SpecialUpdateProfile;
 class SpecialAddRelationship extends UnlistedSpecialPage {
 
 	/**

@@ -3,13 +3,19 @@
 namespace ContinuumUniverses\ContinuumProfile\UserGifts;
 
 use MediaWiki\SpecialPage\UnlistedSpecialPage;
-
-
+use MediaWiki\Exception\PermissionsError;
+use MediaWiki\Exception\UserBlockedError;
+use UploadBase;
+use Exception;
+use ContinuumUniverses\ContinuumProfile\SocialProfileFileBackend;
 use MediaWiki\Html\Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Request\WebRequestUpload;
 use MediaWiki\Shell\Shell;
-
+use MediaWiki\Status\Status;
+use MediaWiki\Exception\FatalError;
+use MediaWiki\Exception\ErrorPageError;
+use MediaWiki\SpecialPage\SpecialPage;
 /**
  * A special page to upload images for gifts.
  * This is mostly copied from an old version of Special:Upload and changed a

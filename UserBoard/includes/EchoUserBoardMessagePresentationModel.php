@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserBoard;
 
 use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
-
+use MediaWiki\SpecialPage\SpecialPage;
 
 /**
  * Formatter for user board message notifications ('social-msg-send')

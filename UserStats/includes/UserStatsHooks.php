@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserStats;
 
 use MediaWiki\Parser\Parser;
-
+use EchoEvent;
 
 class UserStatsHooks {
 

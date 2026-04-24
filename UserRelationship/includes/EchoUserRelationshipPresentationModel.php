@@ -3,7 +3,7 @@
 namespace ContinuumUniverses\ContinuumProfile\UserRelationship;
 
 use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
-
+use MediaWiki\SpecialPage\SpecialPage;
 
 /**
  * Formatter for user relationship (friend/foe) notifications ('social-rel-*')
