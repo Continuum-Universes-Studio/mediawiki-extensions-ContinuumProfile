@@ -30,7 +30,7 @@
 	"boardnofriends": "{{#FORMAL:Du hast|Sie haben}} keine Freunde, denen {{#FORMAL:du|Sie}} eine Nachricht senden {{#FORMAL:könntest|könnten}}!",
 	"messagesentsuccess": "{{#FORMAL:Deine|Ihre}} Nachricht wurde erfolgreich verschickt.",
 	"boardblast-js-sending": "Nachrichten werden gesendet...",
-	"boardblast-error-blacklisted-by-some-users": "Allerdings wurde deine Nachricht nicht an {{PLURAL:$1| eine Person|$1 Personen}} gesendet, da {{PLURAL:$1|diese Person Nachrichten von dir blockiert hat|diese Personen Nachrichten von dir blockiert haben}} .",
+	"boardblast-error-blacklisted-by-some-users": "Allerdings wurde deine Nachricht nicht an {{PLURAL:$1| eine Person|$1 Personen}} gesendet, da {{PLURAL:$1|diese Person Nachrichten von dir blockiert hat|diese Personen Nachrichten von dir blockiert haben}}.",
 	"boardblast-error-generic": "Die Nachricht konnte nicht gesendet werden.",
 	"boardblast-error-missing-message": "Bitte eine Mitteilung eingeben",
 	"boardblast-error-missing-user": "Bitte wähle mindestens eine Person aus",
